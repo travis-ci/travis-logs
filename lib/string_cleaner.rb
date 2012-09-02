@@ -1,8 +1,10 @@
-# encoding: binary
-
 # Removes any bytes from a string that are not valid unicode
 class StringCleaner
   attr_reader :bytes, :buffer, :outstanding
+
+  def self.clean!(str)
+    str.replace clean(str)
+  end
 
   def self.clean(str)
     new.tap { |c| c << str }.to_s

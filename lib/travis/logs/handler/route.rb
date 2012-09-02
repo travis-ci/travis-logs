@@ -26,8 +26,7 @@ module Travis
         # working around an issue with bad bytes and json on jruby 1.7
         # see https://github.com/flori/json/issues/138
         def clean(payload)
-          payload['data']['log'] = StringCleaner.clean(payload['data']['log'])
-p payload
+          StringCleaner.clean! payload['data']['log']
           payload
         end
 
