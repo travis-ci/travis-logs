@@ -33,6 +33,8 @@ module Travis
           # Travis::Features.start
 
           NewRelic.start if File.exists?('config/newrelic.yml')
+
+          p Job::Test.last
         end
     end
 
