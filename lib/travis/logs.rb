@@ -23,7 +23,7 @@ module Travis
 
         def setup
           # TODO remove
-          Travis.config.logs.shards = 3
+          # Travis.config.logs.shards = 3
 
           Travis::Async.enabled = true
           Travis::Database.connect
