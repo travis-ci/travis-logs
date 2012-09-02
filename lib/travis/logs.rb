@@ -2,7 +2,6 @@ require 'multi_json'
 
 require 'travis'
 require 'travis/support'
-require 'memory'
 require 'timeout'
 
 $stdout.sync = true
@@ -23,7 +22,7 @@ module Travis
       protected
 
         def setup
-          Memory.dump_stats
+          # Memory.dump_stats
 
           Travis::Async.enabled = true
           Travis::Database.connect
