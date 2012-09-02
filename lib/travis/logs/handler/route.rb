@@ -1,11 +1,11 @@
-require 'base64'
+require 'string_cleaner'
 
 module Travis
   class Logs
     class  Handler
       class Route < Handler
         def handle
-          publisher.publish(encode(payload))
+          publisher.publish(clean(payload))
         end
         instrument :handle
         new_relic :handle
@@ -25,10 +25,15 @@ module Travis
 
         # working around an issue with bad bytes and json on jruby 1.7
         # see https://github.com/flori/json/issues/138
-        def encode(payload)
-          payload['data']['log'] = Base64.encode64(payload['data']['log'])
+        def clean(payload)
+          payload['data']['log'] = StringCleaner.clean(payload['data']['log'])
           payload
         end
+
+        # def encode(payload)
+        #   payload['data']['log'] = Base64.encode64(payload['data']['log'])
+        #   payload
+        # end
 
         # Travis::Logs::Instrument::Handler::Log.attach_to(self)
       end
