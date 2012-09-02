@@ -1,5 +1,3 @@
-# encoding: binary
-
 # Removes any bytes from a string that are not valid unicode
 class StringCleaner
   attr_reader :bytes, :buffer, :outstanding
