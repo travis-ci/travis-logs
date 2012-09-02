@@ -6,6 +6,19 @@ require 'timeout'
 
 $stdout.sync = true
 
+
+
+Travis::Task::Pusher.class_eval do
+  def trigger(channel, data)
+    p [channel, data]
+    data = MultiJson.encode(data).force_encoding('utf-8')
+    prefix = version == 'v1' ? nil : version
+    event = [prefix, client_event].compact.join(':')
+    Travis.pusher[channel].trigger(event, data)
+  end
+end
+
+
 module Travis
   class Logs
     autoload :Handler, 'travis/logs/handler'
@@ -51,7 +64,6 @@ module Travis
     def receive(type, message, payload)
       return unless payload = decode(payload)
       Travis.uuid = payload['uuid']
-      p [type, payload]
       handle(type, payload)
     rescue Exception => e
       puts "!!!FAILSAFE!!! #{e.message}", e.backtrace
