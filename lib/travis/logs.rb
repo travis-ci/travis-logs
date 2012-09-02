@@ -22,9 +22,6 @@ module Travis
       protected
 
         def setup
-          # TODO remove
-          # Travis.config.logs.shards = 3
-
           Travis::Async.enabled = true
           Travis::Database.connect
           Travis::Exceptions::Reporter.start
@@ -33,8 +30,6 @@ module Travis
           # Travis::Features.start
 
           NewRelic.start if File.exists?('config/newrelic.yml')
-
-          p Job::Test.last
         end
     end
 
