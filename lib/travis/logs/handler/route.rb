@@ -1,15 +1,17 @@
+require 'base64'
+
 module Travis
   class Logs
     class  Handler
       class Route < Handler
         def handle
-          publisher.publish(payload)
+          publisher.publish(encode(payload))
         end
         instrument :handle
         new_relic :handle
 
         def publisher
-          info "routing job-#{job_id} to: reporting.jobs.logs.#{shard}"
+          debug "routing job-#{job_id} to: reporting.jobs.logs.#{shard}"
           Travis::Amqp::Publisher.jobs("logs.#{shard}")
         end
 
@@ -19,6 +21,13 @@ module Travis
 
         def job_id
           payload['data']['id'].to_i
+        end
+
+        # working around an issue with bad bytes and json on jruby 1.7
+        # see https://github.com/flori/json/issues/138
+        def encode(payload)
+          payload['data']['log'] = Base64.encode64(payload['data']['log'])
+          payload
         end
 
         # Travis::Logs::Instrument::Handler::Log.attach_to(self)
