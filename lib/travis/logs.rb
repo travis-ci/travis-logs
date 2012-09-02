@@ -51,6 +51,7 @@ module Travis
     def receive(type, message, payload)
       return unless payload = decode(payload)
       Travis.uuid = payload['uuid']
+      p [type, payload]
       handle(type, payload)
     rescue Exception => e
       puts "!!!FAILSAFE!!! #{e.message}", e.backtrace
