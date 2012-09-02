@@ -10,7 +10,6 @@ $stdout.sync = true
 
 Travis::Task::Pusher.class_eval do
   def trigger(channel, data)
-    p [channel, data]
     data = MultiJson.encode(data).force_encoding('utf-8')
     prefix = version == 'v1' ? nil : version
     event = [prefix, client_event].compact.join(':')

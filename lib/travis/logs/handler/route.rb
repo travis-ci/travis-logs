@@ -5,7 +5,8 @@ module Travis
     class  Handler
       class Route < Handler
         def handle
-          publisher.publish(clean(payload))
+          # publisher.publish(clean(payload))
+          publisher.publish(payload)
         end
         instrument :handle
         new_relic :handle
