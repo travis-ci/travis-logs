@@ -27,6 +27,7 @@ module Travis
         # see https://github.com/flori/json/issues/138
         def clean(payload)
           payload['data']['log'] = StringCleaner.clean(payload['data']['log'])
+p payload
           payload
         end
 
