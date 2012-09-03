@@ -4,11 +4,6 @@ require 'travis'
 require 'travis/support'
 require 'timeout'
 
-require 'travis/support/amqp'
-require 'travis/support/amqp/ruby_amqp'
-require 'travis/support/amqp/ruby_amqp/consumer'
-require 'travis/support/amqp/ruby_amqp/publisher'
-
 $stdout.sync = true
 
 module Travis
