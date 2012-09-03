@@ -3,6 +3,7 @@ require 'multi_json'
 require 'travis'
 require 'travis/support'
 require 'timeout'
+require 'consumer'
 
 $stdout.sync = true
 
@@ -38,16 +39,19 @@ module Travis
     def subscribe
       info 'Subscribing to amqp ...'
       info "Subscribing to reporting.jobs.logs"
-      Travis::Amqp::Consumer.jobs('logs').subscribe(:ack => true) do |msg, payload|
+
+      Travis::Amqp::Consumer.jobs('logs').subscribe do |msg, payload|
         receive(:route, msg, payload)
       end
 
       0.upto(Travis.config.logs.shards - 1).each do |shard|
         info "Subscribing to reporting.jobs.logs.#{shard}"
-        Travis::Amqp::Consumer.jobs("logs.#{shard}").subscribe(:ack => true) do |msg, payload|
+        Travis::Amqp::Consumer.jobs("logs.#{shard}").subscribe do |msg, payload|
           receive(:log, msg, payload)
         end
       end
+
+      Travis::Amqp::Consumer.wait
     end
 
     def receive(type, message, payload)
