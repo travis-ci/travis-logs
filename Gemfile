@@ -9,7 +9,7 @@ gem 'hubble',             :git => 'git://github.com/roidrage/hubble'
 gem 'newrelic_rpm',       '~> 3.3.2'
 
 platforms :mri do
-  gem 'bunny'
+  gem 'amqp'
   gem 'pg'
 end
 
