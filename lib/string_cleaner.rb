@@ -10,7 +10,7 @@ class StringCleaner
     new.tap { |c| c << str }.to_s
   end
 
-  def initialize(str = nil)
+  def initialize
     @bytes = []
     clear_buffer
   end
