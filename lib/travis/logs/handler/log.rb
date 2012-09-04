@@ -3,7 +3,7 @@ module Travis
     class  Handler
       class Log < Handler
         def handle
-          debug "handling log update for job #{data['id']}"
+          info "handling log update for job #{data['id']}"
           ::Job::Test.append_log!(data['id'], data['log'])
         end
         instrument :handle
