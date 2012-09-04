@@ -11,7 +11,7 @@ module Travis
         new_relic :handle
 
         def publisher
-          debug "routing job-#{job_id} to: reporting.jobs.logs.#{shard}"
+          info "routing job-#{job_id} to: reporting.jobs.logs.#{shard}"
           Travis::Amqp::Publisher.jobs("logs.#{shard}")
         end
 
