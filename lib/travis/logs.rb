@@ -2,6 +2,7 @@ require 'multi_json'
 
 require 'travis'
 require 'travis/support'
+require 'travis/log_subscriber/active_record_metrics'
 require 'timeout'
 require 'memory'
 
@@ -31,6 +32,7 @@ module Travis
           Travis::Notification.setup
           Travis::Amqp.config = Travis.config.amqp
           # Travis::Features.start
+          Travis::LogSubscriber::ActiveRecordMetrics.attach
 
           NewRelic.start if File.exists?('config/newrelic.yml')
         end
