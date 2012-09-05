@@ -14,7 +14,7 @@ class Memory
     run_periodically(60) do
       begin
         log
-        meter
+        # meter
       rescue Exception => e
         puts e.message, e.backtrace
       end
