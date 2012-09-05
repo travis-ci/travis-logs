@@ -11,20 +11,25 @@ class Memory
   end
 
   def report_periodically
-    run_periodically(60, &:report)
+    run_periodically(60) do
+      begin
+        report
+      rescue Exception => e
+        puts e.message, e.backtrace
+      end
+    end
   end
 
   def report
     stats.each do |key, value|
-      Metriks.histogram("v1.travis-logs.memory.#{key}").update(value)
+      # Metriks.histogram("v1.travis-logs.memory.#{key}").update(value)
+      puts "[memory] #{key}: #{value.to_s}"
     end
-  rescue Exception => e
-    puts e.message, e.backtrace
   end
 
   def stats
     {
-      :heap_usage => memory_manager.heap_memory_usage,
+      :heap => memory_manager.heap_memory_usage,
       :non_heap => memory_manager.non_heap_memory_usage,
       :waiting => memory_manager.object_pending_finalization_count
     }

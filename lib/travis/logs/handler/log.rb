@@ -3,7 +3,7 @@ module Travis
     class  Handler
       class Log < Handler
         def handle
-          info "handling log update for job #{data['id']}"
+          info "handling log update for job #{data['id']}" unless Travis.env == 'production'
           ::Job::Test.append_log!(data['id'], data['log'])
         end
         instrument :handle
