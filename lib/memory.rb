@@ -29,8 +29,7 @@ class Memory
 
   def meter
     [:used, :committed].each do |key|
-      value = parse_memory(heap)[key]
-      Metriks.meter("v1.travis-logs.memory.heap.#{key}").mark(value.to_i) if value
+      Metriks.meter("v1.travis-logs.memory.heap.#{key}").mark(heap.send(key))
     end
   end
 
@@ -54,12 +53,6 @@ class Memory
 
     def memory_manager
       @memory_manager ||= ManagementFactory.memoryMXBean
-    end
-
-    def parse_memory(string)
-      # init = 402653184(393216K) used = 231936384(226500K) committed = 282722304(276096K) max = 357957632(349568K)
-      string =~ /init = (\d*).* used = (\d*).* committed = (\d*).* max = (\d*)/
-      { :init => $1, :used => $2, :committed => $3, :max => $4 }
     end
 
     # def gc_beans
