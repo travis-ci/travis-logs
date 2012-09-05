@@ -13,31 +13,55 @@ class Memory
   def report_periodically
     run_periodically(60) do
       begin
-        report
+        log
+        meter
       rescue Exception => e
         puts e.message, e.backtrace
       end
     end
   end
 
-  def report
+  def log
     stats.each do |key, value|
       # Metriks.histogram("v1.travis-logs.memory.#{key}").update(value)
       puts "[memory] #{key}: #{value.to_s}"
     end
   end
 
-  def stats
-    {
-      :heap => memory_manager.heap_memory_usage,
-      :non_heap => memory_manager.non_heap_memory_usage,
-      :waiting => memory_manager.object_pending_finalization_count
-    }
+  def meter
+    [:used, :committed].each do |key|
+      value = parse_memory(heap)[key]
+      Metriks.meter("v1.travis-logs.memory.heap.#{key}").mark(value)
+    end
   end
 
-  def memory_manager
-    @memory_manager ||= ManagementFactory.memoryMXBean
-  end
+  private
+
+    def stats
+      { :heap => heap, :non_heap => non_heap, :waiting => waiting }
+    end
+
+    def heap
+      memory_manager.heap_memory_usage
+    end
+
+    def non_heap
+      memory_manager.non_heap_memory_usage
+    end
+
+    def waiting
+      memory_manager.object_pending_finalization_count
+    end
+
+    def memory_manager
+      @memory_manager ||= ManagementFactory.memoryMXBean
+    end
+
+    def parse_memory(string)
+      # init = 402653184(393216K) used = 231936384(226500K) committed = 282722304(276096K) max = 357957632(349568K)
+      string =~ /init = (\d*).* used = (\d*).* committed = (\d*).* max = (\d*)/
+      { :init => $1, :used => $2, :committed => $3, :max => $4 }
+    end
 
   # def gc_beans
   #   @gc_beans ||= ManagementFactory.garbageCollectorMXBeans
