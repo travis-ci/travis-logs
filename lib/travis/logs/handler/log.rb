@@ -4,6 +4,7 @@ module Travis
       class Log < Handler
         def handle
           info "handling log update for job #{data['id']}"
+          breakz!
           ::Job::Test.append_log!(data['id'], data['log'])
         end
         instrument :handle
