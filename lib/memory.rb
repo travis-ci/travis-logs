@@ -11,15 +11,20 @@ class Memory
   end
 
   def report_periodically
-    run_periodically(60, &:report)
+    run_periodically(60) do
+      begin
+        report
+      rescue Exception => e
+        puts e.message, e.backtrace
+      end
+    end
   end
 
   def report
     stats.each do |key, value|
-      Metriks.histogram("v1.travis-logs.memory.#{key}").update(value)
+      # Metriks.histogram("v1.travis-logs.memory.#{key}").update(value)
+      puts "[memory] #{key}: #{value.to_s}"
     end
-  rescue Exception => e
-    puts e.message, e.backtrace
   end
 
   def stats

@@ -23,7 +23,7 @@ module Travis
       protected
 
         def setup
-          # Memory.report_periodically
+          Memory.report_periodically
 
           Travis::Async.enabled = true
           Travis::Database.connect
