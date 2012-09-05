@@ -32,7 +32,6 @@ module Travis
           Travis::Notification.setup
 
           Travis::Amqp.config = Travis.config.amqp
-          Travis::Amqp.channel.prefetch = Travis.config.logs.shards + 1
 
           # Travis::Features.start
           # Travis::LogSubscriber::ActiveRecordMetrics.attach
