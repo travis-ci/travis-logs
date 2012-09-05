@@ -33,7 +33,7 @@ module Travis
           # Travis::Features.start
           # Travis::LogSubscriber::ActiveRecordMetrics.attach
 
-          Travis::Memory.report_periodically
+          Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
 
           NewRelic.start if File.exists?('config/newrelic.yml')
         end
