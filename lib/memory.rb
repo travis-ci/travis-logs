@@ -29,7 +29,7 @@ class Memory
 
   def meter
     [:used, :committed].each do |key|
-      Metriks.meter("v1.travis-logs.memory.heap.#{key}").mark(heap.send(key))
+      Metriks.meter("v1.travis.logs.memory.heap.#{key}").mark(heap.send(key))
     end
   end
 
