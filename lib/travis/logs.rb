@@ -4,7 +4,6 @@ require 'travis'
 require 'travis/support'
 # require 'travis/log_subscriber/active_record_metrics'
 require 'timeout'
-require 'memory'
 
 $stdout.sync = true
 
@@ -24,8 +23,6 @@ module Travis
       protected
 
         def setup
-          Memory.report_periodically
-
           Travis::Async.enabled = true
           Travis::Database.connect
           Travis::Exceptions::Reporter.start
@@ -35,6 +32,8 @@ module Travis
 
           # Travis::Features.start
           # Travis::LogSubscriber::ActiveRecordMetrics.attach
+
+          Travis::Memory.report_periodically
 
           NewRelic.start if File.exists?('config/newrelic.yml')
         end
