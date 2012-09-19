@@ -23,6 +23,7 @@ module Travis
       protected
 
         def setup
+          Travis::Features.start
           Travis::Async.enabled = true
           Travis::Database.connect
           Travis::Exceptions::Reporter.start
