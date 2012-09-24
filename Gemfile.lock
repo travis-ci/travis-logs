@@ -13,14 +13,15 @@ GIT
 
 GIT
   remote: git://github.com/roidrage/hubble
-  revision: 5220415d5542a2868d54f7be9f35fc1d66126b8e
+  revision: f5e6301ac24eabeebaf8f4485d71cdcf93b2f3f8
   specs:
     hubble (0.1.2)
-      json (~> 1.6.5)
+      faraday
+      json (~> 1.6)
 
 GIT
   remote: git://github.com/travis-ci/travis-core
-  revision: d4f40cd9b62c63c48f2cabce83e916c049e7fab0
+  revision: 262de9f07a7e894ef04efe7ee75e64a3e55f92b7
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.3)
@@ -41,7 +42,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-support
-  revision: 268dc0ff74b5a559e06f637e0814af983e60919e
+  revision: 06844d2db558d88be775ca1cf9cfff8ec36120fb
   specs:
     travis-support (0.0.1)
 
@@ -100,7 +101,7 @@ GEM
       multi_json (~> 1.0)
       net-http-persistent (>= 2.7)
       net-http-pipeline
-    guard (1.3.2)
+    guard (1.3.3)
       listen (>= 0.4.2)
       thor (>= 0.14.6)
     guard-rspec (1.2.1)
@@ -115,9 +116,9 @@ GEM
     journey (1.0.4)
     jruby-openssl (0.7.7)
       bouncy-castle-java (>= 1.5.0146.1)
-    json (1.6.7)
-    json (1.6.7-java)
-    listen (0.5.1)
+    json (1.7.5)
+    json (1.7.5-java)
+    listen (0.5.2)
     mail (2.4.4)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
