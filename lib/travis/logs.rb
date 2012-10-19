@@ -35,7 +35,7 @@ module Travis
 
           Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
 
-          NewRelic.start if File.exists?('config/newrelic.yml')
+          #NewRelic.start if File.exists?('config/newrelic.yml')
         end
     end
 
