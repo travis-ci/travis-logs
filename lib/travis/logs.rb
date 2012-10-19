@@ -27,7 +27,7 @@ module Travis
           Travis::Async.enabled = true
           Travis::Database.connect
           Travis::Exceptions::Reporter.start
-          #Travis::Notification.setup
+          Travis::Notification.setup
 
           Travis::Amqp.config = Travis.config.amqp
 
@@ -36,7 +36,7 @@ module Travis
           Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
 
           threads
-          #NewRelic.start if File.exists?('config/newrelic.yml')
+          NewRelic.start if File.exists?('config/newrelic.yml')
         end
     end
 
