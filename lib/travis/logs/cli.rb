@@ -1,6 +1,5 @@
 require 'bundler/setup'
 require 'travis/logs'
-require 'travis/log_subscriber/active_record_metrics'
 
 $stdout.sync = true
 
@@ -13,7 +12,6 @@ module Travis
       def start
         ENV['ENV'] || 'development'
         preload_constants!
-        Travis::LogSubscriber::ActiveRecordMetrics.attach
         Travis::Logs.start
       end
 

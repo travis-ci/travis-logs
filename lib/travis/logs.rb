@@ -2,7 +2,7 @@ require 'multi_json'
 
 require 'travis'
 require 'travis/support'
-# require 'travis/log_subscriber/active_record_metrics'
+require 'travis/log_subscriber/active_record_metrics'
 require 'timeout'
 
 $stdout.sync = true
@@ -31,8 +31,7 @@ module Travis
 
           Travis::Amqp.config = Travis.config.amqp
 
-          # Travis::Features.start
-          # Travis::LogSubscriber::ActiveRecordMetrics.attach
+          Travis::LogSubscriber::ActiveRecordMetrics.attach
 
           Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
 
