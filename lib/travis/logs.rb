@@ -31,7 +31,7 @@ module Travis
 
           Travis::Amqp.config = Travis.config.amqp
 
-          Travis::LogSubscriber::ActiveRecordMetrics.attach
+#          Travis::LogSubscriber::ActiveRecordMetrics.attach
 
           Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
 
