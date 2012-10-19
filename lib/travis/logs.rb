@@ -27,7 +27,7 @@ module Travis
           Travis::Async.enabled = true
           Travis::Database.connect
           Travis::Exceptions::Reporter.start
-          Travis::Notification.setup
+          #Travis::Notification.setup
 
           Travis::Amqp.config = Travis.config.amqp
 
