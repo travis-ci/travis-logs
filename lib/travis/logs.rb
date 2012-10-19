@@ -5,6 +5,9 @@ require 'travis/support'
 require 'travis/log_subscriber/active_record_metrics'
 require 'timeout'
 
+require 'java'
+java_import 'java.lang.Thread'
+
 $stdout.sync = true
 
 module Travis
@@ -35,6 +38,10 @@ module Travis
 
           Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
 
+          run_periodically do
+            Travis.logger.info("Number of active threads: #{java.lang.Thread.activeCount}")
+            sleep 60
+          end
           #NewRelic.start if File.exists?('config/newrelic.yml')
         end
     end
