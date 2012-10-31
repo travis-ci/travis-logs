@@ -7,6 +7,7 @@ gem 'travis-support',     :git => 'git://github.com/travis-ci/travis-support'
 
 gem 'hubble',             :git => 'git://github.com/roidrage/hubble'
 gem 'newrelic_rpm',       '~> 3.3.2'
+gem 'sidekiq'
 
 # platforms :mri do
 #   gem 'amqp'
