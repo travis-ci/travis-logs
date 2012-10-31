@@ -31,6 +31,7 @@ module Travis
           Travis::Notification.setup
 
           Travis::Amqp.config = Travis.config.amqp
+          Travis::Async::Sidekiq.setup(Travis.config.redis.url, Travis.config.sidekiq)
 
           # Travis::Features.start
           # Travis::LogSubscriber::ActiveRecordMetrics.attach
