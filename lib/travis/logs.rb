@@ -42,11 +42,14 @@ module Travis
     end
 
     def self.threads
-      require 'java'
-      java_import 'java.lang.Thread'
-      run_periodically(60) do
-        Travis.logger.info("Thread count: #{java.lang.Thread.activeCount}")
-      end
+      # TODO this causes "undefined method `current' for Java::JavaLang::Thread:Class"
+      # when Thread.current is used
+      #
+      # require 'java'
+      # java_import 'java.lang.Thread'
+      # run_periodically(60) do
+      #   Travis.logger.info("Thread count: #{java.lang.Thread.activeCount}")
+      # end
     end
 
     def subscribe
