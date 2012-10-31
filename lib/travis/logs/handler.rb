@@ -6,6 +6,7 @@ module Travis
 
       class << self
         def handle(type, payload)
+          payload = { 'data' => payload } unless payload.key?('data') # TODO happens when message comes directly from the worker
           handler(type).new(payload).handle
         end
 
