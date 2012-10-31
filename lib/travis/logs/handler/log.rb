@@ -3,7 +3,7 @@ module Travis
     class  Handler
       class Log < Handler
         def handle
-          info "#{Thread.current.object_id} handling log update for job #{data['id']}" # unless Travis.env == 'production'
+          info "#{Thread.current.object_id} handling log update for job #{data['id']}" unless Travis.env == 'production'
           ::Job::Test.append_log!(data['id'], data['log'])
           info "#{Thread.current.object_id} done handling log update for job #{data['id']}" unless Travis.env == 'production'
         end
