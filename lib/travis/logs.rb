@@ -23,6 +23,8 @@ module Travis
       protected
 
         def setup
+          Travis::Task.run_local = true # don't pipe log updates through travis_tasks
+
           Travis::Features.start
           Travis::Async.enabled = true
           Travis::Database.connect
