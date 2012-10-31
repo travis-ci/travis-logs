@@ -2,7 +2,7 @@ require 'multi_json'
 
 require 'travis'
 require 'travis/support'
-# require 'travis/log_subscriber/active_record_metrics'
+require 'travis/log_subscriber/active_record_metrics'
 require 'timeout'
 require 'sidekiq'
 
@@ -33,13 +33,21 @@ module Travis
           Travis::Amqp.config = Travis.config.amqp
           Travis::Async::Sidekiq.setup(Travis.config.redis.url, Travis.config.sidekiq)
 
-          # Travis::Features.start
-          # Travis::LogSubscriber::ActiveRecordMetrics.attach
+          Travis::LogSubscriber::ActiveRecordMetrics.attach
 
           Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
 
+          threads
           NewRelic.start if File.exists?('config/newrelic.yml')
         end
+    end
+
+    def self.threads
+      require 'java'
+      java_import 'java.lang.Thread'
+      run_periodically(60) do
+        Travis.logger.info("Thread count: #{java.lang.Thread.activeCount}")
+      end
     end
 
     def subscribe
