@@ -2,7 +2,6 @@ require 'multi_json'
 
 require 'travis'
 require 'travis/support'
-require 'travis/log_subscriber/active_record_metrics'
 require 'timeout'
 require 'sidekiq'
 
