@@ -45,6 +45,7 @@ module Travis
           Travis::Database.connect
           Travis::Exceptions::Reporter.start
           Travis::Notification.setup
+          Travis::Addons.register
 
           Travis::LogSubscriber::ActiveRecordMetrics.attach
 
