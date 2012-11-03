@@ -7,6 +7,18 @@ require 'sidekiq'
 
 $stdout.sync = true
 
+require 'travis/task'
+
+module Travis
+  class Task
+    class << self
+      def run_local?
+        true
+      end
+    end
+  end
+end
+
 module Travis
   class Logs
     autoload :Handler, 'travis/logs/handler'
@@ -23,16 +35,15 @@ module Travis
       protected
 
         def setup
+          Travis::Async.enabled = true
+          Travis::Amqp.config = Travis.config.amqp
           Travis::Task.run_local = true # don't pipe log updates through travis_tasks
+          # Travis::Async::Sidekiq.setup(Travis.config.redis.url, Travis.config.sidekiq)
 
           Travis::Features.start
-          Travis::Async.enabled = true
           Travis::Database.connect
           Travis::Exceptions::Reporter.start
           Travis::Notification.setup
-
-          Travis::Amqp.config = Travis.config.amqp
-          Travis::Async::Sidekiq.setup(Travis.config.redis.url, Travis.config.sidekiq)
 
           Travis::LogSubscriber::ActiveRecordMetrics.attach
 
