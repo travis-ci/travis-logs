@@ -22,7 +22,7 @@ module Travis
           require 'travis'
 
           [Travis::Logs, Travis].each do |target|
-            target.load_constants!(:skip => [/::AssociationCollection$/])
+            target.load_constants!(skip: [/::AssociationCollection$/])
           end
         end
     end

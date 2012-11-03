@@ -9,6 +9,7 @@ $stdout.sync = true
 
 require 'travis/task'
 
+# TODO why the hell does the setter below not work
 module Travis
   class Task
     class << self
@@ -69,13 +70,13 @@ module Travis
       info 'Subscribing to amqp ...'
       info "Subscribing to reporting.jobs.logs"
 
-      Travis::Amqp::Consumer.jobs('logs').subscribe(:ack => true) do |msg, payload|
+      Travis::Amqp::Consumer.jobs('logs').subscribe(ack: true) do |msg, payload|
         receive(:route, msg, payload)
       end
 
       0.upto(Travis.config.logs.shards - 1).each do |shard|
         info "Subscribing to reporting.jobs.logs.#{shard}"
-        Travis::Amqp::Consumer.jobs("logs.#{shard}").subscribe(:ack => true) do |msg, payload|
+        Travis::Amqp::Consumer.jobs("logs.#{shard}").subscribe(ack: true) do |msg, payload|
           receive(:log, msg, payload)
         end
       end
@@ -98,7 +99,7 @@ module Travis
           Travis::Logs::Handler.handle(type, payload)
         end
       end
-      rescues :handle, :from => Exception unless Travis.env == 'test'
+      rescues :handle, from: Exception unless Travis.env == 'test'
 
       def timeout(&block)
         Timeout::timeout(60, &block)

@@ -1,11 +1,11 @@
 source :rubygems
 
-ruby '1.9.3', :engine => 'jruby', :engine_version => '1.7.0'
+ruby '1.9.3', engine: 'jruby', engine_version: '1.7.0'
 
-gem 'travis-core',        :git => 'git://github.com/travis-ci/travis-core'
-gem 'travis-support',     :git => 'git://github.com/travis-ci/travis-support'
+gem 'travis-core',        git: 'git://github.com/travis-ci/travis-core'
+gem 'travis-support',     git: 'git://github.com/travis-ci/travis-support'
 
-gem 'hubble',             :git => 'git://github.com/roidrage/hubble'
+gem 'hubble',             git: 'git://github.com/roidrage/hubble'
 gem 'newrelic_rpm',       '~> 3.3.2'
 gem 'sidekiq'
 
@@ -16,7 +16,7 @@ gem 'sidekiq'
 
 # can't be removed yet, even though we're on jruby 1.6.7 everywhere
 # this is due to Invalid gemspec errors
-gem 'rollout',            :git => 'git://github.com/jamesgolick/rollout', :ref => 'v1.1.0'
+gem 'rollout',            git: 'git://github.com/jamesgolick/rollout', ref: 'v1.1.0'
 gem 'hot_bunnies',        '~> 1.3.4'
 gem 'jruby-openssl',      '~> 0.7.4'
 gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2.2'
@@ -31,5 +31,5 @@ group :test do
 end
 
 group :development, :test do
-  gem 'micro_migrations', :git => 'git://gist.github.com/2087829.git'
+  gem 'micro_migrations', git: 'git://gist.github.com/2087829.git'
 end
