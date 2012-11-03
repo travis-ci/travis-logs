@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-core
-  revision: 8fc14c9424cad3e01b3c70847d5e581a21f48308
+  revision: e263bc5f38170ff2376e93c17d0abd583315773a
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.3)
@@ -81,7 +81,7 @@ GEM
     arel (3.0.2)
     atomic (1.0.1-java)
     avl_tree (1.1.3)
-    backports (2.6.4)
+    backports (2.6.5)
     bouncy-castle-java (1.5.0146.1)
     builder (3.0.4)
     celluloid (0.12.3)
@@ -144,13 +144,13 @@ GEM
     mime-types (1.19)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
-    multi_json (1.3.6)
+    multi_json (1.3.7)
     multipart-post (1.1.5)
     net-http-persistent (2.8)
     net-http-pipeline (1.0.1)
     newrelic_rpm (3.3.5)
     polyglot (0.3.3)
-    postmark (0.9.13)
+    postmark (0.9.15)
       json
       rake
     postmark-rails (0.4.1)
