@@ -6,7 +6,7 @@ module Travis
       class Log < Handler
         def handle
           info "#{Thread.current.object_id} handling log update for job #{data['id']}" unless Travis.env == 'production'
-          Travis.run_service(:append_log, data: data)
+          Travis.run_service(:logs_append, data: data)
           info "#{Thread.current.object_id} done handling log update for job #{data['id']}" unless Travis.env == 'production'
         end
         instrument :handle
