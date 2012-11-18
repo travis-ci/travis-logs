@@ -1,5 +1,5 @@
 module Travis
-  class Logs
+  module Logs
     class Instrument
       class Handler < Travis::Notification::Instrument
         def log_completed

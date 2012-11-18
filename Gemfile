@@ -2,11 +2,11 @@ source :rubygems
 
 ruby '1.9.3', engine: 'jruby', engine_version: '1.7.0'
 
-gem 'travis-core',        git: 'git://github.com/travis-ci/travis-core'
-gem 'travis-support',     git: 'git://github.com/travis-ci/travis-support'
-gem 'travis-sidekiqs',    git: 'git://github.com/travis-ci/travis-sidekiqs'
+gem 'travis-core',        github: 'travis-ci/travis-core', branch: 'sf-register-services'
+gem 'travis-support',     github: 'travis-ci/travis-support'
+gem 'travis-sidekiqs',    github: 'travis-ci/travis-sidekiqs'
 
-gem 'hubble',             git: 'git://github.com/roidrage/hubble'
+gem 'hubble',             github: 'roidrage/hubble'
 gem 'newrelic_rpm',       '~> 3.3.2'
 gem 'sidekiq'
 
@@ -17,7 +17,7 @@ gem 'sidekiq'
 
 # can't be removed yet, even though we're on jruby 1.6.7 everywhere
 # this is due to Invalid gemspec errors
-gem 'rollout',            git: 'git://github.com/jamesgolick/rollout', ref: 'v1.1.0'
+gem 'rollout',            github: 'jamesgolick/rollout', ref: 'v1.1.0'
 gem 'hot_bunnies',        '~> 1.3.4'
 gem 'jruby-openssl',      '~> 0.7.4'
 gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2.2'

@@ -1,7 +1,7 @@
 require 'string_cleaner'
 
 module Travis
-  class Logs
+  module Logs
     class  Handler
       class Route < Handler
         def handle

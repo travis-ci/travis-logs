@@ -1,7 +1,7 @@
 require 'travis/logs/services/append'
 
 module Travis
-  class Logs
+  module Logs
     class  Handler
       class Log < Handler
         def handle

@@ -5,14 +5,14 @@ GIT
     micro_migrations (0.0.1)
 
 GIT
-  remote: git://github.com/jamesgolick/rollout
+  remote: git://github.com/jamesgolick/rollout.git
   revision: 3e7312cc018061b1ac6a8aeb9f11bbd0331da889
   ref: v1.1.0
   specs:
     rollout (1.1.0)
 
 GIT
-  remote: git://github.com/roidrage/hubble
+  remote: git://github.com/roidrage/hubble.git
   revision: f5e6301ac24eabeebaf8f4485d71cdcf93b2f3f8
   specs:
     hubble (0.1.2)
@@ -20,8 +20,9 @@ GIT
       json (~> 1.6)
 
 GIT
-  remote: git://github.com/travis-ci/travis-core
-  revision: a1c868dcd7f54fe610fe0be1a48f5cc57d600d13
+  remote: git://github.com/travis-ci/travis-core.git
+  revision: 1acce00bc7faf493e9a269b4e704e74f7c96651b
+  branch: sf-register-services
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.3)
@@ -41,7 +42,7 @@ GIT
       thor (~> 0.14.6)
 
 GIT
-  remote: git://github.com/travis-ci/travis-sidekiqs
+  remote: git://github.com/travis-ci/travis-sidekiqs.git
   revision: 4959bd0c3454b98cbf18a5f506f8f33a9a63689d
   specs:
     travis-sidekiqs (0.0.1)
@@ -49,7 +50,7 @@ GIT
       sidekiq (~> 2.5.0)
 
 GIT
-  remote: git://github.com/travis-ci/travis-support
+  remote: git://github.com/travis-ci/travis-support.git
   revision: f78d9161369f574f12b9c0c0dbfe13b997766bdd
   specs:
     travis-support (0.0.1)

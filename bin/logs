@@ -1,0 +1,10 @@
+#! /usr/bin/env ruby
+
+$: << File.expand_path('../../lib', __FILE__)
+
+require 'bundler/setup'
+require 'travis/logs/app'
+
+app = Travis::Logs::App.new
+app.start
+

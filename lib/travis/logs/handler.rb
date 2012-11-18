@@ -1,5 +1,5 @@
 module Travis
-  class Logs
+  module Logs
     class  Handler
       autoload :Log,   'travis/logs/handler/log'
       autoload :Route, 'travis/logs/handler/route'
