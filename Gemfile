@@ -9,6 +9,7 @@ gem 'travis-sidekiqs',    github: 'travis-ci/travis-sidekiqs'
 gem 'hubble',             github: 'roidrage/hubble'
 gem 'newrelic_rpm',       '~> 3.3.2'
 gem 'sidekiq'
+gem 'signature',          '0.1.4'
 
 # platforms :mri do
 #   gem 'amqp'

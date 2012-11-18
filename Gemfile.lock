@@ -208,7 +208,7 @@ GEM
       multi_json (~> 1)
       redis (~> 3)
       redis-namespace
-    signature (0.1.5)
+    signature (0.1.4)
     simple_states (0.1.1)
       activesupport
       hashr (~> 0.0.10)
@@ -248,6 +248,7 @@ DEPENDENCIES
   rollout!
   rspec (~> 2.7.0)
   sidekiq
+  signature (= 0.1.4)
   travis-core!
   travis-sidekiqs!
   travis-support!
