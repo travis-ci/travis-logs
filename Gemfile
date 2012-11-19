@@ -4,6 +4,7 @@ ruby '1.9.3', engine: 'jruby', engine_version: '1.7.0'
 
 gem 'travis-core',        git: 'git://github.com/travis-ci/travis-core'
 gem 'travis-support',     git: 'git://github.com/travis-ci/travis-support'
+gem 'travis-sidekiqs',    git: 'git://github.com/travis-ci/travis-sidekiqs'
 
 gem 'hubble',             git: 'git://github.com/roidrage/hubble'
 gem 'newrelic_rpm',       '~> 3.3.2'
