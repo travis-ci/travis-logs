@@ -1,10 +1,12 @@
+require 'travis/logs/services/append'
+
 module Travis
-  class Logs
+  module Logs
     class  Handler
       class Log < Handler
         def handle
           info "#{Thread.current.object_id} handling log update for job #{data['id']}" unless Travis.env == 'production'
-          ::Job::Test.append_log!(data['id'], data['log'])
+          Travis.run_service(:logs_append, data: data)
           info "#{Thread.current.object_id} done handling log update for job #{data['id']}" unless Travis.env == 'production'
         end
         instrument :handle

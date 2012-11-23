@@ -1,2 +1,2 @@
-logs: ./bin/thor travis:logs:start
+logs: ./bin/logs
 

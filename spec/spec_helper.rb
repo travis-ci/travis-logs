@@ -1,12 +1,13 @@
 ENV['RAILS_ENV'] ||= 'test'
 
-require 'travis/logs'
+require 'travis/logs/app'
 # require 'travis/support'
 # require 'support/active_record'
 # require 'support/payloads'
 require 'stringio'
 require 'mocha'
 require 'active_record'
+require 'logger'
 
 ActiveRecord::Base.class_eval do
   def self.inspect
