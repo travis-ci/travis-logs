@@ -21,8 +21,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-core.git
-  revision: 5965cea06f8cf7adda9bfcdbd72c25e02c91aade
-  branch: sf-register-services
+  revision: ac632a5c50cc4e23eb1270d7f8c1d8963bdc99c3
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.3)
@@ -43,7 +42,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-sidekiqs.git
-  revision: 9bc6c0f948b518b372bb239046bbd3fe6b4fbc97
+  revision: 8ee04e96a26f8caa49045bce87ed756dbc4e1d55
   specs:
     travis-sidekiqs (0.0.1)
       sentry-raven
@@ -88,7 +87,6 @@ GEM
       multi_json (~> 1.0)
     addressable (2.3.2)
     arel (3.0.2)
-    atomic (1.0.1)
     atomic (1.0.1-java)
     avl_tree (1.1.3)
     backports (2.6.5)
@@ -126,7 +124,6 @@ GEM
     hashie (1.2.0)
     hashr (0.0.22)
     hike (1.2.1)
-    hitimes (1.1.1)
     hitimes (1.1.1-java)
     hot_bunnies (1.3.8-java)
     i18n (0.6.1)
@@ -134,7 +131,6 @@ GEM
     journey (1.0.4)
     jruby-openssl (0.7.7)
       bouncy-castle-java (>= 1.5.0146.1)
-    json (1.7.5)
     json (1.7.5-java)
     listen (0.6.0)
     lumberjack (1.0.2)
@@ -164,10 +160,6 @@ GEM
       actionmailer
       postmark (>= 0.9.0)
       rake
-    pry (0.9.10)
-      coderay (~> 1.0.5)
-      method_source (~> 0.8)
-      slop (~> 3.3.1)
     pry (0.9.10-java)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
@@ -215,7 +207,7 @@ GEM
       multi_json (~> 1)
       redis (~> 3)
       redis-namespace
-    signature (0.1.5)
+    signature (0.1.4)
     simple_states (0.1.1)
       activesupport
       hashr (~> 0.0.10)
