@@ -5,9 +5,9 @@ module Travis
     class  Handler
       class Log < Handler
         def handle
-          info "#{Thread.current.object_id} handling log update for job #{data['id']}" unless Travis.env == 'production'
+          # info "#{Thread.current.object_id} handling log update for job #{data['id']}" unless Travis.env == 'production'
           Travis.run_service(:logs_append, data: data)
-          info "#{Thread.current.object_id} done handling log update for job #{data['id']}" unless Travis.env == 'production'
+          info "#{Thread.current.object_id} done handling log update for job #{data['id']}: #{data['log'].to_s.bytesize} bytes" # unless Travis.env == 'production'
         end
         instrument :handle
         new_relic :handle
