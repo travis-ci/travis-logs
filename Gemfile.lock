@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-core.git
-  revision: ac632a5c50cc4e23eb1270d7f8c1d8963bdc99c3
+  revision: 9622c05d63f8d604de66599a8691f6e816c0d382
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.3)
@@ -50,7 +50,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-support.git
-  revision: f78d9161369f574f12b9c0c0dbfe13b997766bdd
+  revision: 3df452650a4c0ae01ed28bea2b81ce15fde5b712
   specs:
     travis-support (0.0.1)
 
@@ -160,6 +160,10 @@ GEM
       actionmailer
       postmark (>= 0.9.0)
       rake
+    pry (0.9.10)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.3.1)
     pry (0.9.10-java)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
@@ -213,7 +217,7 @@ GEM
       hashr (~> 0.0.10)
     slop (3.3.3)
     spoon (0.0.1)
-    sprockets (2.2.1)
+    sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
