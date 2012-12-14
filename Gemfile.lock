@@ -21,11 +21,12 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-core.git
-  revision: 3a4014cb22108b43b8def79e63982169e7741285
+  revision: 6efc6d8f0dae6dcfe2e21e0cb4f874f94e6dc422
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.3)
       activerecord (~> 3.2.3)
+      coder (~> 0.3.0)
       data_migrations (~> 0.0.1)
       gh
       hashr (~> 0.0.19)
@@ -94,6 +95,7 @@ GEM
     celluloid (0.12.3)
       facter (>= 1.6.12)
       timers (>= 1.0.0)
+    coder (0.3.0)
     coderay (1.0.8)
     connection_pool (0.9.2)
     crack (0.3.1)
@@ -145,7 +147,7 @@ GEM
     mime-types (1.19)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
-    multi_json (1.4.0)
+    multi_json (1.5.0)
     multipart-post (1.1.5)
     net-http-persistent (2.8)
     net-http-pipeline (1.0.1)
