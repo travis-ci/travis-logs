@@ -64,15 +64,16 @@ module Travis
 
         def subscribe
           info 'Subscribing to amqp ...'
-          info "Subscribing to reporting.jobs.logs"
+          info "Subscribing to reporting.jobs.#{queue_name}"
 
-          Travis::Amqp::Consumer.jobs('logs').subscribe(ack: true) do |msg, payload|
+          Travis::Amqp::Consumer.jobs(queue_name).subscribe(ack: true, declare: true) do |msg, payload|
             receive(:route, msg, payload)
           end
 
           0.upto(Travis.config.logs.shards - 1).each do |shard|
-            info "Subscribing to reporting.jobs.logs.#{shard}"
-            Travis::Amqp::Consumer.jobs("logs.#{shard}").subscribe(ack: true) do |msg, payload|
+            name = queue_name(shard)
+            info "Subscribing to reporting.jobs.#{name}"
+            Travis::Amqp::Consumer.jobs(name).subscribe(ack: true, declare: true) do |msg, payload|
               receive(:log, msg, payload)
             end
           end
@@ -104,6 +105,19 @@ module Travis
         rescue StandardError => e
           error "[#{Thread.current.object_id}] [decode error] payload could not be decoded with engine #{MultiJson.engine.to_s} (#{e.message}): #{payload.inspect}"
           nil
+        end
+
+        def queue_number
+          ENV['LOGS_QUEUE']
+        end
+
+        def queue_name(shard = nil)
+          number = queue_number
+
+          name = 'logs'
+          name = "#{name}-#{number}" if number
+          name = "#{name}.#{shard}"  if shard
+          name
         end
     end
   end
