@@ -115,7 +115,7 @@ module Travis
           number = queue_number
 
           name = 'logs'
-          name = "#{name}-#{number}" if number
+          name = "#{name}#{number}" if number
           name = "#{name}.#{shard}"  if shard
           name
         end

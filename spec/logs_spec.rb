@@ -32,9 +32,9 @@ describe Travis::Logs do
       it 'adds queue_number to queue_name' do
         app.stubs :queue_number => 6
 
-        Travis::Amqp::Consumer.expects(:jobs).with('logs-6').returns(consumer)
+        Travis::Amqp::Consumer.expects(:jobs).with('logs6').returns(consumer)
         0.upto(2) do |shard|
-          Travis::Amqp::Consumer.expects(:jobs).with("logs-6.#{shard}").returns(consumer)
+          Travis::Amqp::Consumer.expects(:jobs).with("logs6.#{shard}").returns(consumer)
         end
 
         app.send(:subscribe)
