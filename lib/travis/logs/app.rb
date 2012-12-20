@@ -25,6 +25,19 @@ module Travis
   module Logs
     autoload :Handler, 'travis/logs/handler'
 
+    def self.queue_number
+      ENV['LOGS_QUEUE']
+    end
+
+    def self.queue_name(shard = nil)
+      number = queue_number
+
+      name = 'logs'
+      name = "#{name}#{number}" if number
+      name = "#{name}.#{shard}"  if shard
+      name
+    end
+
     class App
       extend Exceptions::Handling
       include Logging
@@ -107,17 +120,8 @@ module Travis
           nil
         end
 
-        def queue_number
-          ENV['LOGS_QUEUE']
-        end
-
         def queue_name(shard = nil)
-          number = queue_number
-
-          name = 'logs'
-          name = "#{name}#{number}" if number
-          name = "#{name}.#{shard}"  if shard
-          name
+          Travis::Logs.queue_name(shard)
         end
     end
   end

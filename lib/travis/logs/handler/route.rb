@@ -12,7 +12,7 @@ module Travis
 
         def publisher
           # info "routing job-#{job_id} to: reporting.jobs.logs.#{shard}" unless Travis.env == 'production'
-          Travis::Amqp::Publisher.jobs("logs.#{shard}")
+          Travis::Amqp::Publisher.jobs(Travis::Logs.queue_name(shard))
         end
 
         def shard

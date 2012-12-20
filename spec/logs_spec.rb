@@ -30,7 +30,7 @@ describe Travis::Logs do
 
     describe 'with queue_number present' do
       it 'adds queue_number to queue_name' do
-        app.stubs :queue_number => 6
+        Travis::Logs.stubs :queue_number => 6
 
         Travis::Amqp::Consumer.expects(:jobs).with('logs6').returns(consumer)
         0.upto(2) do |shard|
