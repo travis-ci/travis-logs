@@ -5,6 +5,7 @@ require 'core_ext/kernel/run_periodically'
 Travis::Database.connect
 Travis::Features.start
 Travis::Exceptions::Reporter.start
+Travis::Instrumentation.setup
 
 def aggregate_logs
   Travis.run_service(:logs_aggregate)
