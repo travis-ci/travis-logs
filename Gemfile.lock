@@ -15,7 +15,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-core.git
-  revision: 8dc7e3c38b4b4c49d09dfbc14d129bdd5e939f2e
+  revision: 9c43b62b3b24376ad7a993c2ee267d4992345969
   branch: sf-log-aggregation
   specs:
     travis-core (0.0.1)
