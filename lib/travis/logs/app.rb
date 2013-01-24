@@ -10,17 +10,6 @@ $stdout.sync = true
 
 require 'travis/task'
 
-# TODO why the hell does the setter below not work
-module Travis
-  class Task
-    class << self
-      def run_local?
-        true
-      end
-    end
-  end
-end
-
 module Travis
   module Logs
     autoload :Handler, 'travis/logs/handler'
@@ -59,8 +48,7 @@ module Travis
         def setup
           Travis::Async.enabled = true
           Travis::Amqp.config = Travis.config.amqp
-          Travis::Task.run_local = true # don't pipe log updates through travis_tasks
-          # Travis::Async::Sidekiq.setup(Travis.config.redis.url, Travis.config.sidekiq)
+          Travis::Addons::Pusher::Task.run_local = true # don't pipe log updates through travis_tasks
 
           Travis::Features.start
           Travis::Database.connect
