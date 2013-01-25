@@ -1,6 +1,5 @@
 require 'travis'
 require 'travis/support'
-require 'travis/logs/archive'
 require 'core_ext/kernel/run_periodically'
 
 Travis::Database.connect
@@ -17,10 +16,6 @@ def aggregate_logs
   Travis.run_service(:logs_aggregate)
 rescue Exception => e
   Travis::Exceptions.handle(e)
-end
-
-run_periodically(3) do
-  archive_logs if Travis::Features.feature_active?(:log_archiving)
 end
 
 run_periodically(Travis.config.logs.intervals.vacuum || 10) do

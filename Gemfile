@@ -1,6 +1,6 @@
 source :rubygems
 
-ruby '1.9.3', engine: 'jruby', engine_version: '1.7.0'
+ruby '1.9.3', engine: 'jruby', engine_version: '1.7.2'
 
 gem 'travis-core',        github: 'travis-ci/travis-core', branch: 'sf-archive-logs'
 gem 'travis-support',     github: 'travis-ci/travis-support'
@@ -10,6 +10,8 @@ gem 'hubble',             github: 'roidrage/hubble'
 gem 'newrelic_rpm',       '~> 3.3.2'
 gem 'sidekiq'
 gem 'signature',          '0.1.4'
+gem 'sidekiq'
+gem 'aws-sdk'
 
 # platforms :mri do
 #   gem 'amqp'
