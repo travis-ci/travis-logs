@@ -15,8 +15,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-core.git
-  revision: 5cdef43930a90ab587724121eeaaad65bdcfb30a
-  branch: sf-archive-logs
+  revision: 987188a5f96f5d7e4f6a6e314ab402f3fbad0963
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.11)
