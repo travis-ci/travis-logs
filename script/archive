@@ -17,7 +17,7 @@ sql = "archived_at IS NULL AND archiving IS NULL AND created_at <= NOW() - inter
 interval = 60 * 60 * 24 * 30 * 3 # 3 months
 count = (ARGV[0] || 1).to_i
 
-logs = Artifact.where(sql, interval).order(:id).limit(count)
+logs = Artifact.where(sql, interval).select([:id, :job_id]).order(:id).limit(count)
 logs.update_all(archiving: true)
 
 class Archiver; include Sidekiq::Worker; end

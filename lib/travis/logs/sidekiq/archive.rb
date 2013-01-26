@@ -5,8 +5,8 @@ require 'core_ext/hash/deep_symbolize_keys'
 
 Travis::Database.connect
 ActiveRecord::Base.logger.level = Logger::ERROR
+Travis::Notification.setup
 # Travis::Exceptions::Reporter.start
-# Travis::Notification.setup
 
 # Sidekiq::Logging.logger.formatter = ->(level, _, _, msg) do
 #   "TID-#{Thread.current.object_id.to_s(36)} #{level}: #{msg}\n"
