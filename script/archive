@@ -6,6 +6,7 @@ require 'travis'
 $stdout.sync = true
 
 Travis.config.log_level = :info
+Travis.config.database.pool = 30
 Travis::Database.connect
 ActiveRecord::Base.logger.level = Logger::ERROR
 
@@ -15,34 +16,32 @@ end
 
 class Archiver; include Sidekiq::Worker; end
 
+def time(msg)
+  print "#{msg} ... ".rjust(20, ' ')
+  start = Time.now
+  result = yield
+  print "done. #{Time.now - start}sec\n"
+  result
+end
+
 def enqueue(count)
-  # sql = "aggregated_at IS NOT NULL AND archived_at IS NULL AND archiving IS NULL AND created_at <= NOW() - interval '? seconds'"
-  # interval = 60 * 60 * 24 * 30 * 3 # 3 months
-
-  sql = "aggregated_at IS NOT NULL AND archived_at IS NULL AND archiving IS NULL"
-
-  puts "\nfetching #{count} logs\n"
-  logs = Artifact.where(sql).select([:id, :job_id]).limit(count)
-
-  update = Thread.new do
-    logs.update_all(archiving: true)
+  logs = time "fetching #{count}" do
+    # sql = "SELECT id, job_id FROM artifacts WHERE id < 3280461 AND archiving = 't' LIMIT #{count}"
+    sql = "SELECT id, job_id FROM artifacts WHERE id < 3280461 AND archive_verified IS NULL LIMIT #{count}"
+    Artifact.connection.select_rows(sql)
   end
-
-  logs.each do |log|
-    params = { type: 'log', id: log.id, job_id: log.job_id }
-    # puts "enqueueing #{params[:id]}"
-    Sidekiq::Client.push('queue' => 'archive_past', 'class' => Archiver, 'args' => [params])
-    # puts "setting #{params[:id]} to archiving"
-    # log.update_attributes(archiving: true)
-    print '.'
+  args = time 'converting' do
+    logs.map { |log| [{ type: 'log', id: log[0], job_id: log[1] }] }
   end
-
-  update.join
+  time 'queueing' do
+    Sidekiq::Client.push_bulk('queue' => 'archive_past', 'class' => Archiver, 'args' => args)
+  end
+  time 'setting flag' do
+    sql = "UPDATE artifacts SET archiving = 't' WHERE id IN (#{logs.map { |log| log[0] }.join(', ')})"
+    Artifact.connection.execute(sql)
+  end
+  logs.size
 end
 
-count = (ARGV[0] || 1).to_i
-count = 25000
-times = 10
-1.upto(times) do
-  enqueue(count) && nil
-end
+sum = 0
+1.upto(37) { count = enqueue(10000); sum += count; puts "queued: #{count}; total: #{sum}"; break if count == 0 }

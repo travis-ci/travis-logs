@@ -22,7 +22,7 @@ class Service < Travis::Logs::Services::Archive
   end
 
   def report(*)
-    params[:log].update_attributes(archived_at: Time.now.utc, archiving: false, archive_verified: true)
+    params[:log].update_attributes!(archived_at: Time.now.utc, archiving: false, archive_verified: true)
   end
 end
 
