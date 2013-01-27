@@ -13,16 +13,36 @@ Sidekiq.configure_client do |c|
   c.redis = { url: Travis.config.redis.url }
 end
 
-sql = "archived_at IS NULL AND archiving IS NULL AND created_at <= NOW() - interval '? seconds'"
-interval = 60 * 60 * 24 * 30 * 3 # 3 months
-count = (ARGV[0] || 1).to_i
-
-logs = Artifact.where(sql, interval).select([:id, :job_id]).order(:id).limit(count)
-logs.update_all(archiving: true)
-
 class Archiver; include Sidekiq::Worker; end
 
-logs.each do |log|
-  params = { type: 'log', id: log.id, job_id: log.job_id }
-  Sidekiq::Client.push('queue' => 'archive_past', 'class' => Archiver, 'args' => [params])
+def enqueue(count)
+  # sql = "aggregated_at IS NOT NULL AND archived_at IS NULL AND archiving IS NULL AND created_at <= NOW() - interval '? seconds'"
+  # interval = 60 * 60 * 24 * 30 * 3 # 3 months
+
+  sql = "aggregated_at IS NOT NULL AND archived_at IS NULL AND archiving IS NULL"
+
+  puts "\nfetching #{count} logs\n"
+  logs = Artifact.where(sql).select([:id, :job_id]).limit(count)
+
+  update = Thread.new do
+    logs.update_all(archiving: true)
+  end
+
+  logs.each do |log|
+    params = { type: 'log', id: log.id, job_id: log.job_id }
+    # puts "enqueueing #{params[:id]}"
+    Sidekiq::Client.push('queue' => 'archive_past', 'class' => Archiver, 'args' => [params])
+    # puts "setting #{params[:id]} to archiving"
+    # log.update_attributes(archiving: true)
+    print '.'
+  end
+
+  update.join
+end
+
+count = (ARGV[0] || 1).to_i
+count = 25000
+times = 10
+1.upto(times) do
+  enqueue(count) && nil
 end
