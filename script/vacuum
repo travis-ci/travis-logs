@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'travis'
+require 'optparse'
 
 $stdout.sync = true
 
@@ -42,7 +43,15 @@ def purge(from, to)
   end
 end
 
-from = ENV['FROM'] || 0
-to = ENV['TO'] || 3280461
+
+OptionParser.new do |o|
+  o.on('-f FROM', '--from FROM') { |v| ARGV[0] = v }
+  o.on('-t TO', '--to TO') { |v| ARGV[1] = v }
+  o.parse!
+end
+
+from = ARGV[0] || 0
+to   = ARGV[1] || 3280461
+
 purge(from.to_i, to.to_i)
 
