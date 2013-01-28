@@ -18,7 +18,6 @@ def http
 end
 
 def verify(log)
-  puts "Verifying id: #{log.id}, job_id: #{log.job_id}"
   response = http.get("http://archive.travis-ci.org/jobs/#{log.job_id}/log.txt")
   actual   = response.headers['content-length'].try(:to_i)
   expected = log.content.bytesize.to_i
@@ -26,6 +25,7 @@ def verify(log)
   if response.status == 200 && actual == expected
     true
   else
+    puts "Could not verify log id: #{log.id}, job_id: #{log.job_id}"
     log.update_attributes!(archive_verified: false)
     false
   end
