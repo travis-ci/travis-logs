@@ -44,14 +44,17 @@ def purge(from, to)
 end
 
 
+options = {}
+
 OptionParser.new do |o|
-  o.on('-f FROM', '--from FROM') { |v| ARGV[0] = v }
-  o.on('-t TO', '--to TO') { |v| ARGV[1] = v }
+  o.on('-f FROM', '--from FROM') { |v| options[:from] = v }
+  o.on('-t TO', '--to TO')       { |v| options[:to]   = v }
+  o.on('-d', '--dry', 'Boolean') { |v| options[:dry]  = v }
   o.parse!
 end
 
-from = ARGV[0] || 0
-to   = ARGV[1] || 3280461
+from = options[:from] || ARGV[0] || 0
+to   = options[:to]   || ARGV[1] || 3280461
 
-purge(from.to_i, to.to_i)
+purge(from.to_i, to.to_i, dry: options[:dry])
 
