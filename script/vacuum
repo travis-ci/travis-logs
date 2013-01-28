@@ -18,7 +18,7 @@ def http
 end
 
 def verify(log)
-  puts "verifying id: #{log.id}, job_id: #{log.job_id}"
+  puts "Verifying id: #{log.id}, job_id: #{log.job_id}"
   response = http.get("http://archive.travis-ci.org/jobs/#{log.job_id}/log.txt")
   actual   = response.headers['content-length'].try(:to_i)
   expected = log.content.bytesize.to_i
@@ -31,14 +31,14 @@ def verify(log)
   end
 
 rescue Faraday::Error => e
-  puts "could not verify log id:#{log.id}, job_id: #{log.job_id} #{e.message}"
+  puts "Could not verify log id:#{log.id}, job_id: #{log.job_id} #{e.message}"
   false
 end
 
 def purge(from, to, options = {})
   Artifact.find_each(conditions: ['id BETWEEN ? AND ?', from, to], batch_size: 5) do |log|
     next unless verify(log)
-    puts "purging: id: #{log.id}, job_id: #{log.job_id}"
+    puts "Purging log: id: #{log.id}, job_id: #{log.job_id}"
     log.destroy unless options[:dry]
   end
 end
@@ -56,5 +56,6 @@ end
 from = options[:from] || ARGV[0] || 0
 to   = options[:to]   || ARGV[1] || 3280461
 
+puts "Going to purge logs for ids #{from}-#{to} #{'(dry run)' if options[:dry]}"
 purge(from.to_i, to.to_i, dry: options[:dry])
 
