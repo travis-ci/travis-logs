@@ -35,11 +35,11 @@ rescue Faraday::Error => e
   false
 end
 
-def purge(from, to)
+def purge(from, to, options = {})
   Artifact.find_each(conditions: ['id BETWEEN ? AND ?', from, to], batch_size: 5) do |log|
     next unless verify(log)
     puts "purging: id: #{log.id}, job_id: #{log.job_id}"
-    log.destroy
+    log.destroy unless options[:dry]
   end
 end
 
