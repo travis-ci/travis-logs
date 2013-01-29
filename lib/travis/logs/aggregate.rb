@@ -4,6 +4,7 @@ require 'core_ext/kernel/run_periodically'
 
 Travis::Database.connect
 Travis::Features.start
+Travis::Notification.setup
 Travis::Exceptions::Reporter.start
 
 Travis::Async.enabled = true
