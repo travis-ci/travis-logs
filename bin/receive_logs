@@ -1,10 +1,15 @@
 #! /usr/bin/env ruby
 
-$: << File.expand_path('../../lib', __FILE__)
+$: << 'lib'
 
 require 'bundler/setup'
-require 'travis/logs/app'
+require 'travis/logs/receive'
+require 'core_ext/module/load_constants'
 
-app = Travis::Logs::App.new
-app.start
+[Travis::Logs::Receive, Travis].each do |target|
+  target.load_constants!(skip: [/::AssociationCollection$/])
+end
 
+app = Travis::Logs::Receive.new
+app.setup
+app.run

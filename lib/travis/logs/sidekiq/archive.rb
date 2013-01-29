@@ -1,16 +1,13 @@
+# Do not use. This was used to archive the backlog of logs.
+# For day to day archiving travis-tasks should be used.
+
 require 'travis'
 require 'sidekiq'
 require 'core_ext/hash/deep_symbolize_keys'
-# require 'core_ext/module/load_constants'
 
 Travis::Database.connect
 ActiveRecord::Base.logger.level = Logger::ERROR
 Travis::Notification.setup
-# Travis::Exceptions::Reporter.start
-
-# Sidekiq::Logging.logger.formatter = ->(level, _, _, msg) do
-#   "TID-#{Thread.current.object_id.to_s(36)} #{level}: #{msg}\n"
-# end
 
 Sidekiq.configure_server do |c|
   c.redis = { url: Travis.config.redis.url }
