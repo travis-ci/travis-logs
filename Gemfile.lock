@@ -15,7 +15,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-core.git
-  revision: ce73cb56bd518b1aca5cecd6dba1b6ba88d18770
+  revision: 1d5774cf50f04a2ad2b313cbcb1dda6fdb024661
   specs:
     travis-core (0.0.1)
       actionmailer (~> 3.2.11)
@@ -157,6 +157,7 @@ GEM
     net-http-persistent (2.8)
     net-http-pipeline (1.0.1)
     newrelic_rpm (3.3.5)
+    nokogiri (1.5.6)
     nokogiri (1.5.6-java)
     polyglot (0.3.3)
     postmark (0.9.18)
@@ -166,6 +167,10 @@ GEM
       actionmailer
       postmark (>= 0.9.0)
       rake
+    pry (0.9.11.4)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.4)
     pry (0.9.11.4-java)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
