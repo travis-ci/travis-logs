@@ -36,7 +36,7 @@ module Travis
           rescue Exception => e
             begin
               puts e.message, e.backtrace
-              Travis::Exceptions.handle(Hub::Error.new(message.properties.type, payload, e))
+              Travis::Exceptions.handle(e)
             rescue Exception => e
               puts "!!!FAILSAFE!!! #{e.message}", e.backtrace
             end
