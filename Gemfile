@@ -23,6 +23,10 @@ gem 'aws-sdk'
 gem 'rollout',            github: 'jamesgolick/rollout', ref: 'v1.1.0'
 gem 'hot_bunnies',        '~> 1.3.4'
 gem 'jruby-openssl',      '~> 0.7.4'
+
+# can't be upgraded so far because it starts raising exceptions like:
+# https://gist.github.com/drogus/35765d53a3239cee7317
+# pinged @nicksieger and @headius about this
 gem 'activerecord-jdbcpostgresql-adapter', '1.2.2.1'
 
 group :test do
