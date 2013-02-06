@@ -23,7 +23,7 @@ gem 'aws-sdk'
 gem 'rollout',            github: 'jamesgolick/rollout', ref: 'v1.1.0'
 gem 'hot_bunnies',        '~> 1.3.4'
 gem 'jruby-openssl',      '~> 0.7.4'
-gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2.2'
+gem 'activerecord-jdbcpostgresql-adapter'
 
 group :test do
   gem 'rspec',            '~> 2.7.0'
