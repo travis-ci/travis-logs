@@ -79,8 +79,8 @@ GEM
       arel (~> 3.0.2)
       tzinfo (~> 0.3.29)
     activerecord-jdbc-adapter (1.2.6)
-    activerecord-jdbcpostgresql-adapter (1.2.6)
-      activerecord-jdbc-adapter (~> 1.2.6)
+    activerecord-jdbcpostgresql-adapter (1.2.5)
+      activerecord-jdbc-adapter (~> 1.2.5)
       jdbc-postgres (>= 9.1, < 9.3)
     activesupport (3.2.11)
       i18n (~> 0.6)
@@ -236,7 +236,7 @@ PLATFORMS
   java
 
 DEPENDENCIES
-  activerecord-jdbcpostgresql-adapter
+  activerecord-jdbcpostgresql-adapter (= 1.2.5)
   aws-sdk
   database_cleaner (~> 0.7.1)
   guard
