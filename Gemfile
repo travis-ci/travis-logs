@@ -2,7 +2,7 @@ source :rubygems
 
 ruby '1.9.3', engine: 'jruby', engine_version: '1.7.2'
 
-gem 'travis-core',        github: 'travis-ci/travis-core', branch: 'sf-log-models'
+gem 'travis-core',        github: 'travis-ci/travis-core'
 gem 'travis-support',     github: 'travis-ci/travis-support'
 gem 'travis-sidekiqs',    github: 'travis-ci/travis-sidekiqs', require: nil
 
