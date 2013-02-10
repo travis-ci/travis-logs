@@ -43,7 +43,7 @@ module Travis
         end
 
         def receive(payload)
-          Travis.run_service(:logs_append, data: payload)
+          Travis.run_service(:logs_receive, data: payload)
         end
 
         def queue_name(shard = nil)
