@@ -4,19 +4,23 @@ require 'bundler/setup'
 require 'travis'
 Travis::Database.connect
 
-cols = %w(procpid current_query query_start)
-sql  = "SELECT #{cols.join(', ')} FROM pg_stat_activity WHERE current_query <> '<IDLE>'"
-rows = ActiveRecord::Base.connection.select_all(sql).map do |row|
-  row['current_query'] = row['current_query'][0..120] if row['current_query']
-  row['query_start'] = row['query_start'].split('.')[0..-2].join if row['query_start']
-  row
+def list_queries
+  cols = %w(procpid current_query query_start)
+  sql  = "SELECT #{cols.join(', ')} FROM pg_stat_activity WHERE current_query <> '<IDLE>'"
+  rows = ActiveRecord::Base.connection.select_all(sql).map do |row|
+    row['current_query'] = row['current_query'][0..120] if row['current_query']
+    row['query_start'] = row['query_start'].split('.')[0..-2].join if row['query_start']
+    row
+  end
+
+  widths = Hash[*cols.map { |col| [col, rows.map { |row| row[col].to_s.size }.max] }.flatten]
+
+  out = rows.map do |row|
+    '| ' + widths.map { |col, width| row[col].to_s.ljust(width) }.join(' | ') + ' |'
+  end
+
+  line = "+#{widths.values.map { |width| '-' * (width + 2) }.join('+')}+"
+  puts line, out, line
 end
 
-widths = Hash[*cols.map { |col| [col, rows.map { |row| row[col].to_s.size }.max] }.flatten]
-
-out = rows.map do |row|
-  '| ' + widths.map { |col, width| row[col].to_s.ljust(width) }.join(' | ') + ' |'
-end
-
-line = "+#{widths.values.map { |width| '-' * (width + 2) }.join('+')}+"
-puts line, out, line
+list_queries
