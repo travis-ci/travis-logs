@@ -30,7 +30,7 @@ class Archiver
     ActiveRecord::Base.silence do
       params.deep_symbolize_keys!
       puts "archiving: #{params.inspect}"
-      Service.new(params.merge(log: Artifact.find(params[:id]))).run
+      Service.new(params.merge(log: Log.find(params[:id]))).run
     end
   rescue Exception => e
     puts e.message, e.backtrace
