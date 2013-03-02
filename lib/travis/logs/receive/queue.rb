@@ -35,6 +35,7 @@ module Travis
             Timeout::timeout(options[:timeout] || 10, &block)
           rescue Exception => e
             begin
+              console.log "Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
               puts e.message, e.backtrace
               Travis::Exceptions.handle(e)
             rescue Exception => e
