@@ -24,6 +24,7 @@ module Travis
         private
 
           def receive(message, payload)
+            puts "Received message on #{name}"
             failsafe(message, payload) do
               payload = decode(payload) || raise("no payload #{message.inspect}")
               Travis.uuid = payload.delete('uuid')
