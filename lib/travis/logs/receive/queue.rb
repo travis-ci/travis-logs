@@ -32,7 +32,7 @@ module Travis
           end
 
           def failsafe(message, payload, options = {}, &block)
-            Timeout::timeout(options[:timeout] || 60, &block)
+            Timeout::timeout(options[:timeout] || 10, &block)
           rescue Exception => e
             begin
               puts e.message, e.backtrace
