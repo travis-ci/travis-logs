@@ -27,38 +27,15 @@ module Travis
       end
 
       def run
-        Queue.subscribe(queue_name, &method(:route))
-        0.upto(shards).each do |shard|
-          Queue.subscribe(queue_name(shard), &method(:receive))
+        0.upto(Travis.config.logs.threads || 10).each do
+          Queue.subscribe('logs', &method(:receive))
         end
       end
 
       private
 
-        def route(payload)
-          shard = payload['id'].to_i % shards
-          queue = queue_name(shard)
-          payload.update(uuid: Travis.uuid)
-          Travis::Amqp::Publisher.jobs(queue).publish(payload)
-        end
-
         def receive(payload)
           Travis.run_service(:logs_receive, data: payload)
-        end
-
-        def queue_name(shard = nil)
-          name = ['logs']
-          name << number      if number
-          name << ".#{shard}" if shard
-          name.join
-        end
-
-        def shards
-          Travis.config.logs.shards - 1
-        end
-
-        def number
-           ENV['LOGS_QUEUE']
         end
     end
   end
