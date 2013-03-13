@@ -13,6 +13,8 @@ module Travis
       autoload :Queue, 'travis/logs/receive/queue'
 
       def setup
+        Travis.config.logs.shards = 20
+
         Travis::Async.enabled = true
         Travis::Amqp.config = Travis.config.amqp
         Travis::Addons::Pusher::Task.run_local = true # don't pipe log updates through travis_tasks
