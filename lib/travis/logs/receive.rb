@@ -32,11 +32,9 @@ module Travis
         end
       end
 
-      private
-
-        def receive(payload)
-          Travis.run_service(:logs_receive, data: payload)
-        end
+      def receive(payload)
+        Travis.run_service(:logs_receive, data: payload)
+      end
     end
   end
 end
