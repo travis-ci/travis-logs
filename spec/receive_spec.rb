@@ -6,7 +6,7 @@ describe Travis::Logs::Receive do
   let(:payload) { { 'id' => 1, 'log' => 'foo' } }
 
   before :each do
-    Travis.config.logs.stubs(:shards).returns(3)
+    Travis.config.logs.stubs(:threads).returns(5)
   end
 
   describe 'run' do
@@ -17,28 +17,8 @@ describe Travis::Logs::Receive do
     end
 
     it 'subscribes to reporting.jobs.logs' do
-      Travis::Amqp::Consumer.expects(:jobs).with('logs').returns(consumer)
+      Travis::Amqp::Consumer.expects(:jobs).with('logs').times(5).returns(consumer)
       app.run
-    end
-
-    it 'subscribes to reporting.jobs.logs.[shard] for n shards' do
-      0.upto(2) do |shard|
-        Travis::Amqp::Consumer.expects(:jobs).with("logs.#{shard}").returns(consumer)
-      end
-      app.run
-    end
-
-    describe 'with queue_number present' do
-      it 'adds queue_number to queue_name' do
-        app.stubs(:number).returns(6)
-
-        Travis::Amqp::Consumer.expects(:jobs).with('logs6').returns(consumer)
-        0.upto(2) do |shard|
-          Travis::Amqp::Consumer.expects(:jobs).with("logs6.#{shard}").returns(consumer)
-        end
-
-        app.run
-      end
     end
   end
 
