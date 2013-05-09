@@ -27,7 +27,7 @@ module Travis
       end
 
       def run
-        0.upto(Travis.config.logs.threads || 10).each do
+        1.upto(Travis.config.logs.threads || 10).each do
           Queue.subscribe('logs', &method(:receive))
         end
       end
