@@ -24,12 +24,12 @@ gem 'pusher', '~> 0.11.3'
 # this is due to Invalid gemspec errors
 gem 'rollout',            github: 'jamesgolick/rollout', ref: 'v1.1.0'
 gem 'hot_bunnies',        '~> 1.3.4'
-gem 'jruby-openssl',      '~> 0.7.4'
+gem 'jruby-openssl',      '~> 0.8.8'
 
 # can't be upgraded so far because it starts raising exceptions like:
 # https://gist.github.com/drogus/35765d53a3239cee7317
 # pinged @nicksieger and @headius about this
-gem 'activerecord-jdbcpostgresql-adapter', '1.2.2.1'
+gem 'activerecord-jdbcpostgresql-adapter', '1.2.9'
 
 group :test do
   gem 'rspec',            '~> 2.7.0'
