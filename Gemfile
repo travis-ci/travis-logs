@@ -12,6 +12,7 @@ gem 'sidekiq'
 gem 'signature',          '~> 0.1.6'
 gem 'sidekiq'
 gem 'aws-sdk'
+gem 'dalli'
 
 gem 'pusher', '~> 0.11.3'
 
