@@ -1,7 +1,6 @@
 require 'travis'
 require 'core_ext/module/load_constants'
 require 'timeout'
-
 require 'travis/logs/receive/queue'
 
 $stdout.sync = true
