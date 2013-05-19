@@ -6,7 +6,7 @@ require 'bundler/setup'
 require 'travis/logs/aggregate'
 require 'core_ext/module/load_constants'
 
-[Travis::Logs::Receive, Travis].each do |target|
+[Travis::Logs::Aggregate, Travis].each do |target|
   target.load_constants!(skip: [/::AssociationCollection$/])
 end
 
