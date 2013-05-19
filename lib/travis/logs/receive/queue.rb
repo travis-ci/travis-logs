@@ -1,4 +1,5 @@
 require 'coder'
+require 'multi_json'
 
 module Travis
   module Logs

@@ -1,17 +1,14 @@
-require 'multi_json'
-
 require 'travis'
 require 'core_ext/module/load_constants'
 require 'timeout'
-require 'sidekiq'
+
+require 'travis/logs/receive/queue'
 
 $stdout.sync = true
 
 module Travis
   module Logs
     class Receive
-      autoload :Queue, 'travis/logs/receive/queue'
-
       def setup
         Travis::Async.enabled = true
         Travis::Amqp.config = Travis.config.amqp
