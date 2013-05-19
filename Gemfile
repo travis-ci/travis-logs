@@ -14,12 +14,7 @@ gem 'sidekiq'
 gem 'aws-sdk'
 gem 'dalli'
 
-gem 'pusher', '~> 0.11.3'
-
-# platforms :mri do
-#   gem 'amqp'
-#   gem 'pg'
-# end
+gem 'pusher',             '~> 0.11.3'
 
 # can't be removed yet, even though we're on jruby 1.6.7 everywhere
 # this is due to Invalid gemspec errors
