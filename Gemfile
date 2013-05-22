@@ -6,11 +6,10 @@ gem 'travis-core',        github: 'travis-ci/travis-core'
 gem 'travis-support',     github: 'travis-ci/travis-support'
 gem 'travis-sidekiqs',    github: 'travis-ci/travis-sidekiqs', require: nil
 
-gem 'hubble',             github: 'roidrage/hubble'
+gem 'sentry-raven',       github: 'getsentry/raven-ruby'
 gem 'newrelic_rpm',       '~> 3.3.2'
 gem 'sidekiq'
 gem 'signature',          '~> 0.1.6'
-gem 'sidekiq'
 gem 'aws-sdk'
 gem 'dalli'
 
