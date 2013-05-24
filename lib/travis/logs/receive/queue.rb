@@ -1,5 +1,6 @@
 require 'coder'
 require 'multi_json'
+require 'timeout'
 
 module Travis
   module Logs

@@ -16,27 +16,6 @@ GIT
     rollout (1.1.0)
 
 GIT
-  remote: git://github.com/travis-ci/travis-core.git
-  revision: 475973f29cd817bacec61db17a903730f4f07c51
-  specs:
-    travis-core (0.0.1)
-      actionmailer (~> 3.2.12)
-      activerecord (~> 3.2.12)
-      coder (~> 0.3.0)
-      data_migrations (~> 0.0.1)
-      gh
-      hashr (~> 0.0.19)
-      metriks (~> 0.9.7)
-      multi_json
-      pusher (~> 0.11.0)
-      railties (~> 3.2.12)
-      rake
-      redis (~> 3.0)
-      rollout (~> 1.1.0)
-      simple_states (~> 0.1.1)
-      thor (~> 0.14.6)
-
-GIT
   remote: git://github.com/travis-ci/travis-sidekiqs.git
   revision: df0b0c183dfbf4a55c0925dba0df412c690db05b
   specs:
@@ -58,19 +37,6 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    actionmailer (3.2.13)
-      actionpack (= 3.2.13)
-      mail (~> 2.5.3)
-    actionpack (3.2.13)
-      activemodel (= 3.2.13)
-      activesupport (= 3.2.13)
-      builder (~> 3.0.0)
-      erubis (~> 2.7.0)
-      journey (~> 1.0.4)
-      rack (~> 1.4.5)
-      rack-cache (~> 1.2)
-      rack-test (~> 0.6.1)
-      sprockets (~> 2.2.1)
     activemodel (3.2.13)
       activesupport (= 3.2.13)
       builder (~> 3.0.0)
@@ -94,7 +60,6 @@ GEM
       json (~> 1.4)
       nokogiri (>= 1.4.4)
       uuidtools (~> 2.1)
-    backports (3.3.1)
     bouncy-castle-java (1.5.0147)
     builder (3.0.4)
     celluloid (0.12.4)
@@ -105,24 +70,13 @@ GEM
     connection_pool (1.0.0)
     crack (0.3.2)
     dalli (2.6.3)
-    data_migrations (0.0.1)
-      activerecord
-      rake
     database_cleaner (0.7.2)
     diff-lcs (1.1.3)
-    erubis (2.7.0)
     facter (1.7.1)
     faraday (0.8.7)
       multipart-post (~> 1.1)
     ffi (1.8.1-java)
     formatador (0.2.4)
-    gh (0.11.2)
-      addressable
-      backports
-      faraday (~> 0.8)
-      multi_json (~> 1.0)
-      net-http-persistent (>= 2.7)
-      net-http-pipeline
     guard (1.8.0)
       formatador (>= 0.2.4)
       listen (>= 1.0.0)
@@ -133,12 +87,10 @@ GEM
       guard (>= 1.1)
     hashie (2.0.5)
     hashr (0.0.22)
-    hike (1.2.2)
     hitimes (1.2.1-java)
     hot_bunnies (1.3.8-java)
     i18n (0.6.1)
     jdbc-postgres (9.2.1002.1)
-    journey (1.0.4)
     jruby-openssl (0.8.8)
       bouncy-castle-java (>= 1.5.0147)
     json (1.8.0-java)
@@ -147,25 +99,18 @@ GEM
       rb-inotify (>= 0.9)
       rb-kqueue (>= 0.2)
     lumberjack (1.0.3)
-    mail (2.5.4)
-      mime-types (~> 1.16)
-      treetop (~> 1.4.8)
     metaclass (0.0.1)
     method_source (0.8.1)
     metriks (0.9.9.4)
       atomic (~> 1.0)
       avl_tree (~> 1.1.2)
       hitimes (~> 1.1)
-    mime-types (1.23)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
     multi_json (1.7.3)
     multipart-post (1.2.0)
-    net-http-persistent (2.8)
-    net-http-pipeline (1.0.1)
     newrelic_rpm (3.3.5)
     nokogiri (1.5.9-java)
-    polyglot (0.3.3)
     pry (0.9.12.2-java)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
@@ -174,28 +119,11 @@ GEM
     pusher (0.11.3)
       multi_json (~> 1.0)
       signature (~> 0.1.6)
-    rack (1.4.5)
-    rack-cache (1.2)
-      rack (>= 0.4)
-    rack-ssl (1.3.3)
-      rack
-    rack-test (0.6.2)
-      rack (>= 1.0)
-    railties (3.2.13)
-      actionpack (= 3.2.13)
-      activesupport (= 3.2.13)
-      rack-ssl (~> 1.3.2)
-      rake (>= 0.8.7)
-      rdoc (~> 3.4)
-      thor (>= 0.14.6, < 2.0)
-    rake (10.0.4)
     rb-fsevent (0.9.3)
     rb-inotify (0.9.0)
       ffi (>= 0.5.0)
     rb-kqueue (0.2.0)
       ffi (>= 0.5.0)
-    rdoc (3.12.2)
-      json (~> 1.4)
     redis (3.0.4)
     redis-namespace (1.3.0)
       redis (~> 3.0.0)
@@ -214,23 +142,11 @@ GEM
       redis (~> 3)
       redis-namespace
     signature (0.1.7)
-    simple_states (0.1.1)
-      activesupport
-      hashr (~> 0.0.10)
     slop (3.4.5)
     spoon (0.0.4)
       ffi
-    sprockets (2.2.2)
-      hike (~> 1.2)
-      multi_json (~> 1.0)
-      rack (~> 1.0)
-      tilt (~> 1.1, != 1.3.0)
-    thor (0.14.6)
-    tilt (1.4.1)
+    thor (0.18.1)
     timers (1.1.0)
-    treetop (1.4.12)
-      polyglot
-      polyglot (>= 0.3.1)
     tzinfo (0.3.37)
     uuidtools (2.1.4)
     webmock (1.8.11)
@@ -241,14 +157,18 @@ PLATFORMS
   java
 
 DEPENDENCIES
-  activerecord-jdbcpostgresql-adapter (= 1.2.9)
+  activerecord (~> 3.2.13)
+  activerecord-jdbcpostgresql-adapter (~> 1.2.9)
   aws-sdk
+  coder (~> 0.3.0)
   dalli
   database_cleaner (~> 0.7.1)
   guard
   guard-rspec
+  hashr
   hot_bunnies (~> 1.3.4)
   jruby-openssl (~> 0.8.8)
+  metriks (~> 0.9.9.4)
   micro_migrations!
   mocha (~> 0.10.0)
   newrelic_rpm (~> 3.3.2)
@@ -258,7 +178,6 @@ DEPENDENCIES
   sentry-raven!
   sidekiq
   signature (~> 0.1.6)
-  travis-core!
   travis-sidekiqs!
   travis-support!
   webmock (~> 1.8.0)

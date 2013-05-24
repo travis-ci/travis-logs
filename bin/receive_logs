@@ -4,11 +4,6 @@ $: << 'lib'
 
 require 'bundler/setup'
 require 'travis/logs/receive'
-require 'core_ext/module/load_constants'
-
-[Travis::Logs::Receive, Travis].each do |target|
-  target.load_constants!(skip: [/::AssociationCollection$/])
-end
 
 app = Travis::Logs::Receive.new
 app.setup

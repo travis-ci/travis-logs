@@ -2,10 +2,16 @@ source 'https://rubygems.org'
 
 ruby '1.9.3', engine: 'jruby', engine_version: '1.7.2'
 
-gem 'travis-core',        github: 'travis-ci/travis-core'
 gem 'travis-support',     github: 'travis-ci/travis-support'
 gem 'travis-sidekiqs',    github: 'travis-ci/travis-sidekiqs', require: nil
 
+gem 'activerecord',                        '~> 3.2.13'
+gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2.9'
+
+gem 'hashr'
+
+gem 'metriks',            '~> 0.9.9.4'
+gem 'coder',              '~> 0.3.0'
 gem 'sentry-raven',       github: 'getsentry/raven-ruby'
 gem 'newrelic_rpm',       '~> 3.3.2'
 gem 'sidekiq'
@@ -20,11 +26,6 @@ gem 'pusher',             '~> 0.11.3'
 gem 'rollout',            github: 'jamesgolick/rollout', ref: 'v1.1.0'
 gem 'hot_bunnies',        '~> 1.3.4'
 gem 'jruby-openssl',      '~> 0.8.8'
-
-# can't be upgraded so far because it starts raising exceptions like:
-# https://gist.github.com/drogus/35765d53a3239cee7317
-# pinged @nicksieger and @headius about this
-gem 'activerecord-jdbcpostgresql-adapter', '1.2.9'
 
 group :test do
   gem 'rspec',            '~> 2.7.0'
