@@ -3,8 +3,6 @@ require 'active_support/core_ext/string/filters'
 require 'metriks'
 
 class Log < ActiveRecord::Base
-  autoload :Part, 'travis/model/log/part'
-
   AGGREGATE_PARTS_SELECT_SQL = <<-sql.squish
     SELECT array_to_string(array_agg(log_parts.content ORDER BY number, id), '')
       FROM log_parts
