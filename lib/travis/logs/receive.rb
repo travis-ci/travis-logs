@@ -7,6 +7,8 @@ require 'travis/support/log_subscriber/active_record_metrics'
 require 'travis/support/memory'
 require 'travis/logs/receive/queue'
 require 'travis/logs/services/process_log_part'
+require 'metriks'
+require 'metriks/reporter/logger'
 
 $stdout.sync = true
 
@@ -14,6 +16,8 @@ module Travis
   module Logs
     class Receive
       def setup
+        Metriks::Reporter::Logger.new.start
+
         Travis::Amqp.config = Travis::Logs.config.amqp
 
         Travis::Database.connect
