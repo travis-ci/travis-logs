@@ -7,6 +7,7 @@ module Travis
   module Logs
     module Services
       class AggregateLogs
+        METRIKS_PREFIX = "logs.aggregate_logs"
 
         AGGREGATE_UPDATE_SQL = <<-sql.squish
           UPDATE logs
@@ -39,13 +40,13 @@ module Travis
         private
 
           def aggregate(id)
-            meter('logs.aggregate') do
+            measure('aggregate') do
               connection.execute(sanitize_sql([AGGREGATE_UPDATE_SQL, Time.now, id, id]))
             end
           end
 
           def vacuum(id)
-            meter('logs.vacuum') do
+            measure('vacuum') do
               LogPart.delete_all(log_id: id)
             end
           end
@@ -54,11 +55,12 @@ module Travis
             log = Log.find(id)
             Logs::Sidekiq.queue_archive_job({ id: log.id, job_id: log.job_id, type: 'log' })
           rescue ActiveRecord::RecordNotFound
-            puts "[warn] could not find a log with the id #{id}"
+            mark('log.record_not_found')
+            Travis.logger.warn "could not find a log with the id #{id}"
           end
 
           def aggregateable_ids
-            LogPart.connection.select_values(query).map { |id| id.nil? ? id : id.to_i }
+            connection.select_values(query).map { |id| id.nil? ? id : id.to_i }
           end
 
           def query
@@ -70,14 +72,11 @@ module Travis
           end
 
           def transaction(&block)
-            ActiveRecord::Base.transaction(&block)
+            measure do
+              ActiveRecord::Base.transaction(&block)
+            end
           rescue ActiveRecord::ActiveRecordError => e
-            # puts e.message, e.backtrace
             Travis::Exceptions.handle(e)
-          end
-
-          def meter(name, &block)
-            Metriks.timer(name).time(&block)
           end
 
           def connection
@@ -86,6 +85,19 @@ module Travis
 
           def sanitize_sql(*args)
             LogPart.send(:sanitize_sql, *args)
+          end
+
+          def measure(name=nil, &block)
+            timer_name = [METRIKS_PREFIX, name].compact.join('.')
+            Metriks.timer(timer_name).time(&block)
+          rescue => e
+            failed_name = [name, 'failed'].compact.join('.')
+            mark(failed_name)
+            raise
+          end
+
+          def mark(name)
+            Metriks.meter("#{METRIKS_PREFIX}.#{name}").mark
           end
       end
     end
