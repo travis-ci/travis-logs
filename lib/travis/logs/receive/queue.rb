@@ -8,6 +8,8 @@ module Travis
       class Queue
         include Logging
 
+        METRIKS_PREFIX = "logs.queue"
+
         def self.subscribe(name, &handler)
           new(name, &handler).subscribe
         end
@@ -26,25 +28,33 @@ module Travis
         private
 
           def receive(message, payload)
-            failsafe(message, payload) do
+            smart_retry(message, payload) do
               payload = decode(payload) || raise("no payload #{message.inspect}")
               Travis.uuid = payload.delete('uuid')
               handler.call(payload)
             end
-          end
-
-          def failsafe(message, payload, options = {}, &block)
-            Timeout::timeout(options[:timeout] || 10, &block)
-          rescue Exception => e
-            begin
-              puts "Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
-              puts e.message, e.backtrace
-              Travis::Exceptions.handle(e)
-            rescue Exception => e
-              puts "!!!FAILSAFE!!! #{e.message}", e.backtrace
-            end
+          rescue => e
+            log_exception(e)
           ensure
             message.ack
+          end
+
+          def smart_retry(message, payload, &block)
+            retry_count = 0
+            begin
+              Timeout::timeout(3, &block)
+            rescue Timeout::TimeoutError => e
+              if retry_count < 2
+                retry_count += 1
+                Travis.logger.error "execution expired, retrying #{retry_count} of 2"
+                Metriks.meter("#{METRIKS_PREFIX}.timeout.retry").mark
+                retry
+              else
+                Travis.logger.error "execution expired, aborting"
+                Metriks.meter("#{METRIKS_PREFIX}.timeout.error").mark
+                raise
+              end
+            end
           end
 
           def decode(payload)
@@ -53,6 +63,14 @@ module Travis
           rescue StandardError => e
             error "[decode error] payload could not be decoded with engine #{MultiJson.engine.to_s}: #{e.inspect} #{payload.inspect}"
             nil
+          end
+
+          def log_exception(error)
+            Travis.logger.error "Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
+            Travis.logger.error e.message, e.backtrace
+            Travis::Exceptions.handle(e)
+          rescue Exception => e
+            Travis.logger.error "!!!FAILSAFE!!! #{e.message}", e.backtrace
           end
       end
     end
