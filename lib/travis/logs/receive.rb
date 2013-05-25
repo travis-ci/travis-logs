@@ -16,16 +16,12 @@ module Travis
   module Logs
     class Receive
       def setup
-        Travis.logger.info('starting log parts processor')
-
-        Metriks::Reporter::Logger.new.start
-
+        Travis.logger.info('** Starting Log Parts Processor **')
         Travis::Amqp.config = Travis::Logs.config.amqp
-
         Travis::Database.connect
         Travis::Exceptions::Reporter.start
-
         Travis::LogSubscriber::ActiveRecordMetrics.attach
+        Metriks::Reporter::Logger.new(logger: Travis.logger).start
         Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
       end
 

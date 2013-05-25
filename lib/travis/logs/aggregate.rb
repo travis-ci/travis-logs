@@ -13,12 +13,12 @@ module Travis
   module Logs
     class Aggregate
       def setup
-        Travis.logger.info('starting logs aggregation')
-        Metriks::Reporter::Logger.new.start
+        Travis.logger.info('** Starting Logs Aggregation **')
         Travis::Database.connect
         Travis::Exceptions::Reporter.start
         Travis::Logs::Sidekiq.setup
         Travis::LogSubscriber::ActiveRecordMetrics.attach
+        Metriks::Reporter::Logger.new(logger: Travis.logger).start
         Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
       end
 
