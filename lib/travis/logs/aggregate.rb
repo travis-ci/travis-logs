@@ -6,6 +6,8 @@ require 'travis/support/log_subscriber/active_record_metrics'
 require 'travis/support/memory'
 require 'travis/logs/services/aggregate_logs'
 require 'core_ext/kernel/run_periodically'
+require 'metriks'
+require 'metriks/reporter/logger'
 
 module Travis
   module Logs
