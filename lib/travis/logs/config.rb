@@ -92,7 +92,7 @@ module Travis
               :s3            => { :access_key_id => '', :secret_access_key => '' },
               :pusher        => { :app_id => 'app-id', :key => 'key', :secret => 'secret' },
               :sidekiq       => { :namespace => 'sidekiq', :pool_size => 1 },
-              :logs          => { :shards => 1, :intervals => { :vacuum => 10, :regular => 180, :force => 3 * 60 * 60 } },
+              :logs          => { :threads => 10, :intervals => { :vacuum => 10, :regular => 180, :force => 3 * 60 * 60 } },
               :redis         => { :url => 'redis://localhost:6379' },
               :ssl           => { },
               :sentry        => { }
