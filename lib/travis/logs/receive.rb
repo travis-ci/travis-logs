@@ -9,6 +9,7 @@ require 'travis/logs/receive/queue'
 require 'travis/logs/services/process_log_part'
 require 'metriks'
 require 'metriks/reporter/logger'
+require 'active_support/core_ext/logger'
 
 $stdout.sync = true
 
@@ -21,7 +22,7 @@ module Travis
         Travis::Database.connect
         Travis::Exceptions::Reporter.start
         Travis::LogSubscriber::ActiveRecordMetrics.attach
-        Metriks::Reporter::Logger.new(logger: Travis.logger).start
+        Metriks::Reporter::Logger.new.start
         Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
       end
 

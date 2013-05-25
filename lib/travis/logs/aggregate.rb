@@ -8,6 +8,7 @@ require 'travis/logs/services/aggregate_logs'
 require 'core_ext/kernel/run_periodically'
 require 'metriks'
 require 'metriks/reporter/logger'
+require 'active_support/core_ext/logger'
 
 module Travis
   module Logs
@@ -18,7 +19,7 @@ module Travis
         Travis::Exceptions::Reporter.start
         Travis::Logs::Sidekiq.setup
         Travis::LogSubscriber::ActiveRecordMetrics.attach
-        Metriks::Reporter::Logger.new(logger: Travis.logger).start
+        Metriks::Reporter::Logger.new.start
         Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
       end
 
