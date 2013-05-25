@@ -11,6 +11,8 @@ module Travis
   module Logs
     class Aggregate
       def setup
+        Travis.logger.info('starting logs aggregation')
+        Metriks::Reporter::Logger.new.start
         Travis::Database.connect
         Travis::Exceptions::Reporter.start
         Travis::Logs::Sidekiq.setup

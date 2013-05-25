@@ -16,6 +16,8 @@ module Travis
   module Logs
     class Receive
       def setup
+        Travis.logger.info('starting log parts processor')
+
         Metriks::Reporter::Logger.new.start
 
         Travis::Amqp.config = Travis::Logs.config.amqp
