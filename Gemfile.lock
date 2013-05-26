@@ -9,13 +9,6 @@ GIT
       uuidtools
 
 GIT
-  remote: git://github.com/jamesgolick/rollout.git
-  revision: 3e7312cc018061b1ac6a8aeb9f11bbd0331da889
-  ref: v1.1.0
-  specs:
-    rollout (1.1.0)
-
-GIT
   remote: git://github.com/travis-ci/travis-sidekiqs.git
   revision: df0b0c183dfbf4a55c0925dba0df412c690db05b
   specs:
@@ -173,7 +166,6 @@ DEPENDENCIES
   mocha (~> 0.10.0)
   newrelic_rpm (~> 3.3.2)
   pusher (~> 0.11.3)
-  rollout!
   rspec (~> 2.7.0)
   sentry-raven!
   sidekiq

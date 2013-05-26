@@ -21,9 +21,6 @@ gem 'dalli'
 
 gem 'pusher',             '~> 0.11.3'
 
-# can't be removed yet, even though we're on jruby 1.6.7 everywhere
-# this is due to Invalid gemspec errors
-gem 'rollout',            github: 'jamesgolick/rollout', ref: 'v1.1.0'
 gem 'hot_bunnies',        '~> 1.5.0'
 gem 'jruby-openssl',      '~> 0.8.8'
 
