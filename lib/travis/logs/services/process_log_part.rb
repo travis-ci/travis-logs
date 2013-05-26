@@ -21,9 +21,11 @@ module Travis
 
         def run
           measure do
-            find_or_create_log
-            create_part
-            notify
+            with_connection do
+              find_or_create_log
+              create_part
+              notify
+            end
           end
         end
 
@@ -82,6 +84,10 @@ module Travis
           def filter(chars)
             # postgres seems to have issues with null chars
             Coder.clean!(chars.to_s.gsub("\0", ''))
+          end
+
+          def with_connection
+            ActiveRecord::Base.connection_pool.with_connection { yield }
           end
 
           def measure(name=nil, &block)
