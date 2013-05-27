@@ -12,10 +12,16 @@ module Travis
 
         METRIKS_PREFIX = "logs.aggregate_logs"
 
+        AGGREGATE_PARTS_SELECT_SQL = <<-sql.squish
+          SELECT array_to_string(array_agg(log_parts.content ORDER BY number, id), '')
+            FROM log_parts
+           WHERE log_id = ?
+        sql
+
         AGGREGATE_UPDATE_SQL = <<-sql.squish
           UPDATE logs
              SET aggregated_at = ?,
-                 content = (COALESCE(content, '') || (#{Log::AGGREGATE_PARTS_SELECT_SQL}))
+                 content = (COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL}))
            WHERE logs.id = ?
         sql
 
