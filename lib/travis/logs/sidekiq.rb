@@ -1,4 +1,5 @@
 require 'sidekiq'
+require 'sidekiq/redis_connection'
 require 'securerandom'
 require 'core_ext/securerandom'
 
@@ -7,11 +8,13 @@ module Travis
     module Sidekiq
       class << self
         def setup
+          Travis.logger.info('Setting up Sidekiq and the Redis connection')
           url = Logs.config.redis.url
           namespace = Logs.config.sidekiq.namespace
           pool_size = Logs.config.sidekiq.pool_size
           ::Sidekiq.configure_client do |c|
-            c.redis = { :url => url, :namespace => namespace, :size => pool_size }
+            c.logger = Travis.logger
+            c.redis = ::Sidekiq::RedisConnection.create({ :url => url, :namespace => namespace, :size => pool_size })
           end
         end
 
