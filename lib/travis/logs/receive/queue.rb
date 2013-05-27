@@ -28,22 +28,22 @@ module Travis
         private
 
           def receive(message, payload)
-            smart_retry(message, payload) do
+            smart_retry do
               payload = decode(payload) || raise("no payload #{message.inspect}")
               Travis.uuid = payload.delete('uuid')
               handler.call(payload)
             end
           rescue => e
-            log_exception(e)
+            log_exception(e, payload)
           ensure
             message.ack
           end
 
-          def smart_retry(message, payload, &block)
+          def smart_retry(&block)
             retry_count = 0
             begin
               Timeout::timeout(3, &block)
-            rescue Timeout::TimeoutError => e
+            rescue Timeout::Error => e
               if retry_count < 2
                 retry_count += 1
                 Travis.logger.error "execution expired, retrying #{retry_count} of 2"
@@ -58,19 +58,21 @@ module Travis
           end
 
           def decode(payload)
-            cleaned = Coder.clean(payload)
-            MultiJson.decode(cleaned)
+            return payload if payload.is_a?(Hash)
+            payload = Coder.clean(payload)
+            MultiJson.decode(payload)
           rescue StandardError => e
             error "[decode error] payload could not be decoded with engine #{MultiJson.engine.to_s}: #{e.inspect} #{payload.inspect}"
             nil
           end
 
-          def log_exception(error)
+          def log_exception(error, payload)
             Travis.logger.error "Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
-            Travis.logger.error e.message, e.backtrace
-            Travis::Exceptions.handle(e)
+            super(error)
+            Travis::Exceptions.handle(error)
           rescue Exception => e
-            Travis.logger.error "!!!FAILSAFE!!! #{e.message}", e.backtrace
+            Travis.logger.error "!!!FAILSAFE!!! #{e.message}"
+            Travis.logger.error e.backtrace.first
           end
       end
     end
