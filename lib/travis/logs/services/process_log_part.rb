@@ -3,6 +3,10 @@ require 'travis/logs/helpers/metrics'
 require 'pusher'
 require 'coder'
 
+# pusher requires this in a method, which sometimes 
+# causes and uninitialized constant error
+require 'net/https'
+
 module Travis
   module Logs
     module Services
