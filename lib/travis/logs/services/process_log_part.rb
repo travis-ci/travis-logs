@@ -1,5 +1,4 @@
-require 'travis/logs/models/log'
-require 'travis/logs/models/log_part'
+require 'travis/logs/models'
 require 'travis/logs/helpers/metrics'
 require 'pusher'
 require 'coder'

@@ -1,13 +1,10 @@
 require 'travis/logs'
 require 'travis/support'
-require 'travis/support/database'
+require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/reporting'
 require 'travis/support/exceptions/reporter'
-require 'travis/support/log_subscriber/active_record_metrics'
-require 'travis/support/memory'
 require 'travis/logs/services/aggregate_logs'
 require 'core_ext/kernel/run_periodically'
-require 'metriks'
-require 'metriks/reporter/logger'
 require 'active_support/core_ext/logger'
 
 module Travis
@@ -15,12 +12,10 @@ module Travis
     class Aggregate
       def setup
         Travis.logger.info('** Starting Logs Aggregation **')
-        Travis::Database.connect
+        Travis::Logs::Helpers::Database.setup
+        Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
         Travis::Logs::Sidekiq.setup
-        Travis::LogSubscriber::ActiveRecordMetrics.attach
-        Metriks::Reporter::Logger.new.start
-        Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
       end
 
       def run
