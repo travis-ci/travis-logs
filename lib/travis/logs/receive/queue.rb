@@ -46,11 +46,11 @@ module Travis
             rescue Timeout::Error => e
               if retry_count < 2
                 retry_count += 1
-                Travis.logger.error "execution expired, retrying #{retry_count} of 2"
+                Travis.logger.error "[queue] Processing of AMQP message exceeded 3 seconds, retrying #{retry_count} of 2"
                 Metriks.meter("#{METRIKS_PREFIX}.timeout.retry").mark
                 retry
               else
-                Travis.logger.error "execution expired, aborting"
+                Travis.logger.error "[queue] Failed to process AMQP message after 3 retries, aborting"
                 Metriks.meter("#{METRIKS_PREFIX}.timeout.error").mark
                 raise
               end
@@ -62,12 +62,12 @@ module Travis
             payload = Coder.clean(payload)
             MultiJson.decode(payload)
           rescue StandardError => e
-            error "[decode error] payload could not be decoded with engine #{MultiJson.engine.to_s}: #{e.inspect} #{payload.inspect}"
+            error "[queue:decode] payload could not be decoded with engine #{MultiJson.engine.to_s}: #{e.inspect} #{payload.inspect}"
             nil
           end
 
           def log_exception(error, payload)
-            Travis.logger.error "Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
+            Travis.logger.error "[queue] Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
             super(error)
             Travis::Exceptions.handle(error)
           rescue Exception => e
