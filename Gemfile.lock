@@ -9,6 +9,12 @@ GIT
       uuidtools
 
 GIT
+  remote: git://github.com/rkh/coder.git
+  revision: f7430cea03af163441debdacd9c0fc9032402d81
+  specs:
+    coder (0.3.0)
+
+GIT
   remote: git://github.com/travis-ci/travis-sidekiqs.git
   revision: df0b0c183dfbf4a55c0925dba0df412c690db05b
   specs:
@@ -20,12 +26,6 @@ GIT
   revision: c0add49c71ff3c788b4b7e5b63c11d3896d9847d
   specs:
     travis-support (0.0.1)
-
-GIT
-  remote: https://gist.github.com/2087829.git
-  revision: c766c06b0bdbda3bd96c3f4e376249cafcbbfaaa
-  specs:
-    micro_migrations (0.0.1)
 
 GEM
   remote: https://rubygems.org/
@@ -58,7 +58,6 @@ GEM
     celluloid (0.12.4)
       facter (>= 1.6.12)
       timers (>= 1.0.0)
-    coder (0.3.0)
     coderay (1.0.9)
     connection_pool (1.0.0)
     crack (0.3.2)
@@ -100,7 +99,7 @@ GEM
       hitimes (~> 1.1)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
-    multi_json (1.7.3)
+    multi_json (1.7.4)
     multipart-post (1.2.0)
     newrelic_rpm (3.3.5)
     nokogiri (1.5.9-java)
@@ -112,6 +111,7 @@ GEM
     pusher (0.11.3)
       multi_json (~> 1.0)
       signature (~> 0.1.6)
+    rake (10.0.4)
     rb-fsevent (0.9.3)
     rb-inotify (0.9.0)
       ffi (>= 0.5.0)
@@ -153,7 +153,7 @@ DEPENDENCIES
   activerecord (~> 3.2.13)
   activerecord-jdbcpostgresql-adapter (~> 1.2.9)
   aws-sdk
-  coder (~> 0.3.0)
+  coder!
   dalli
   database_cleaner (~> 0.7.1)
   guard
@@ -162,10 +162,10 @@ DEPENDENCIES
   hot_bunnies (~> 1.5.0)
   jruby-openssl (~> 0.8.8)
   metriks (~> 0.9.9.4)
-  micro_migrations!
   mocha (~> 0.10.0)
   newrelic_rpm (~> 3.3.2)
   pusher (~> 0.11.3)
+  rake
   rspec (~> 2.7.0)
   sentry-raven!
   sidekiq
