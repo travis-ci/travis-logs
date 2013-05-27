@@ -5,7 +5,6 @@ ruby '1.9.3', engine: 'jruby', engine_version: '1.7.2'
 gem 'rake'
 
 gem 'travis-support',     github: 'travis-ci/travis-support'
-gem 'travis-sidekiqs',    github: 'travis-ci/travis-sidekiqs', require: nil
 
 gem 'activerecord',                        '~> 3.2.13'
 gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2.9'
