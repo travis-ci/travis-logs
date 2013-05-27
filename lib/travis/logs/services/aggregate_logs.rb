@@ -64,7 +64,7 @@ module Travis
           end
 
           def queue_archiving(id)
-            log = Log.find(id)
+            log = Log.select([:id, :job_id]).find(id)
             Logs::Sidekiq.queue_archive_job({ id: log.id, job_id: log.job_id, type: 'log' })
           rescue ActiveRecord::RecordNotFound
             mark('log.record_not_found')
