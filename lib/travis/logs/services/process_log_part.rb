@@ -1,5 +1,6 @@
 require 'travis/logs/models/log'
 require 'travis/logs/models/log_part'
+require 'travis/logs/helpers/metrics'
 require 'pusher'
 require 'coder'
 
@@ -7,7 +8,13 @@ module Travis
   module Logs
     module Services
       class ProcessLogPart
+        include Helpers::Metrics
+
         METRIKS_PREFIX = "logs.process_log_part"
+
+        def self.metriks_prefix
+          METRIKS_PREFIX
+        end
 
         def self.run(payload)
           new(payload).run
@@ -88,19 +95,6 @@ module Travis
 
           def with_connection
             ActiveRecord::Base.connection_pool.with_connection { yield }
-          end
-
-          def measure(name=nil, &block)
-            timer_name = [METRIKS_PREFIX, name].compact.join('.')
-            Metriks.timer(timer_name).time(&block)
-          rescue => e
-            failed_name = [name, 'failed'].compact.join('.')
-            mark(failed_name)
-            raise
-          end
-
-          def mark(name)
-            Metriks.meter("#{METRIKS_PREFIX}.#{name}").mark
           end
 
           def pusher_payload

@@ -1,12 +1,15 @@
 require 'active_support/core_ext/string/filters'
 require 'travis/logs/models/log'
 require 'travis/logs/models/log_part'
+require 'travis/logs/helpers/metrics'
 require 'travis/logs/sidekiq'
 
 module Travis
   module Logs
     module Services
       class AggregateLogs
+        include Helpers::Metrics
+
         METRIKS_PREFIX = "logs.aggregate_logs"
 
         AGGREGATE_UPDATE_SQL = <<-sql.squish
@@ -22,6 +25,10 @@ module Travis
            WHERE created_at <= NOW() - interval '? seconds' AND final = ?
               OR created_at <= NOW() - interval '? seconds'
         sql
+
+        def self.metriks_prefix
+          METRIKS_PREFIX
+        end
 
         def self.run
           new.run
@@ -85,19 +92,6 @@ module Travis
 
           def sanitize_sql(*args)
             LogPart.send(:sanitize_sql, *args)
-          end
-
-          def measure(name=nil, &block)
-            timer_name = [METRIKS_PREFIX, name].compact.join('.')
-            Metriks.timer(timer_name).time(&block)
-          rescue => e
-            failed_name = [name, 'failed'].compact.join('.')
-            mark(failed_name)
-            raise
-          end
-
-          def mark(name)
-            Metriks.meter("#{METRIKS_PREFIX}.#{name}").mark
           end
       end
     end
