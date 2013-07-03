@@ -18,7 +18,7 @@ module Travis
 
         def self.connection_string
           extra_params = "&#{config[:extra_params]}"
-          "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:user]}&password=#{config[:password]}"
+          "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:username]}&password=#{config[:password]}"
         end
         
         def self.config
