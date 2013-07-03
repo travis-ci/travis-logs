@@ -6,8 +6,8 @@ gem 'rake'
 
 gem 'travis-support',     github: 'travis-ci/travis-support'
 
-gem 'activerecord',                        '~> 3.2.13'
-gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2.9'
+gem 'sequel',             '~> 4.0.0'
+gem 'jdbc-postgres',      '~> 9.2.1002.1'
 
 gem 'hot_bunnies',        '~> 1.5.0'
 gem 'jruby-openssl',      '~> 0.8.8'

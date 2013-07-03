@@ -1,22 +1,29 @@
-require 'travis/support/database'
-require 'travis/logs/models'
+require 'sequel'
+require 'jdbc/postgres'
 
 module Travis
   module Logs
     module Helpers
       module Database
 
-        # the only way to preload the columns for AR is to call [model].columns
-        def self.setup
+        def self.connect
           Travis.logger.info('Setting up database connection and preloading model columns')
-          ActiveRecord::Base.default_timezone = :utc
-          ActiveRecord::Base.logger = Travis.logger
-          ActiveRecord::Base.configurations = { Travis.env => Travis.config.database.merge(reaping_frequency: 10) }
-          ActiveRecord::Base.establish_connection(Travis.env)
-          Log.columns
-          LogPart.columns
+          
+          db = Sequel.connect(connection_string, max_connections: config[:pool])
+          db.logger = Travis.logger unless Travis::Logs.config.env == 'production'
+          db.timezone = :utc
+          db.test_connection
+          db
         end
 
+        def self.connection_string
+          extra_params = "&#{config[:extra_params]}"
+          "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:user]}&password=#{config[:password]}"
+        end
+        
+        def self.config
+          Travis::Logs.config.database
+        end
       end
     end
   end

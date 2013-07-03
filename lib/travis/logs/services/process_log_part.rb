@@ -1,4 +1,3 @@
-require 'travis/logs/models'
 require 'travis/logs/helpers/metrics'
 require 'pusher'
 require 'coder'
@@ -23,6 +22,24 @@ module Travis
           new(payload).run
         end
 
+        def self.prepare(db)
+          db[:logs].select(:id).filter(job_id: :$job_id).prepare(:select, :find_log_id)
+          
+          db[:logs].prepare(:insert, :create_log, {
+            :job_id => :$job_id,
+            :created_at => :$created_at,
+            :updated_at => :$updated_at
+          })
+          
+          db[:log_parts].prepare(:insert, :create_log_part, { 
+            :log_id => :$log_id,
+            :content => :$content,
+            :number => :$number,
+            :final => :$final,
+            :created_at => :$created_at
+          })
+        end
+
         attr_reader :payload
 
         def initialize(payload)
@@ -43,14 +60,14 @@ module Travis
 
           def create_part
             valid_log_id?
-            LogPart.create!(log_id: log.id, content: chars, number: number, final: final?)
-          rescue ActiveRecord::ActiveRecordError => e
+            db.call(:create_log_part, log_id: log.id, content: chars, number: number, final: final?, created_at: Time.now.utc)
+          rescue Sequel::Error => e
             Travis.logger.warn "[warn] could not save log_park in create_part job_id: #{payload['id']}: #{e.message}"
             Travis.logger.warn e.backtrace
           end
 
           def valid_log_id?
-            if log.id.to_i == 0
+            if log_id == 0
               Travis.logger.warn "[warn] log.id is #{log.id.inspect} in create_part (job_id: #{payload['id']})" 
               mark('log.id_invalid')
             end
@@ -64,19 +81,20 @@ module Travis
             Travis.logger.error("Error notifying of log update: #{e.message} (from #{e.backtrace.first})")
           end
 
-          def log
-            @log ||= find_log || create_log
+          def log_id
+            @log_id ||= find_log_id || create_log
           end
-          alias_method :find_or_create_log, :log
+          alias_method :find_or_create_log, :log_id
 
-          def find_log
-            Log.where(job_id: payload['id']).select(:id).first
+          def find_log_id
+            result = db.call(:find_log_id, job_id: payload['id']).first
+            result ? result[:id] : nil
           end
 
           def create_log
             Travis.logger.warn "Had to create a log for job_id: #{payload['id']}!"
             mark('log.create')
-            Log.create!(job_id: payload['id'])
+            db.call(:create_log, job_id: payload['id'], created_at: Time.now.utc, updated_at: Time.now.utc)
           end
 
           def chars
@@ -96,8 +114,8 @@ module Travis
             Coder.clean!(chars.to_s.gsub("\0", ''))
           end
 
-          def with_connection
-            ActiveRecord::Base.connection_pool.with_connection { yield }
+          def db
+            Travis::Logs.database_connection
           end
 
           def pusher_payload

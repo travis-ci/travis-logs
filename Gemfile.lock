@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/getsentry/raven-ruby.git
-  revision: a07adb1fcbe4b11d938e2af236eb2063d2a22c32
+  revision: 1ddda159f1e68b9b72fca11c9e2b364fa8572980
   specs:
     sentry-raven (0.4.8)
       faraday (>= 0.7.6)
@@ -10,9 +10,9 @@ GIT
 
 GIT
   remote: git://github.com/rkh/coder.git
-  revision: f7430cea03af163441debdacd9c0fc9032402d81
+  revision: 44b0cf89b98caecc654dd1a724a448e17ef7aa6c
   specs:
-    coder (0.3.0)
+    coder (0.4.0)
 
 GIT
   remote: git://github.com/travis-ci/travis-support.git
@@ -23,44 +23,28 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (3.2.13)
-      activesupport (= 3.2.13)
-      builder (~> 3.0.0)
-    activerecord (3.2.13)
-      activemodel (= 3.2.13)
-      activesupport (= 3.2.13)
-      arel (~> 3.0.2)
-      tzinfo (~> 0.3.29)
-    activerecord-jdbc-adapter (1.2.9)
-    activerecord-jdbcpostgresql-adapter (1.2.9)
-      activerecord-jdbc-adapter (~> 1.2.9)
-      jdbc-postgres (>= 9.1, < 9.3)
-    activesupport (3.2.13)
-      i18n (= 0.6.1)
-      multi_json (~> 1.0)
-    addressable (2.3.4)
-    arel (3.0.2)
-    atomic (1.1.9-java)
+    addressable (2.3.5)
+    atomic (1.1.10-java)
     avl_tree (1.1.3)
-    aws-sdk (1.10.0)
+    aws-sdk (1.11.3)
       json (~> 1.4)
-      nokogiri (>= 1.4.4)
+      nokogiri (< 1.6.0)
       uuidtools (~> 2.1)
     bouncy-castle-java (1.5.0147)
-    builder (3.0.4)
-    celluloid (0.14.0)
+    celluloid (0.14.1)
       timers (>= 1.0.0)
     coderay (1.0.9)
-    connection_pool (1.0.0)
-    crack (0.3.2)
-    dalli (2.6.3)
+    connection_pool (1.1.0)
+    crack (0.4.0)
+      safe_yaml (~> 0.9.0)
+    dalli (2.6.4)
     database_cleaner (0.7.2)
     diff-lcs (1.1.3)
     faraday (0.8.7)
       multipart-post (~> 1.1)
-    ffi (1.8.1-java)
+    ffi (1.9.0-java)
     formatador (0.2.4)
-    guard (1.8.0)
+    guard (1.8.1)
       formatador (>= 0.2.4)
       listen (>= 1.0.0)
       lumberjack (>= 1.0.2)
@@ -72,16 +56,15 @@ GEM
     hashr (0.0.22)
     hitimes (1.2.1-java)
     hot_bunnies (1.5.0-java)
-    i18n (0.6.1)
     jdbc-postgres (9.2.1002.1)
     jruby-openssl (0.8.8)
       bouncy-castle-java (>= 1.5.0147)
     json (1.8.0-java)
-    listen (1.1.3)
+    listen (1.2.2)
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
       rb-kqueue (>= 0.2)
-    lumberjack (1.0.3)
+    lumberjack (1.0.4)
     metaclass (0.0.1)
     method_source (0.8.1)
     metriks (0.9.9.4)
@@ -90,10 +73,10 @@ GEM
       hitimes (~> 1.1)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
-    multi_json (1.7.4)
+    multi_json (1.7.7)
     multipart-post (1.2.0)
     newrelic_rpm (3.3.5)
-    nokogiri (1.5.9-java)
+    nokogiri (1.5.10-java)
     pry (0.9.12.2-java)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
@@ -102,7 +85,7 @@ GEM
     pusher (0.11.3)
       multi_json (~> 1.0)
       signature (~> 0.1.6)
-    rake (10.0.4)
+    rake (10.1.0)
     rb-fsevent (0.9.3)
     rb-inotify (0.9.0)
       ffi (>= 0.5.0)
@@ -119,8 +102,10 @@ GEM
     rspec-expectations (2.7.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.7.0)
-    sidekiq (2.12.0)
-      celluloid (>= 0.14.0)
+    safe_yaml (0.9.3)
+    sequel (4.0.0)
+    sidekiq (2.12.4)
+      celluloid (>= 0.14.1)
       connection_pool (>= 1.0.0)
       json
       redis (>= 3.0)
@@ -131,7 +116,6 @@ GEM
       ffi
     thor (0.18.1)
     timers (1.1.0)
-    tzinfo (0.3.37)
     uuidtools (2.1.4)
     webmock (1.8.11)
       addressable (>= 2.2.7)
@@ -141,8 +125,6 @@ PLATFORMS
   java
 
 DEPENDENCIES
-  activerecord (~> 3.2.13)
-  activerecord-jdbcpostgresql-adapter (~> 1.2.9)
   aws-sdk
   coder!
   dalli
@@ -151,6 +133,7 @@ DEPENDENCIES
   guard-rspec
   hashr
   hot_bunnies (~> 1.5.0)
+  jdbc-postgres (~> 9.2.1002.1)
   jruby-openssl (~> 0.8.8)
   metriks (~> 0.9.9.4)
   mocha (~> 0.10.0)
@@ -159,6 +142,7 @@ DEPENDENCIES
   rake
   rspec (~> 2.7.0)
   sentry-raven!
+  sequel (~> 4.0.0)
   sidekiq
   signature (~> 0.1.6)
   travis-support!

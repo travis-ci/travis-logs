@@ -79,12 +79,6 @@ module Travis
         end
       end
 
-      HOSTS = {
-        :production  => 'travis-ci.org',
-        :staging     => 'staging.travis-ci.org',
-        :development => 'localhost:3000'
-      }
-
       include Logging
 
       define  :amqp          => { :username => 'guest', :password => 'guest', :host => 'localhost', :prefetch => 1 },
