@@ -48,11 +48,9 @@ module Travis
 
         def run
           measure do
-            with_connection do
-              find_or_create_log
-              create_part
-              notify
-            end
+            find_or_create_log
+            create_part
+            notify
           end
         end
 
