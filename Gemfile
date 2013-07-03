@@ -4,6 +4,7 @@ ruby '1.9.3', engine: 'jruby', engine_version: '1.7.4'
 
 gem 'rake'
 
+gem 'activesupport'
 gem 'travis-support',     github: 'travis-ci/travis-support'
 
 gem 'sequel',             '~> 4.0.0'
