@@ -58,7 +58,7 @@ module Travis
 
           def create_part
             valid_log_id?
-            db.call(:create_log_part, log_id: log.id, content: chars, number: number, final: final?, created_at: Time.now.utc)
+            db.call(:create_log_part, log_id: log_id, content: chars, number: number, final: final?, created_at: Time.now.utc)
           rescue Sequel::Error => e
             Travis.logger.warn "[warn] could not save log_park in create_part job_id: #{payload['id']}: #{e.message}"
             Travis.logger.warn e.backtrace
