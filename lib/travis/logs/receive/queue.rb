@@ -1,5 +1,5 @@
 require 'coder'
-require 'multi_json'
+require 'json'
 require 'timeout'
 
 module Travis
@@ -60,7 +60,7 @@ module Travis
           def decode(payload)
             return payload if payload.is_a?(Hash)
             payload = Coder.clean(payload)
-            MultiJson.decode(payload)
+            ::JSON.parse(payload)
           rescue StandardError => e
             error "[queue:decode] payload could not be decoded with engine #{MultiJson.engine.to_s}: #{e.inspect} #{payload.inspect}"
             nil

@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/getsentry/raven-ruby.git
-  revision: 1ddda159f1e68b9b72fca11c9e2b364fa8572980
+  revision: 81e858a508a0e86628758ab68393b06496bf2e98
   specs:
     sentry-raven (0.4.8)
       faraday (>= 0.7.6)
@@ -147,6 +147,7 @@ DEPENDENCIES
   hot_bunnies (~> 1.5.0)
   jdbc-postgres (~> 9.2.1002.1)
   jruby-openssl (~> 0.8.8)
+  json (~> 1.8.0)
   metriks (~> 0.9.9.4)
   mocha (~> 0.10.0)
   newrelic_rpm (~> 3.3.2)
