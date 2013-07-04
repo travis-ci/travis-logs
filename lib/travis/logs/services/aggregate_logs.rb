@@ -1,5 +1,4 @@
 require 'active_support/core_ext/string/filters'
-require 'travis/logs/models'
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/sidekiq'
 
@@ -27,12 +26,16 @@ module Travis
         AGGREGATEABLE_SELECT_SQL = <<-sql.squish
           SELECT DISTINCT log_id
             FROM log_parts
-           WHERE created_at <= NOW() - interval '? seconds' AND final = ?
-              OR created_at <= NOW() - interval '? seconds'
+           WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
+              OR  created_at <= NOW() - interval '? seconds'
         sql
 
         def self.metriks_prefix
           METRIKS_PREFIX
+        end
+
+        def self.prepare(db)
+          # do not use prepared queries for the time being
         end
 
         def self.run
@@ -53,30 +56,28 @@ module Travis
 
           def aggregate(id)
             measure('aggregate') do
-              connection.execute(sanitize_sql([AGGREGATE_UPDATE_SQL, Time.now, id, id]))
+              connection[AGGREGATE_UPDATE_SQL, Time.now, id, id]
             end
           end
 
           def vacuum(id)
             measure('vacuum') do
-              LogPart.delete_all(log_id: id)
+              connection[:log_parts].where(log_id: id).delete
             end
           end
 
           def queue_archiving(id)
-            log = Log.select([:id, :job_id]).find(id)
-            Logs::Sidekiq.queue_archive_job({ id: log.id, job_id: log.job_id, type: 'log' })
-          rescue ActiveRecord::RecordNotFound
-            mark('log.record_not_found')
-            Travis.logger.warn "could not find a log with the id #{id}"
+            log = connection[:logs].select(:id, :job_id).first(id: id)
+            if log
+              Logs::Sidekiq.queue_archive_job({ id: log[:id], job_id: log[:job_id], type: 'log' })
+            else
+              mark('log.record_not_found')
+              Travis.logger.warn "could not find a log with the id #{id}"
+            end
           end
 
           def aggregateable_ids
-            connection.select_values(query).map { |id| id.nil? ? id : id.to_i }
-          end
-
-          def query
-            LogPart.send(:sanitize_sql, [AGGREGATEABLE_SELECT_SQL, intervals[:regular], true, intervals[:force]])
+            connection[AGGREGATEABLE_SELECT_SQL, intervals[:regular], true, intervals[:force]].map(:log_id)
           end
 
           def intervals
@@ -85,18 +86,14 @@ module Travis
 
           def transaction(&block)
             measure do
-              ActiveRecord::Base.transaction(&block)
+              connection.transaction(&block)
             end
-          rescue ActiveRecord::ActiveRecordError => e
+          rescue Sequel::Error => e
             Travis::Exceptions.handle(e)
           end
 
           def connection
-            LogPart.connection
-          end
-
-          def sanitize_sql(*args)
-            LogPart.send(:sanitize_sql, *args)
+            Travis::Logs.database_connection
           end
       end
     end

@@ -12,10 +12,13 @@ module Travis
     class Aggregate
       def setup
         Travis.logger.info('** Starting Logs Aggregation **')
-        Travis::Logs::Helpers::Database.setup
         Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
         Travis::Logs::Sidekiq.setup
+        
+        db = Travis::Logs::Helpers::Database.connect
+        Logs.database_connection = db
+        Travis::Logs::Services::ProcessLogPart.prepare(db)
       end
 
       def run
