@@ -23,7 +23,7 @@ module Travis
         end
 
         def self.prepare(db)
-          db[:logs].select(:id).filter(job_id: :$job_id).prepare(:select, :find_log_id)
+          db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
           
           db[:logs].prepare(:insert, :create_log, {
             :job_id => :$job_id,
