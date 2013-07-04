@@ -62,7 +62,7 @@ module Travis
             payload = Coder.clean(payload)
             ::JSON.parse(payload)
           rescue StandardError => e
-            error "[queue:decode] payload could not be decoded with engine #{MultiJson.engine.to_s}: #{e.inspect} #{payload.inspect}"
+            error "[queue:decode] payload could not be decoded: #{e.inspect} #{payload.inspect}"
             nil
           end
 
