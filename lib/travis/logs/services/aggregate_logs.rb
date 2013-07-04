@@ -56,7 +56,7 @@ module Travis
 
           def aggregate(id)
             measure('aggregate') do
-              connection[AGGREGATE_UPDATE_SQL, Time.now, id, id]
+              connection[AGGREGATE_UPDATE_SQL, Time.now, id, id].update
             end
           end
 
