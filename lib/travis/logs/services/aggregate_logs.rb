@@ -35,6 +35,7 @@ module Travis
         end
 
         def self.prepare(db)
+          # DB['SELECT * FROM table WHERE a = ?', :$a].prepare(:all, :ps_name).call(:a=>1)
           # do not use prepared queries for the time being
         end
 
@@ -48,6 +49,7 @@ module Travis
               aggregate(id)
               vacuum(id)
               queue_archiving(id)
+              Travis.logger.info "Finished aggregating Log with id:#{id}"
             end
           end
         end
@@ -72,7 +74,7 @@ module Travis
               Logs::Sidekiq.queue_archive_job({ id: log[:id], job_id: log[:job_id], type: 'log' })
             else
               mark('log.record_not_found')
-              Travis.logger.warn "could not find a log with the id #{id}"
+              Travis.logger.warn "Could not queue Log with id:#{id} for archiving as it could not be found"
             end
           end
 
