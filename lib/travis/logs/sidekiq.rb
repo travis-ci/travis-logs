@@ -14,7 +14,7 @@ module Travis
           pool_size = Logs.config.sidekiq.pool_size
           ::Sidekiq.configure_client do |c|
             c.logger = Travis.logger
-            c.redis = ::Sidekiq::RedisConnection.create({ :url => url, :namespace => namespace, :size => pool_size })
+            c.redis = { :url => url, :namespace => namespace, :size => pool_size }
           end
         end
       end
