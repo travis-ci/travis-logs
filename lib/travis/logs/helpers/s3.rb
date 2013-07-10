@@ -1,3 +1,5 @@
+require 'aws/s3'
+
 module Travis
   module Logs
     module Helpers
