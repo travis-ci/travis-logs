@@ -39,9 +39,12 @@ module Travis
 
         def log
           @log ||= begin
-            connection[:logs].where(log_id: log_id).first
-            Travis.logger.warn "[warn] log with id:#{payload['id']} could not be found"
-            mark('log.not_found')
+            log = connection[:logs].where(log_id: log_id).first
+            unless log
+              Travis.logger.warn "[warn] log with id:#{payload['id']} could not be found"
+              mark('log.not_found')
+            end
+            log
           end
         end
         alias_method :fetch, :log
@@ -111,7 +114,7 @@ module Travis
             count ||= 0
             if times > (count += 1)
               puts "[#{header}] retry #{count} because: #{e.message}"
-              sleep count *  unless params[:no_sleep]
+              sleep count * 1
               retry
             else
               raise
