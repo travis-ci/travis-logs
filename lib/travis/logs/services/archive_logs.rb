@@ -5,7 +5,7 @@ require 'uri'
 module Travis
   module Logs
     module Services
-      class Archive 
+      class ArchiveLogs
         include Helpers::Metrics
 
         METRIKS_PREFIX = "logs.archive"
