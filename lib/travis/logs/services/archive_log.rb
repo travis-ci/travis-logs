@@ -1,6 +1,6 @@
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
-require 'aws/s3'
+require 'active_support/core_ext/object/try'
 require 'uri'
 
 module Travis
