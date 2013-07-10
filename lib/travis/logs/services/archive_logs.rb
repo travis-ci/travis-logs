@@ -20,11 +20,10 @@ module Travis
           end
         end
 
-        attr_reader :log_id, :job_id
+        attr_reader :log_id
 
-        def initialize(log_id, job_id)
+        def initialize(log_id)
           @log_id = id
-          @job_id = job_id
         end
 
         def run
@@ -76,7 +75,7 @@ module Travis
         end
 
         def target_url
-          "http://#{hostname('archive')}/jobs/#{job_id}/log.txt"
+          "http://#{hostname('archive')}/jobs/#{log[:job_id]}/log.txt"
         end
 
         private

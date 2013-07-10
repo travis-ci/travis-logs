@@ -7,13 +7,12 @@ require 'travis/logs/services/archive_logs'
 require 'travis/logs/helpers/database'
 require 'travis/logs/helpers/reporting'
 require 'active_support/core_ext/logger'
-require 'sidekiq'
+require 'travis/logs/sidekiq/archive'
 require 'core_ext/hash/deep_symbolize_keys'
 
 $stdout.sync = true
 Travis.logger.info('** Setting up Sidekiq **')
 
-Travis::Database.connect
 Travis::Logs::Helpers::Reporting.setup
 Travis::Exceptions::Reporter.start
 
@@ -25,20 +24,4 @@ Sidekiq.configure_server do |config|
     :namespace => Travis::Logs.config.sidekiq.namespace
   }
   config.logger = nil unless Travis::Logs.config.log_level == :debug
-end
-
-module Travis
-  module Logs
-    module Sidekiq
-      class Archiver
-        include Sidekiq::Worker
-
-        sidekiq_options queue: 'archive'
-
-        def perform(params)
-          puts params.inspect
-        end
-      end
-    end
-  end
 end

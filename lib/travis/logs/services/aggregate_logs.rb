@@ -74,7 +74,7 @@ module Travis
             log = connection[:logs].select(:id, :job_id).first(id: id)
 
             if log
-              Logs::Sidekiq.queue_archive_job({ id: log[:id], job_id: log[:job_id], type: 'log' })
+              Sidekiq::Archive.perform_async(log[:id])
             else
               mark('log.record_not_found')
               Travis.logger.warn "Could not queue Log with id:#{id} for archiving as it could not be found"
