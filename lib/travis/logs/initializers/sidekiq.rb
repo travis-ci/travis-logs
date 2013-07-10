@@ -1,4 +1,4 @@
-require 'bundler/setup'
+$: << 'lib'
 
 require 'travis/logs'
 require 'travis/support'
