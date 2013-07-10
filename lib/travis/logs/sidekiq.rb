@@ -8,6 +8,8 @@ module Travis
       class << self
         def setup
           Travis.logger.info('Setting up Sidekiq and the Redis connection')
+          Travis.logger.info("using redis:#{Logs.config.redis.inspect}")
+          Travis.logger.info("using sidekiq:#{Logs.config.sidekiq.inspect}")
           url = Logs.config.redis.url
           namespace = Logs.config.sidekiq.namespace
           pool_size = Logs.config.sidekiq.pool_size
