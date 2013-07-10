@@ -28,11 +28,7 @@ module Travis
         end
 
         def run
-          unless fetch
-            Travis.logger.warn "[warn] could not archive log as log with id:#{payload['id']} could not be found"
-            mark('log.not_found')
-            return
-          end
+          return unless fetch
           mark_as_archiving
           store
           verify
@@ -42,7 +38,11 @@ module Travis
         end
 
         def log
-          @log ||= connection[:logs].where(log_id: log_id).first
+          @log ||= begin
+            connection[:logs].where(log_id: log_id).first
+            Travis.logger.warn "[warn] log with id:#{payload['id']} could not be found"
+            mark('log.not_found')
+          end
         end
         alias_method :fetch, :log
 
