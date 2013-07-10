@@ -76,7 +76,7 @@ module Travis
         end
 
         def target_url
-          "http://#{hostname('archive')}/jobs/#{log[:job_id]}/log.txt"
+          "http://#{hostname}/jobs/#{log[:job_id]}/log.txt"
         end
 
         private
