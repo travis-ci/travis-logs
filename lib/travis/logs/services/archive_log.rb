@@ -104,8 +104,8 @@ module Travis
             @s3 ||= Helpers::S3.new(target_url)
           end
 
-          def hostname(name)
-            "#{name}#{'-staging' if Travis.env == 'staging'}.#{Travis.config.host.split('.')[-2, 2].join('.')}"
+          def hostname
+            Travis.config.s3.hostname
           end
 
           def retrying(header, times = 5)
