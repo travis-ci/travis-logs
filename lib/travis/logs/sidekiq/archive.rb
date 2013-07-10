@@ -1,5 +1,5 @@
 require 'sidekiq/worker'
-require 'travis/logs/services/archive_logs'
+require 'travis/logs/services/archive_log'
 
 module Travis
   module Logs
@@ -10,7 +10,7 @@ module Travis
         sidekiq_options queue: 'archive'
 
         def perform(log_id)
-          Services::ArchiveLogs.new(log_id).run
+          Services::ArchiveLog.new(log_id).run
         end
       end
     end

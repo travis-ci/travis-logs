@@ -5,7 +5,7 @@ require 'uri'
 module Travis
   module Logs
     module Services
-      class ArchiveLogs
+      class ArchiveLog
         include Helpers::Metrics
 
         METRIKS_PREFIX = "logs.archive"
@@ -23,7 +23,7 @@ module Travis
         attr_reader :log_id
 
         def initialize(log_id)
-          @log_id = id
+          @log_id = log_id
         end
 
         def run
