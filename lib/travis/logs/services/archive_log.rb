@@ -1,4 +1,5 @@
 require 'travis/logs/helpers/metrics'
+require 'travis/logs/helpers/s3'
 require 'aws/s3'
 require 'uri'
 
