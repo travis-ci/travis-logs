@@ -5,7 +5,7 @@ module Travis
   module Logs
     module Sidekiq
       class Archive
-        include Sidekiq::Worker
+        include ::Sidekiq::Worker
 
         sidekiq_options queue: 'archive'
 
