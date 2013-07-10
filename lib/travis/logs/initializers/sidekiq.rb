@@ -27,17 +27,18 @@ Sidekiq.configure_server do |config|
   config.logger = nil unless Travis::Logs.config.log_level == :debug
 end
 
-class Archiver
-  include Sidekiq::Worker
+module Travis
+  module Logs
+    module Sidekiq
+      class Archiver
+        include Sidekiq::Worker
 
-  def perform(params)
-    ActiveRecord::Base.silence do
-      params.deep_symbolize_keys!
-      puts "archiving: #{params.inspect}"
-      Service.new(params.merge(log: Log.find(params[:id]))).run
+        sidekiq_options queue: 'archive'
+
+        def perform(params)
+          puts params.inspect
+        end
+      end
     end
-  rescue Exception => e
-    puts e.message, e.backtrace
-    raise
   end
 end
