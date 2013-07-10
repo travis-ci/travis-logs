@@ -1,6 +1,5 @@
 require 'sidekiq'
 require 'sidekiq/redis_connection'
-require 'travis/logs/sidekiq/archive'
 
 module Travis
   module Logs

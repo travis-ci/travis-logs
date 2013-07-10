@@ -1,6 +1,6 @@
 require 'active_support/core_ext/string/filters'
 require 'travis/logs/helpers/metrics'
-require 'travis/logs/sidekiq'
+require 'travis/logs/sidekiq/archive'
 
 module Travis
   module Logs

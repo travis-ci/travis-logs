@@ -18,3 +18,6 @@ Travis::Exceptions::Reporter.start
 Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
 
 Travis::Logs::Sidekiq.setup
+
+# load the workers
+require 'travis/logs/sidekiq/archive'
