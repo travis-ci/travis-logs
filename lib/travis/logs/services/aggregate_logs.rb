@@ -69,7 +69,10 @@ module Travis
           end
 
           def queue_archiving(id)
+            return unless Travis::Logs.config.logs.archive
+
             log = connection[:logs].select(:id, :job_id).first(id: id)
+
             if log
               Logs::Sidekiq.queue_archive_job({ id: log[:id], job_id: log[:job_id], type: 'log' })
             else
