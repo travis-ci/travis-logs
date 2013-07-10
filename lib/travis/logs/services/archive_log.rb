@@ -38,7 +38,7 @@ module Travis
 
         def log
           @log ||= begin
-            log = connection[:logs].where(log_id: log_id).first
+            log = connection[:logs].where(id: log_id).first
             unless log
               Travis.logger.warn "[warn] log with id:#{payload['id']} could not be found"
               mark('log.not_found')
@@ -49,7 +49,7 @@ module Travis
         alias_method :fetch, :log
 
         def mark_as_archiving(archiving = true)
-          connection[:logs].where(log_id: log_id).update(archiving: archiving)
+          connection[:logs].where(id: log_id).update(archiving: archiving)
         end
 
         def store
@@ -71,7 +71,7 @@ module Travis
         end
 
         def confirm
-          connection[:logs].where(log_id: log_id).update(archived_at: Time.now, archive_verified: true)
+          connection[:logs].where(id: log_id).update(archived_at: Time.now, archive_verified: true)
         end
 
         def target_url
