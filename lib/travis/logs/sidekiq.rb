@@ -1,7 +1,6 @@
 require 'sidekiq'
 require 'sidekiq/redis_connection'
-require 'securerandom'
-require 'core_ext/securerandom'
+require 'travis/logs/sidekiq/archive'
 
 module Travis
   module Logs
@@ -16,11 +15,6 @@ module Travis
             c.logger = Travis.logger
             c.redis = ::Sidekiq::RedisConnection.create({ :url => url, :namespace => namespace, :size => pool_size })
           end
-        end
-
-        def queue_archive_job(payload)
-          args = [SecureRandom.uuid, 'Travis::Addons::Archive::Task', 'perform', payload]
-          ::Sidekiq::Client.push('queue' => 'archive', 'retry' => 8, 'class' => 'Travis::Async::Sidekiq::Worker', 'args' => args)
         end
       end
     end

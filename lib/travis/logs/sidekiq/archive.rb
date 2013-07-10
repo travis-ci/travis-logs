@@ -1,4 +1,4 @@
-require 'sidekiq'
+require 'sidekiq/worker'
 require 'travis/logs/services/archive_logs'
 
 module Travis
