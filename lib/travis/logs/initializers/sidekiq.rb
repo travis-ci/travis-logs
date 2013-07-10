@@ -1,3 +1,5 @@
+require 'bundler/setup'
+
 require 'travis/logs'
 require 'travis/support'
 require 'travis/support/exceptions/reporter'
