@@ -10,7 +10,7 @@ gem 'travis-support',     github: 'travis-ci/travis-support'
 gem 'sequel',             '~> 4.0.0'
 gem 'jdbc-postgres',      '~> 9.2.1002.1'
 
-gem 'hot_bunnies',        '~> 1.5.0'
+gem 'march_hare',         '~> 2.0.0.rc1'
 gem 'jruby-openssl',      '~> 0.8.8'
 
 gem 'json',               '~> 1.8.0'
