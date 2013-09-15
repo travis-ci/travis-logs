@@ -29,7 +29,7 @@ module Travis
 
           def receive(message, payload)
             smart_retry do
-              payload = decode(payload) || raise("no payload #{message.inspect}")
+              payload = decode(payload) || return
               Travis.uuid = payload.delete('uuid')
               handler.call(payload)
             end
@@ -63,6 +63,7 @@ module Travis
             ::JSON.parse(payload)
           rescue StandardError => e
             error "[queue:decode] payload could not be decoded: #{e.inspect} #{payload.inspect}"
+            Metriks.meter("#{METRIKS_PREFIX}.payload.decode_error").mark
             nil
           end
 
