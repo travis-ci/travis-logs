@@ -26,12 +26,8 @@ module Travis
 
       def run
         1.upto(Logs.config.logs.threads) do
-          Queue.subscribe('logs', &method(:receive))
+          Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
         end
-      end
-
-      def receive(payload)
-        Travis::Logs::Services::ProcessLogPart.run(payload)
       end
     end
   end

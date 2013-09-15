@@ -10,13 +10,13 @@ module Travis
 
         METRIKS_PREFIX = "logs.queue"
 
-        def self.subscribe(name, &handler)
-          new(name, &handler).subscribe
+        def self.subscribe(name, handler)
+          new(name, handler).subscribe
         end
 
         attr_reader :name, :handler
 
-        def initialize(name, &handler)
+        def initialize(name, handler)
           @name = name
           @handler = handler
         end
@@ -31,7 +31,7 @@ module Travis
             smart_retry do
               payload = decode(payload) || return
               Travis.uuid = payload.delete('uuid')
-              handler.call(payload)
+              handler.run(payload)
             end
           rescue => e
             log_exception(e, payload)
