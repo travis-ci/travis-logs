@@ -45,16 +45,22 @@ module Travis
 
         def run
           aggregateable_ids.each do |id|
-            transaction do
-              aggregate(id)
-              vacuum(id)
-              queue_archiving(id)
-              Travis.logger.info "Finished aggregating Log with id:#{id}"
-            end
+            aggregate_log(id)
           end
         end
 
         private
+
+          def aggregate_log(id)
+            transaction do
+              aggregate(id)
+              vacuum(id)
+            end
+            queue_archiving(id)
+            Travis.logger.info "Finished aggregating Log with id:#{id}"
+          rescue => e
+            Travis::Exceptions.handle(e)
+          end
 
           def aggregate(id)
             measure('aggregate') do
@@ -93,8 +99,6 @@ module Travis
             measure do
               connection.transaction(&block)
             end
-          rescue Sequel::Error => e
-            Travis::Exceptions.handle(e)
           end
 
           def connection
