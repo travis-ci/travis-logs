@@ -11,7 +11,6 @@ module Travis
         def self.setup
           Travis.logger.info('Setting up Metriks and Memory reporting')
           Metriks::Reporter::Logger.new.start
-          Travis::LogSubscriber::ActiveRecordMetrics.attach
         end
 
       end
