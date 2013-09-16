@@ -30,6 +30,10 @@ module Travis
         def run
           return unless fetch
           mark_as_archiving
+          unless content
+            mark("log.empty")
+            return
+          end
           store
           verify
           confirm
