@@ -12,7 +12,6 @@ module Travis
           Travis.logger.info('Setting up Metriks and Memory reporting')
           Metriks::Reporter::Logger.new.start
           Travis::LogSubscriber::ActiveRecordMetrics.attach
-          Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
         end
 
       end
