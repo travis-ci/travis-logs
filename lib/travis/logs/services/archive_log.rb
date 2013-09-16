@@ -59,8 +59,9 @@ module Travis
             Travis.logger.warn "[warn] log with id:#{log_id} was blank"
             mark("log.empty")
             true
+          else
+            false
           end
-          false
         end
 
         def store
