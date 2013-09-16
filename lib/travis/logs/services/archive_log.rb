@@ -42,7 +42,7 @@ module Travis
           @log ||= begin
             log = connection[:logs].where(id: log_id).first
             unless log
-              Travis.logger.warn "[warn] log with id:#{payload['id']} could not be found"
+              Travis.logger.warn "[warn] log with id:#{log_id} could not be found"
               mark('log.not_found')
             end
             log
@@ -56,7 +56,7 @@ module Travis
 
         def check_if_blank
           if content.blank?
-            Travis.logger.warn "[warn] log with id:#{payload['id']} was blank"
+            Travis.logger.warn "[warn] log with id:#{log_id} was blank"
             mark("log.empty")
             content = ""
           end
