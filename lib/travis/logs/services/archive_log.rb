@@ -30,7 +30,7 @@ module Travis
         def run
           return unless fetch
           mark_as_archiving
-          check_if_blank
+          return if content_blank?
           store
           verify
           confirm
@@ -54,12 +54,13 @@ module Travis
           connection[:logs].where(id: log_id).update(archiving: archiving)
         end
 
-        def check_if_blank
+        def content_blank?
           if content.blank?
             Travis.logger.warn "[warn] log with id:#{log_id} was blank"
             mark("log.empty")
-            content = ""
+            true
           end
+          false
         end
 
         def store
