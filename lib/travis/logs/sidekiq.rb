@@ -13,7 +13,11 @@ module Travis
           namespace = Logs.config.sidekiq.namespace
           pool_size = Logs.config.sidekiq.pool_size
           ::Sidekiq.redis = ::Sidekiq::RedisConnection.create({ :url => url, :namespace => namespace, :size => pool_size })
-          ::Sidekiq.logger = Travis.logger
+          if Travis.config.log_level == :debug
+            ::Sidekiq.logger = Travis.logger
+          else
+            ::Sidekiq.logger = nil
+          end
         end
       end
     end
