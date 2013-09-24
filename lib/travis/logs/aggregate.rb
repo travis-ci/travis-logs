@@ -1,31 +1,35 @@
-require 'travis'
+require 'travis/logs'
 require 'travis/support'
+require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/reporting'
+require 'travis/logs/sidekiq'
+require 'travis/support/exceptions/reporter'
+require 'travis/logs/services/aggregate_logs'
 require 'core_ext/kernel/run_periodically'
+require 'active_support/core_ext/logger'
 
 module Travis
   module Logs
     class Aggregate
       def setup
-        Travis::Database.connect
-        Travis::Features.start
-        Travis::Notification.setup
+        Travis.logger.info('** Starting Logs Aggregation **')
+        Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
-
-        Travis::Async.enabled = true
-        Travis::Async::Sidekiq.setup(Travis.config.redis.url, Travis.config.sidekiq)
-
-        instrumenter = Travis.env == 'production' ? Travis::Instrumentation : Travis::Notification
-        instrumenter.setup
+        Travis::Logs::Sidekiq.setup
+        
+        db = Travis::Logs::Helpers::Database.connect
+        Logs.database_connection = db
+        Travis::Logs::Services::AggregateLogs.prepare(db)
       end
 
       def run
-        run_periodically(Travis.config.logs.intervals.vacuum || 10) do
-          aggregate_logs if Travis::Features.feature_active?(:log_aggregation)
+        run_periodically(Travis.config.logs.intervals.vacuum) do
+          aggregate_logs
         end.join
       end
 
       def aggregate_logs
-        Travis.run_service(:logs_aggregate)
+        Travis::Logs::Services::AggregateLogs.run
       rescue Exception => e
         Travis::Exceptions.handle(e)
       end
