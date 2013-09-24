@@ -17,12 +17,13 @@ module Travis
         end
 
         def self.connection_string
-          extra_params = "&#{config[:extra_params]}"
           "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:username]}&password=#{config[:password]}"
         end
         
         def self.config
-          Travis::Logs.config.database
+          {
+            username: ENV["USER"],
+          }.merge(Travis::Logs.config.database)
         end
       end
     end

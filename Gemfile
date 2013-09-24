@@ -26,7 +26,7 @@ gem 'aws-sdk'
 gem 'dalli'
 
 group :test do
-  gem 'rspec',            '~> 2.7.0'
+  gem 'rspec',            '~> 2.14.1'
   gem 'database_cleaner', '~> 0.7.1'
   gem 'mocha',            '~> 0.10.0'
   gem 'webmock',          '~> 1.8.0'

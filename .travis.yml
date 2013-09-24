@@ -1,11 +1,12 @@
 language: ruby
 rvm:
-  - jruby-19mode-1.7.2
+  - jruby-19mode
 jdk: openjdk7
 services:
   - redis
   - rabbitmq
 before_script:
-  - cp config/database.example.yml config/database.yml
-  - 'RAILS_ENV=test rake db:create db:schema:load --trace'
+  - psql -c "CREATE DATABASE travis_test;" -U postgres
+  - cp config/travis.example.yml config/travis.yml
+  - bundle exec rake db:setup
 script: bundle exec rspec spec
