@@ -1,7 +1,12 @@
-require 'travis'
-require 'core_ext/module/load_constants'
-require 'timeout'
+require 'travis/logs'
+require 'travis/support'
+require 'travis/support/amqp'
+require 'travis/support/exceptions/reporter'
 require 'travis/logs/receive/queue'
+require 'travis/logs/services/process_log_part'
+require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/reporting'
+require 'active_support/core_ext/logger'
 
 $stdout.sync = true
 
@@ -9,27 +14,20 @@ module Travis
   module Logs
     class Receive
       def setup
-        Travis::Async.enabled = true
-        Travis::Amqp.config = Travis.config.amqp
-        Travis::Addons::Pusher::Task.run_local = true # don't pipe log updates through travis_tasks
-
-        Travis::Database.connect
+        Travis.logger.info('** Starting Log Parts Processor **')
+        Travis::Amqp.config = Travis::Logs.config.amqp
+        Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
-        Travis::Notification.setup
-        Travis::Addons.register
-
-        Travis::LogSubscriber::ActiveRecordMetrics.attach
-        Travis::Memory.new(:logs).report_periodically if Travis.env == 'production'
+        
+        db = Travis::Logs::Helpers::Database.connect
+        Logs.database_connection = db
+        Travis::Logs::Services::ProcessLogPart.prepare(db)
       end
 
       def run
-        1.upto(Travis.config.logs.threads || 10).each do
-          Queue.subscribe('logs', &method(:receive))
+        1.upto(Logs.config.logs.threads) do
+          Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
         end
-      end
-
-      def receive(payload)
-        Travis.run_service(:logs_receive, data: payload)
       end
     end
   end

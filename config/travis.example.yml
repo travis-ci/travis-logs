@@ -1,0 +1,17 @@
+database_defaults: &database_defaults
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  min_messages: warning
+  host: localhost
+  port: 5432
+
+development:
+  database:
+    <<: *database_defaults
+    database: travis_development
+
+test:
+  database:
+    <<: *database_defaults
+    database: travis_test
