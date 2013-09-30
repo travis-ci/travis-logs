@@ -7,7 +7,7 @@ module Travis
       class Archive
         include ::Sidekiq::Worker
 
-        sidekiq_options queue: 'archive'
+        sidekiq_options queue: 'archive', retry: 3
 
         def perform(log_id)
           Services::ArchiveLog.new(log_id).run
