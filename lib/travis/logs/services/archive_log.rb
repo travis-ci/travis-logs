@@ -23,8 +23,9 @@ module Travis
 
         attr_reader :log_id
 
-        def initialize(log_id)
+        def initialize(log_id, storage_service=Helpers::S3.new)
           @log_id = log_id
+          @storage_service = storage_service
         end
 
         def run
@@ -67,7 +68,7 @@ module Travis
         def store
           retrying(:store) do
             measure('store') do
-              s3.store(content)
+              storage_service.store(content, target_url)
             end
           end
         end
@@ -75,7 +76,9 @@ module Travis
         def verify
           retrying(:verify) do
             measure('verify') do
-              unless content.bytesize == archived_content_length
+              actual = archived_content_length
+              expected = content.bytesize
+              unless actual == expected
                 raise VerificationFailed.new(log_id, target_url, expected, actual)
               end
             end
@@ -92,8 +95,10 @@ module Travis
 
         private
 
+          attr_reader :storage_service
+
           def archived_content_length
-            http.head(target_url).headers['content-length'].try(:to_i)
+            storage_service.content_length(target_url)
           end
 
           def content
@@ -106,17 +111,6 @@ module Travis
 
           def connection
             Travis::Logs.database_connection
-          end
-
-          def http
-            Faraday.new(ssl: Travis.config.ssl.compact) do |f|
-              f.request :url_encoded
-              f.adapter :net_http
-            end
-          end
-
-          def s3
-            @s3 ||= Helpers::S3.new(target_url)
           end
 
           def hostname
