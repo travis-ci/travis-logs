@@ -73,7 +73,7 @@ module Travis
 
           def notify
             measure('pusher') do
-              Logs.config.pusher_client["job-#{payload['id']}"].trigger('job:log', pusher_payload)
+              Logs.config.pusher_client[pusher_channel].trigger('job:log', pusher_payload)
             end
           rescue => e
             Travis.logger.error("Error notifying of log update: #{e.message} (from #{e.backtrace.first})")
@@ -114,6 +114,13 @@ module Travis
 
           def db
             Travis::Logs.database_connection
+          end
+
+          def pusher_channel
+            channel = ""
+            channel << "private-" if Logs.config.pusher.secure
+            channel << "job-#{payload['id']}"
+            channel
           end
 
           def pusher_payload

@@ -84,7 +84,7 @@ module Travis
       define  :amqp          => { :username => 'guest', :password => 'guest', :host => 'localhost', :prefetch => 1 },
               :database      => { :adapter => 'postgresql', :database => "travis_#{env}", :encoding => 'unicode', :min_messages => 'warning' },
               :s3            => { :hostname => "archive.travis-ci.org", :access_key_id => '', :secret_access_key => '', :acl => :public_read },
-              :pusher        => { :app_id => 'app-id', :key => 'key', :secret => 'secret' },
+              :pusher        => { :app_id => 'app-id', :key => 'key', :secret => 'secret', :secure => false },
               :sidekiq       => { :namespace => 'sidekiq', :pool_size => 3 },
               :logs          => { :archive => true, :threads => 10, :intervals => { :vacuum => 10, :regular => 180, :force => 3 * 60 * 60 } },
               :redis         => { :url => 'redis://localhost:6379' },
