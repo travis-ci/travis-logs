@@ -13,6 +13,7 @@ module Travis
           db.logger = Travis.logger unless Travis::Logs.config.env == 'production'
           db.timezone = :utc
           db.test_connection
+          db << "SET application_name = 'logs'"
           db
         end
 
