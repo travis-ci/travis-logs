@@ -41,6 +41,14 @@ module Travis
           @db.call(*args)
         end
 
+        def create_table(*args)
+          @db.create_table(*args)
+        end
+
+        def drop_table(*args)
+          @db.drop_table(*args)
+        end
+
         private
 
         def create_db
