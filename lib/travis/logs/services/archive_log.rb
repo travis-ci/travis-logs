@@ -23,9 +23,10 @@ module Travis
 
         attr_reader :log_id
 
-        def initialize(log_id, storage_service=Helpers::S3.new)
+        def initialize(log_id, storage_service=Helpers::S3.new, database=Travis::Logs.database_connection)
           @log_id = log_id
           @storage_service = storage_service
+          @database = database
         end
 
         def run
@@ -41,7 +42,7 @@ module Travis
 
         def log
           @log ||= begin
-            log = connection[:logs].where(id: log_id).first
+            log = database.log_for_id(log_id)
             unless log
               Travis.logger.warn "[warn] log with id:#{log_id} could not be found"
               mark('log.not_found')
@@ -52,7 +53,7 @@ module Travis
         alias_method :fetch, :log
 
         def mark_as_archiving(archiving = true)
-          connection[:logs].where(id: log_id).update(archiving: archiving)
+          database.mark_as_archiving(log_id, archiving)
         end
 
         def content_blank?
@@ -86,7 +87,7 @@ module Travis
         end
 
         def confirm
-          connection[:logs].where(id: log_id).update(archived_at: Time.now, archive_verified: true)
+          database.mark_archive_verified(log_id)
         end
 
         def target_url
@@ -95,7 +96,7 @@ module Travis
 
         private
 
-          attr_reader :storage_service
+          attr_reader :storage_service, :database
 
           def archived_content_length
             storage_service.content_length(target_url)
@@ -107,10 +108,6 @@ module Travis
 
           def content=(new_content)
             @content = new_content
-          end
-
-          def connection
-            Travis::Logs.database_connection
           end
 
           def hostname

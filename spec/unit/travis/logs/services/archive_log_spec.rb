@@ -28,29 +28,35 @@ end
 
 module Travis::Logs::Services
   describe ArchiveLog do
-    before(:each) do
-      @db = Travis::Logs::Helpers::Database.connect
-      @db[:logs].delete
-      @db[:log_parts].delete
-      Travis::Logs.database_connection = @db
-    end
+    let(:log) { { id: 1, job_id: 2, content: "Hello, world!" } }
+    let(:database) { double("database", mark_as_archiving: nil, mark_archive_verified: nil, log_for_id: log) }
+    let(:storage_service) { FakeStorageService.new }
+    let(:service) { described_class.new(log[:id], storage_service, database) }
 
     it "pushes the log to S3" do
-      log_id = @db[:logs].insert(job_id: 123, created_at: Time.now.utc, updated_at: Time.now.utc, content: "Hello, world!")
-      storage_service = FakeStorageService.new
+      service.run
 
-      Travis::Logs::Services::ArchiveLog.new(log_id, storage_service).run
+      expect(storage_service.objects["http://archive.travis-ci.org/jobs/#{log[:job_id]}/log.txt"]).to eq(log[:content])
+    end
 
-      expect(storage_service.objects["http://archive.travis-ci.org/jobs/123/log.txt"]).to eq("Hello, world!")
+    it "marks the log as archiving, then unmarks" do
+      expect(database).to receive(:mark_as_archiving).with(log[:id], true).ordered
+      expect(database).to receive(:mark_as_archiving).with(log[:id], false).ordered
+
+      service.run
+    end
+
+    it "marks the archive as verified" do
+      service.run
+
+      expect(database).to have_received(:mark_archive_verified).with(log[:id])
     end
 
     context "when the stored content length is different" do
       it "raises an error" do
-        log_id = @db[:logs].insert(job_id: 123, created_at: Time.now.utc, updated_at: Time.now.utc, content: "Hello, world!")
-        storage_service = FakeStorageService.new
         storage_service.return_incorrect_content_length!
 
-        expect { Travis::Logs::Services::ArchiveLog.new(log_id, storage_service).run }.to raise_error
+        expect { service.run }.to raise_error
       end
     end
   end
