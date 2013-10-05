@@ -42,7 +42,7 @@ module Travis
           @db.call(:find_log_id, job_id: job_id).first
         end
 
-        def mark_as_archiving(log_id, archiving)
+        def update_archiving_status(log_id, archiving)
           @db[:logs].where(id: log_id).update(archiving: archiving)
         end
 

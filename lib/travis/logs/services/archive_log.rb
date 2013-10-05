@@ -53,7 +53,7 @@ module Travis
         alias_method :fetch, :log
 
         def mark_as_archiving(archiving = true)
-          database.mark_as_archiving(log_id, archiving)
+          database.update_archiving_status(log_id, archiving)
         end
 
         def content_blank?

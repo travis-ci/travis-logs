@@ -29,7 +29,7 @@ end
 module Travis::Logs::Services
   describe ArchiveLog do
     let(:log) { { id: 1, job_id: 2, content: "Hello, world!" } }
-    let(:database) { double("database", mark_as_archiving: nil, mark_archive_verified: nil, log_for_id: log) }
+    let(:database) { double("database", update_archiving_status: nil, mark_archive_verified: nil, log_for_id: log) }
     let(:storage_service) { FakeStorageService.new }
     let(:service) { described_class.new(log[:id], storage_service, database) }
 
@@ -40,8 +40,8 @@ module Travis::Logs::Services
     end
 
     it "marks the log as archiving, then unmarks" do
-      expect(database).to receive(:mark_as_archiving).with(log[:id], true).ordered
-      expect(database).to receive(:mark_as_archiving).with(log[:id], false).ordered
+      expect(database).to receive(:update_archiving_status).with(log[:id], true).ordered
+      expect(database).to receive(:update_archiving_status).with(log[:id], false).ordered
 
       service.run
     end
