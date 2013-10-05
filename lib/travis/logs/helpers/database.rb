@@ -5,12 +5,26 @@ module Travis
   module Logs
     module Helpers
       class Database
+        # This method should only be called for "maintenance" tasks (such as
+        # creating the tables or debugging).
+        def self.create_sequel
+          config = { username: ENV["USER"] }.merge(Travis::Logs.config.database)
+          Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
+            db.logger = Travis.logger unless Travis::Logs.config.env == 'production'
+            db.timezone = :utc
+          end
+        end
+
+        def self.jdbc_uri_from_config(config)
+          "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:username]}&password=#{config[:password]}"
+        end
+
         def self.connect
           new.tap(&:connect)
         end
 
         def initialize
-          @db = create_db
+          @db = self.class.create_sequel
         end
 
         def connect
@@ -55,32 +69,7 @@ module Travis
           @db.call(*args)
         end
 
-        def create_table(*args, &block)
-          @db.create_table(*args, &block)
-        end
-
-        def drop_table(*args)
-          @db.drop_table(*args)
-        end
-
         private
-
-        def create_db
-          Sequel.connect(connection_string, max_connections: config[:pool]).tap do |db|
-            db.logger = Travis.logger unless Travis::Logs.config.env == 'production'
-            db.timezone = :utc
-          end
-        end
-
-        def connection_string
-          "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:username]}&password=#{config[:password]}"
-        end
-        
-        def config
-          {
-            username: ENV["USER"],
-          }.merge(Travis::Logs.config.database)
-        end
 
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
