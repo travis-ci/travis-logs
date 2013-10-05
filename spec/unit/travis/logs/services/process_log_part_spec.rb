@@ -33,8 +33,10 @@ module Travis::Logs::Services
   describe ProcessLogPart do
     let(:payload) { { "id" => 2, "log" => "hello, world", "number" => 1 } }
     let(:database) { FakeDatabase.new }
+    let(:pusher_channel) { double("pusher-channel", trigger: nil) }
+    let(:pusher_client) { double("pusher-client", :[] => pusher_channel) }
 
-    let(:service) { described_class.new(payload, database) }
+    let(:service) { described_class.new(payload, database, pusher_client) }
 
     context "without an existing log" do
       it "creates a log" do
@@ -63,10 +65,6 @@ module Travis::Logs::Services
     end
 
     it "notifies pusher" do
-      pusher_channel = double("pusher_channel", trigger: nil)
-      pusher_client = double("pusher_client", :[] => pusher_channel)
-      allow(Travis::Logs.config).to receive(:pusher_client) { pusher_client }
-
       service.run
 
       pusher_client.should have_received(:[]).with("job-#{payload["id"]}")

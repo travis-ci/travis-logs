@@ -24,9 +24,10 @@ module Travis
 
         attr_reader :payload
 
-        def initialize(payload, database = Travis::Logs.database_connection)
+        def initialize(payload, database = Travis::Logs.database_connection, pusher_client = Travis::Logs.config.pusher_client)
           @payload = payload
           @database = database
+          @pusher_client = pusher_client
         end
 
         def run
@@ -39,7 +40,7 @@ module Travis
 
         private
 
-          attr_reader :database
+          attr_reader :database, :pusher_client
 
           def create_part
             valid_log_id?
@@ -58,7 +59,7 @@ module Travis
 
           def notify
             measure('pusher') do
-              Logs.config.pusher_client[pusher_channel].trigger('job:log', pusher_payload)
+              pusher_client[pusher_channel].trigger('job:log', pusher_payload)
             end
           rescue => e
             Travis.logger.error("Error notifying of log update: #{e.message} (from #{e.backtrace.first})")
