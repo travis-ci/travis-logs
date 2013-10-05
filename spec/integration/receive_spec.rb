@@ -25,7 +25,6 @@ describe "receive_logs" do
     db[:logs].delete
     db[:log_parts].delete
     Travis::Logs.database_connection = db
-    Travis::Logs::Services::ProcessLogPart.prepare(db)
     Travis::Logs::Receive::Queue.subscribe("logs", Travis::Logs::Services::ProcessLogPart)
     message = double("message", ack: nil)
     queue.call(message, '{"id":123,"log":"hello, world","number":1}')
