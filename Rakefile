@@ -27,6 +27,7 @@ namespace :db do
     end
 
     db.create_table(:log_parts) do
+      primary_key :id
       Integer :log_id, null: false
       String :content, text: true
       Integer :number
