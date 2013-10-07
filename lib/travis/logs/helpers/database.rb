@@ -1,5 +1,6 @@
 require 'sequel'
 require 'jdbc/postgres'
+require "delegate"
 
 module Travis
   module Logs
@@ -61,8 +62,8 @@ module Travis
         # For compatibility API
         # TODO: Remove these when all Sequel calls are handled in this class
 
-        def [](table)
-          @db[table]
+        def [](*args)
+          @db[*args]
         end
 
         def call(*args)
