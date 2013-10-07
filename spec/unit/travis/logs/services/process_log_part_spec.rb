@@ -38,11 +38,23 @@ module Travis::Logs::Services
 
     let(:service) { described_class.new(payload, database, pusher_client) }
 
+    before(:each) do
+      allow(Metriks).to receive(:meter).and_return(double("meter", mark: nil))
+    end
+
     context "without an existing log" do
       it "creates a log" do
         service.run
 
         expect(database.log_for_job_id(2)).not_to be_nil
+      end
+
+      it "marks the log.create metric" do
+        meter = double("log.create meter")
+        expect(Metriks).to receive(:meter).with("logs.process_log_part.log.create").and_return(meter)
+        expect(meter).to receive(:mark)
+
+        service.run
       end
     end
 
