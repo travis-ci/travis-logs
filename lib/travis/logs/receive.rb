@@ -18,7 +18,7 @@ module Travis
         Travis::Amqp.config = Travis::Logs.config.amqp
         Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
-        
+
         db = Travis::Logs::Helpers::Database.connect
         Logs.database_connection = db
         Travis::Logs::Services::ProcessLogPart.prepare(db)

@@ -2,7 +2,7 @@ require 'travis/logs/helpers/metrics'
 require 'pusher'
 require 'coder'
 
-# pusher requires this in a method, which sometimes 
+# pusher requires this in a method, which sometimes
 # causes and uninitialized constant error
 require 'net/https'
 
@@ -24,14 +24,14 @@ module Travis
 
         def self.prepare(db)
           db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
-          
+
           db[:logs].prepare(:insert, :create_log, {
             :job_id => :$job_id,
             :created_at => :$created_at,
             :updated_at => :$updated_at
           })
-          
-          db[:log_parts].prepare(:insert, :create_log_part, { 
+
+          db[:log_parts].prepare(:insert, :create_log_part, {
             :log_id => :$log_id,
             :content => :$content,
             :number => :$number,
@@ -66,7 +66,7 @@ module Travis
 
           def valid_log_id?
             if log_id == 0
-              Travis.logger.warn "[warn] log.id is #{log.id.inspect} in create_part (job_id: #{payload['id']})" 
+              Travis.logger.warn "[warn] log.id is #{log.id.inspect} in create_part (job_id: #{payload['id']})"
               mark('log.id_invalid')
             end
           end

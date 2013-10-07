@@ -8,7 +8,7 @@ module Travis
 
         def self.connect
           Travis.logger.info('Setting up database connection and preloading model columns')
-          
+
           db = Sequel.connect(connection_string, max_connections: config[:pool])
           db.logger = Travis.logger unless Travis::Logs.config.env == 'production'
           db.timezone = :utc
@@ -20,7 +20,7 @@ module Travis
         def self.connection_string
           "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:username]}&password=#{config[:password]}"
         end
-        
+
         def self.config
           {
             username: ENV["USER"],
