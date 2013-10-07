@@ -12,8 +12,7 @@ class FakeDatabase
     @log_parts = []
   end
 
-  def create_log(job_id)
-    log_id = @logs.length + 1
+  def create_log(job_id, log_id = @logs.length + 1)
     @logs << { id: log_id, job_id: job_id, content: "" }
     log_id
   end
@@ -67,6 +66,20 @@ module Travis::Logs::Services
         service.run
 
         expect(database.logs.count { |log| log[:job_id] == 2 }).to eq(1)
+      end
+    end
+
+    context "with an invalid log ID" do
+      before(:each) do
+        database.create_log(2, 0)
+      end
+
+      it "marks the log.id_invalid metric" do
+        meter = double("log.id_invalid meter")
+        expect(Metriks).to receive(:meter).with("logs.process_log_part.log.id_invalid").and_return(meter)
+        expect(meter).to receive(:mark)
+
+        service.run
       end
     end
 
