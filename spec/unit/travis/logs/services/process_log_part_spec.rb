@@ -64,11 +64,30 @@ module Travis::Logs::Services
       expect(database.log_parts.last).to include(content: "hello, world", number: 1, final: false)
     end
 
-    it "notifies pusher" do
-      service.run
+    context "when pusher.secure is true" do
+      before(:each) do
+        Travis::Logs.config.pusher.secure = true
+      end
 
-      pusher_client.should have_received(:[]).with("job-#{payload["id"]}")
-      pusher_channel.should have_received(:trigger).with("job:log", { "id" => payload["id"], "_log" => payload["log"], "number" => payload["number"], "final" => false })
+      it "notifies pusher on a private channel" do
+        service.run
+
+        pusher_client.should have_received(:[]).with("private-job-#{payload["id"]}")
+        pusher_channel.should have_received(:trigger).with("job:log", { "id" => payload["id"], "_log" => payload["log"], "number" => payload["number"], "final" => false })
+      end
+    end
+
+    context "when pusher.secure is false" do
+      before(:each) do
+        Travis::Logs.config.pusher.secure = false
+      end
+
+      it "notifies pusher on a regular channel" do
+        service.run
+
+        pusher_client.should have_received(:[]).with("job-#{payload["id"]}")
+        pusher_channel.should have_received(:trigger).with("job:log", { "id" => payload["id"], "_log" => payload["log"], "number" => payload["number"], "final" => false })
+      end
     end
   end
 end
