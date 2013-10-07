@@ -42,19 +42,19 @@ module Travis::Logs::Services
       it "creates a log" do
         service.run
 
-        expect(database.log_for_job_id(payload["id"])).not_to be_nil
+        expect(database.log_for_job_id(2)).not_to be_nil
       end
     end
 
     context "with an existing log" do
       before(:each) do
-        database.create_log(payload["id"])
+        database.create_log(2)
       end
 
       it "does not create another log" do
         service.run
 
-        expect(database.logs.count { |log| log[:job_id] == payload["id"] }).to eq(1)
+        expect(database.logs.count { |log| log[:job_id] == 2 }).to eq(1)
       end
     end
 
@@ -72,8 +72,8 @@ module Travis::Logs::Services
       it "notifies pusher on a private channel" do
         service.run
 
-        pusher_client.should have_received(:[]).with("private-job-#{payload["id"]}")
-        pusher_channel.should have_received(:trigger).with("job:log", { "id" => payload["id"], "_log" => payload["log"], "number" => payload["number"], "final" => false })
+        pusher_client.should have_received(:[]).with("private-job-2")
+        pusher_channel.should have_received(:trigger).with("job:log", { "id" => 2, "_log" => "hello, world", "number" => 1, "final" => false })
       end
     end
 
@@ -85,8 +85,8 @@ module Travis::Logs::Services
       it "notifies pusher on a regular channel" do
         service.run
 
-        pusher_client.should have_received(:[]).with("job-#{payload["id"]}")
-        pusher_channel.should have_received(:trigger).with("job:log", { "id" => payload["id"], "_log" => payload["log"], "number" => payload["number"], "final" => false })
+        pusher_client.should have_received(:[]).with("job-2")
+        pusher_channel.should have_received(:trigger).with("job:log", { "id" => 2, "_log" => "hello, world", "number" => 1, "final" => false })
       end
     end
   end
