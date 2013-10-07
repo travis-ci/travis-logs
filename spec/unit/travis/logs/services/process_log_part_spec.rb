@@ -32,8 +32,7 @@ module Travis::Logs::Services
   describe ProcessLogPart do
     let(:payload) { { "id" => 2, "log" => "hello, world", "number" => 1 } }
     let(:database) { FakeDatabase.new }
-    let(:pusher_channel) { double("pusher-channel", trigger: nil) }
-    let(:pusher_client) { double("pusher-client", :[] => pusher_channel) }
+    let(:pusher_client) { double("pusher-client", push: nil) }
 
     let(:service) { described_class.new(payload, database, pusher_client) }
 
@@ -97,8 +96,12 @@ module Travis::Logs::Services
       it "notifies pusher on a private channel" do
         service.run
 
-        pusher_client.should have_received(:[]).with("private-job-2")
-        pusher_channel.should have_received(:trigger).with("job:log", { "id" => 2, "_log" => "hello, world", "number" => 1, "final" => false })
+        pusher_client.should have_received(:push).with({
+          "id" => 2,
+          "chars" => "hello, world",
+          "number" => 1,
+          "final" => false
+        })
       end
     end
 
@@ -110,8 +113,12 @@ module Travis::Logs::Services
       it "notifies pusher on a regular channel" do
         service.run
 
-        pusher_client.should have_received(:[]).with("job-2")
-        pusher_channel.should have_received(:trigger).with("job:log", { "id" => 2, "_log" => "hello, world", "number" => 1, "final" => false })
+        pusher_client.should have_received(:push).with({
+          "id" => 2,
+          "chars" => "hello, world",
+          "number" => 1,
+          "final" => false
+        })
       end
     end
   end

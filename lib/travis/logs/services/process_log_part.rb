@@ -1,4 +1,5 @@
 require 'travis/logs/helpers/metrics'
+require "travis/logs/helpers/pusher"
 require 'pusher'
 require 'coder'
 
@@ -24,10 +25,10 @@ module Travis
 
         attr_reader :payload
 
-        def initialize(payload, database = Travis::Logs.database_connection, pusher_client = Travis::Logs.config.pusher_client)
+        def initialize(payload, database = nil, pusher_client = nil)
           @payload = payload
-          @database = database
-          @pusher_client = pusher_client
+          @database = database || Travis::Logs.database_connection
+          @pusher_client = pusher_client || Travis::Logs::Helpers::Pusher.new
         end
 
         def run
@@ -59,7 +60,7 @@ module Travis
 
           def notify
             measure('pusher') do
-              pusher_client[pusher_channel].trigger('job:log', pusher_payload)
+              pusher_client.push(pusher_payload)
             end
           rescue => e
             Travis.logger.error("Error notifying of log update: #{e.message} (from #{e.backtrace.first})")
@@ -98,19 +99,12 @@ module Travis
             Coder.clean!(chars.to_s.gsub("\0", ''))
           end
 
-          def pusher_channel
-            channel = ""
-            channel << "private-" if Logs.config.pusher.secure
-            channel << "job-#{payload['id']}"
-            channel
-          end
-
           def pusher_payload
             {
-              'id' => payload['id'],
-              '_log' => chars,
-              'number' => number,
-              'final' => final?
+              "id" => payload["id"],
+              "chars" => chars,
+              "number" => number,
+              "final" => final?
             }
           end
       end
