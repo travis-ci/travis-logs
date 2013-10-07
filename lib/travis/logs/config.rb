@@ -101,10 +101,6 @@ module Travis
       def env
         self.class.env
       end
-
-      def pusher_client
-        @pusher ||= ::Pusher::Client.new(self.pusher)
-      end
     end
   end
 end

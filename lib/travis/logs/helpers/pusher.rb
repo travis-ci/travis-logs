@@ -7,8 +7,8 @@ module Travis
       #
       # This class handles pushing job payloads to Pusher.
       class Pusher
-        def initialize(pusher_client = Travis::Logs.config.pusher_client)
-          @pusher_client = pusher_client
+        def initialize(pusher_client = nil)
+          @pusher_client = pusher_client || default_client
         end
 
         def push(payload)
@@ -35,6 +35,10 @@ module Travis
             "number" => payload["number"],
             "final" => payload["final"],
           }
+        end
+
+        def default_client
+          ::Pusher::Client.new(Travis::Logs.config.pusher)
         end
       end
     end
