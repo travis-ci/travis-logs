@@ -36,6 +36,7 @@ module Travis
         def connect
           @db.test_connection
           @db << "SET application_name = 'logs'"
+          @db << "SET TIME ZONE 'UTC'"
           prepare_statements
         end
 
@@ -56,7 +57,11 @@ module Travis
         end
 
         def create_log(job_id)
-          @db.call(:create_log, job_id: job_id, created_at: Time.now, updated_at: Time.now.utc)
+          @db.call(:create_log, {
+            job_id: job_id,
+            created_at: Time.now.utc,
+            updated_at: Time.now.utc
+          })
         end
 
         def create_log_part(params)
@@ -92,7 +97,7 @@ module Travis
         SQL
 
         def aggregate(log_id)
-          @db[AGGREGATE_UPDATE_SQL, Time.now, log_id, log_id].update
+          @db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
         end
 
         def transaction(&block)
