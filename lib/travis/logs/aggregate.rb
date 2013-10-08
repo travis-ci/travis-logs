@@ -16,7 +16,7 @@ module Travis
         Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
         Travis::Logs::Sidekiq.setup
-        
+
         db = Travis::Logs::Helpers::Database.connect
         Logs.database_connection = db
         Travis::Logs::Services::AggregateLogs.prepare(db)

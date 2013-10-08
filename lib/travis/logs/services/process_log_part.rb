@@ -3,7 +3,7 @@ require "travis/logs/helpers/pusher"
 require 'pusher'
 require 'coder'
 
-# pusher requires this in a method, which sometimes 
+# pusher requires this in a method, which sometimes
 # causes and uninitialized constant error
 require 'net/https'
 
