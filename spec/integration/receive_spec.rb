@@ -21,11 +21,10 @@ describe "receive_logs" do
     queue = FakeAmqpQueue.new
     allow(Travis::Amqp::Consumer).to receive(:jobs) { queue }
     allow(Travis.config).to receive(:pusher_client) { double("pusher_client", :[] => double("channel", trigger: nil)) }
-    db = Travis::Logs::Helpers::Database.connect
+    db = Travis::Logs::Helpers::Database.create_sequel
     db[:logs].delete
     db[:log_parts].delete
-    Travis::Logs.database_connection = db
-    Travis::Logs::Services::ProcessLogPart.prepare(db)
+    Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
     Travis::Logs::Receive::Queue.subscribe("logs", Travis::Logs::Services::ProcessLogPart)
     message = double("message", ack: nil)
     queue.call(message, '{"id":123,"log":"hello, world","number":1}')

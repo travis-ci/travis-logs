@@ -8,7 +8,7 @@ require "travis/logs/helpers/database"
 
 namespace :db do
   task :setup do
-    db = Travis::Logs::Helpers::Database.connect
+    db = Travis::Logs::Helpers::Database.create_sequel
     db.create_table(:logs) do
       primary_key :id
       Integer :job_id
@@ -27,6 +27,7 @@ namespace :db do
     end
 
     db.create_table(:log_parts) do
+      primary_key :id
       Integer :log_id, null: false
       String :content, text: true
       Integer :number
@@ -38,7 +39,7 @@ namespace :db do
   end
 
   task :drop do
-    db = Travis::Logs::Helpers::Database.connect
+    db = Travis::Logs::Helpers::Database.create_sequel
     db.drop_table(:logs)
     db.drop_table(:log_parts)
   end
