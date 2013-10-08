@@ -1,10 +1,15 @@
 require 'sequel'
 require 'jdbc/postgres'
 require "delegate"
+require "active_support/core_ext/string/filters"
 
 module Travis
   module Logs
     module Helpers
+      # The Database helper talks to the Postgres database.
+      #
+      # No database-specific logic (such as table names and SQL queries) should
+      # be outside of this class.
       class Database
         # This method should only be called for "maintenance" tasks (such as
         # creating the tables or debugging).
@@ -36,7 +41,6 @@ module Travis
 
         def log_for_id(log_id)
           @db.call(:find_log, log_id: log_id).first
-          @db[:logs].where(id: log_id).first
         end
 
         def log_for_job_id(job_id)
