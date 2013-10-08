@@ -59,6 +59,42 @@ module Travis
           @db.call(:create_log_part, params.merge(created_at: Time.now.utc))
         end
 
+        def delete_log_parts(log_id)
+          @db.call(:delete_log_parts, log_id: log_id)
+        end
+
+        AGGREGATEABLE_SELECT_SQL = <<-SQL.squish
+          SELECT DISTINCT log_id
+            FROM log_parts
+           WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
+              OR  created_at <= NOW() - interval '? seconds'
+        SQL
+
+        def aggregatable_log_parts(regular_interval, force_interval)
+          @db[AGGREGATEABLE_SELECT_SQL, regular_interval, true, force_interval].map(:log_id)
+        end
+
+        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.squish
+          SELECT array_to_string(array_agg(log_parts.content ORDER BY number, id), '')
+            FROM log_parts
+           WHERE log_id = ?
+        SQL
+
+        AGGREGATE_UPDATE_SQL = <<-SQL.squish
+          UPDATE logs
+             SET aggregated_at = ?,
+                 content = (COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL}))
+           WHERE logs.id = ?
+        SQL
+
+        def aggregate(log_id)
+          @db[AGGREGATE_UPDATE_SQL, Time.now, log_id, log_id].update
+        end
+
+        def transaction(&block)
+          @db.transaction(&block)
+        end
+
         # For compatibility API
         # TODO: Remove these when all Sequel calls are handled in this class
 
@@ -87,6 +123,7 @@ module Travis
             final: :$final,
             created_at: :$created_at,
           })
+          @db[:log_parts].where(log_id: :$log_id).prepare(:delete, :delete_log_parts)
         end
       end
     end

@@ -10,26 +10,6 @@ module Travis
 
         METRIKS_PREFIX = "logs.aggregate_logs"
 
-        AGGREGATE_PARTS_SELECT_SQL = <<-sql.squish
-          SELECT array_to_string(array_agg(log_parts.content ORDER BY number, id), '')
-            FROM log_parts
-           WHERE log_id = ?
-        sql
-
-        AGGREGATE_UPDATE_SQL = <<-sql.squish
-          UPDATE logs
-             SET aggregated_at = ?,
-                 content = (COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL}))
-           WHERE logs.id = ?
-        sql
-
-        AGGREGATEABLE_SELECT_SQL = <<-sql.squish
-          SELECT DISTINCT log_id
-            FROM log_parts
-           WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
-              OR  created_at <= NOW() - interval '? seconds'
-        sql
-
         def self.metriks_prefix
           METRIKS_PREFIX
         end
@@ -43,6 +23,10 @@ module Travis
           new.run
         end
 
+        def initialize(database = nil)
+          @database = database || Travis::Logs.database_connection
+        end
+
         def run
           aggregateable_ids.each do |id|
             aggregate_log(id)
@@ -50,6 +34,7 @@ module Travis
         end
 
         private
+          attr_reader :database
 
           def aggregate_log(id)
             transaction do
@@ -64,20 +49,20 @@ module Travis
 
           def aggregate(id)
             measure('aggregate') do
-              connection[AGGREGATE_UPDATE_SQL, Time.now, id, id].update
+              database.aggregate(id)
             end
           end
 
           def vacuum(id)
             measure('vacuum') do
-              connection[:log_parts].where(log_id: id).delete
+              database.delete_log_parts(id)
             end
           end
 
           def queue_archiving(id)
             return unless Travis::Logs.config.logs.archive
 
-            log = connection[:logs].select(:id, :job_id).first(id: id)
+            log = database.log_for_id(id)
 
             if log
               Sidekiq::Archive.perform_async(log[:id])
@@ -88,7 +73,7 @@ module Travis
           end
 
           def aggregateable_ids
-            connection[AGGREGATEABLE_SELECT_SQL, intervals[:regular], true, intervals[:force]].map(:log_id)
+            database.aggregatable_log_parts(intervals[:regular], intervals[:force])
           end
 
           def intervals
@@ -97,12 +82,8 @@ module Travis
 
           def transaction(&block)
             measure do
-              connection.transaction(&block)
+              database.transaction(&block)
             end
-          end
-
-          def connection
-            Travis::Logs.database_connection
           end
       end
     end
