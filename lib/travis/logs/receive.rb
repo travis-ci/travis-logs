@@ -21,7 +21,6 @@ module Travis
 
         db = Travis::Logs::Helpers::Database.connect
         Logs.database_connection = db
-        Travis::Logs::Services::ProcessLogPart.prepare(db)
       end
 
       def run

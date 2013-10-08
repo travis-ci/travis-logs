@@ -1,4 +1,5 @@
 require 'travis/logs/helpers/metrics'
+require "travis/logs/helpers/pusher"
 require 'pusher'
 require 'coder'
 
@@ -22,28 +23,12 @@ module Travis
           new(payload).run
         end
 
-        def self.prepare(db)
-          db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
-
-          db[:logs].prepare(:insert, :create_log, {
-            :job_id => :$job_id,
-            :created_at => :$created_at,
-            :updated_at => :$updated_at
-          })
-
-          db[:log_parts].prepare(:insert, :create_log_part, {
-            :log_id => :$log_id,
-            :content => :$content,
-            :number => :$number,
-            :final => :$final,
-            :created_at => :$created_at
-          })
-        end
-
         attr_reader :payload
 
-        def initialize(payload)
+        def initialize(payload, database = nil, pusher_client = nil)
           @payload = payload
+          @database = database || Travis::Logs.database_connection
+          @pusher_client = pusher_client || Travis::Logs::Helpers::Pusher.new
         end
 
         def run
@@ -56,9 +41,11 @@ module Travis
 
         private
 
+          attr_reader :database, :pusher_client
+
           def create_part
             valid_log_id?
-            db.call(:create_log_part, log_id: log_id, content: chars, number: number, final: final?, created_at: Time.now.utc)
+            database.create_log_part(log_id: log_id, content: chars, number: number, final: final?)
           rescue Sequel::Error => e
             Travis.logger.warn "[warn] could not save log_park in create_part job_id: #{payload['id']}: #{e.message}"
             Travis.logger.warn e.backtrace
@@ -66,14 +53,14 @@ module Travis
 
           def valid_log_id?
             if log_id == 0
-              Travis.logger.warn "[warn] log.id is #{log.id.inspect} in create_part (job_id: #{payload['id']})"
+              Travis.logger.warn "[warn] log.id is #{log_id.inspect} in create_part (job_id: #{payload['id']})"
               mark('log.id_invalid')
             end
           end
 
           def notify
             measure('pusher') do
-              Logs.config.pusher_client[pusher_channel].trigger('job:log', pusher_payload)
+              pusher_client.push(pusher_payload)
             end
           rescue => e
             Travis.logger.error("Error notifying of log update: #{e.message} (from #{e.backtrace.first})")
@@ -85,14 +72,14 @@ module Travis
           alias_method :find_or_create_log, :log_id
 
           def find_log_id
-            result = db.call(:find_log_id, job_id: payload['id']).first
-            result ? result[:id] : nil
+            log = database.log_for_job_id(payload["id"])
+            log ? log[:id] : nil
           end
 
           def create_log
             Travis.logger.warn "Had to create a log for job_id: #{payload['id']}!"
             mark('log.create')
-            db.call(:create_log, job_id: payload['id'], created_at: Time.now.utc, updated_at: Time.now.utc)
+            database.create_log(payload["id"])
           end
 
           def chars
@@ -112,23 +99,12 @@ module Travis
             Coder.clean!(chars.to_s.gsub("\0", ''))
           end
 
-          def db
-            Travis::Logs.database_connection
-          end
-
-          def pusher_channel
-            channel = ""
-            channel << "private-" if Logs.config.pusher.secure
-            channel << "job-#{payload['id']}"
-            channel
-          end
-
           def pusher_payload
             {
-              'id' => payload['id'],
-              '_log' => chars,
-              'number' => number,
-              'final' => final?
+              "id" => payload["id"],
+              "chars" => chars,
+              "number" => number,
+              "final" => final?
             }
           end
       end
