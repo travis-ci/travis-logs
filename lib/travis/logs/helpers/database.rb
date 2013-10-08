@@ -104,17 +104,6 @@ module Travis
           @db.transaction(&block)
         end
 
-        # For compatibility API
-        # TODO: Remove these when all Sequel calls are handled in this class
-
-        def [](*args)
-          @db[*args]
-        end
-
-        def call(*args)
-          @db.call(*args)
-        end
-
         private
 
         def prepare_statements
