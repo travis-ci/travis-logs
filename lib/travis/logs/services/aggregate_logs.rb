@@ -39,6 +39,7 @@ module Travis
           def aggregate_log(id)
             transaction do
               aggregate(id)
+              assert_not_empty(id)
               vacuum(id)
             end
             queue_archiving(id)
@@ -50,6 +51,13 @@ module Travis
           def aggregate(id)
             measure('aggregate') do
               database.aggregate(id)
+            end
+          end
+
+          def assert_not_empty(id)
+            log = database.log_for_id(id)
+            if log.content.empty?
+              fail "Log #{id} is empty, not vacuuming the log parts."
             end
           end
 
