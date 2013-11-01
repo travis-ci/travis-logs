@@ -1,3 +1,4 @@
+require "travis/support"
 require "travis/logs"
 require "travis/logs/services/purge_log"
 
@@ -20,6 +21,20 @@ module Travis::Logs::Services
         it "marks log as purged" do
           PurgeLog.new(@log[:id], @storage_service, @database).run
           expect(@database).to have_received(:mark_purged).with(@log[:id])
+        end
+      end
+
+      context "log is not on S3" do
+        before(:each) do
+          @database = double("database")
+          @storage_service = double("storage", content_length: nil)
+          @log = { id: 1, job_id: 2, content: nil }
+          allow(@database).to receive(:log_for_id).with(1).and_return(@log)
+        end
+
+        it "prints a warning" do
+          expect(Travis.logger).to receive(:warn).with(/id:1.+missing/i)
+          PurgeLog.new(@log[:id], @storage_service, @database).run
         end
       end
     end

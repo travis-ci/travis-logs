@@ -21,7 +21,9 @@ module Travis
 
         def run
           if content.nil?
-            unless content_length.nil?
+            if content_length.nil?
+              Travis.logger.warn("Log with id:#{@log_id} missing in database or on S3")
+            else
               @database.mark_archive_verified(@log_id)
               @database.mark_purged(@log_id)
             end
