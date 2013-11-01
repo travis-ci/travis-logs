@@ -179,5 +179,18 @@ module Travis::Logs::Helpers
         expect(sequel[:logs][id: @log_id][:aggregated_at]).not_to be_nil
       end
     end
+
+    describe "#mark_purged" do
+      before(:each) do
+        @log_id = sequel[:logs].insert(purged_at: nil)
+      end
+
+      it "sets purged_at" do
+        database.mark_purged(@log_id)
+
+        purged_at = sequel[:logs].where(id: @log_id).get(:purged_at)
+        expect(purged_at).not_to be_nil
+      end
+    end
   end
 end
