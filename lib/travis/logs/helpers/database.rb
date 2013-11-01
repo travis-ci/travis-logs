@@ -16,7 +16,6 @@ module Travis
         def self.create_sequel
           config = { username: ENV["USER"] }.merge(Travis::Logs.config.database)
           Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
-            db.logger = Travis.logger unless Travis::Logs.config.env == 'production'
             db.timezone = :utc
           end
         end
