@@ -23,7 +23,12 @@ module Travis
         end
 
         def content_length(url)
-          http.head(url).headers["content-length"].try(:to_i)
+          response = http.head(url)
+          if (200...300).cover?(response.status)
+            Integer(response.headers["content-length"])
+          else
+            nil
+          end
         end
 
         private
