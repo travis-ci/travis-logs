@@ -1,5 +1,5 @@
-require "travis/support"
 require "travis/logs"
+require "travis/support"
 require "travis/logs/services/purge_log"
 
 module Travis::Logs::Services
@@ -56,6 +56,26 @@ module Travis::Logs::Services
         it "clears the log content" do
           PurgeLog.new(@log[:id], @storage_service, @database).run
           expect(@database).to have_received(:clear_log_content).with(@log[:id])
+        end
+      end
+
+      context "content length does not match" do
+        before do
+          @database = double("database", mark_not_archived: nil)
+          @storage_service = double("storage", content_length: 1)
+          @log = { id: 1, job_id: 2, content: "hello, world!" }
+          allow(@database).to receive(:log_for_id).with(1).and_return(@log)
+        end
+
+        it "marks the log as not archived" do
+          PurgeLog.new(@log[:id], @storage_service, @database, ->(log_id) {}).run
+          expect(@database).to have_received(:mark_not_archived).with(@log[:id])
+        end
+
+        it "queues the log for archiving" do
+          archiver = double("archiver", call: nil)
+          PurgeLog.new(@log[:id], @storage_service, @database, archiver).run
+          expect(archiver).to have_received(:call).with(@log[:id])
         end
       end
     end

@@ -1,5 +1,7 @@
 require "travis/logs/helpers/metrics"
 require "travis/logs/helpers/s3"
+require "travis/logs/sidekiq"
+require "travis/logs/sidekiq/archive"
 
 module Travis
   module Logs
@@ -13,10 +15,11 @@ module Travis
           METRIKS_PREFIX
         end
 
-        def initialize(log_id, storage_service = Helpers::S3.new, database = Travis::Logs.database_connection)
+        def initialize(log_id, storage_service = nil, database = nil, archiver = nil)
           @log_id = log_id
-          @database = database
-          @storage_service = storage_service
+          @storage_service = storage_service || Helpers::S3.new
+          @database = database || Travis::Logs.database_connection
+          @archiver = archiver || ->(log_id) { Sidekiq::Archive.perform_async(log_id) }
         end
 
         def run
@@ -31,6 +34,9 @@ module Travis
             if content_length == content.length
               @database.clear_log_content(@log_id)
               @database.mark_purged(@log_id)
+            else
+              @database.mark_not_archived(@log_id)
+              @archiver.call(@log_id)
             end
           end
         end

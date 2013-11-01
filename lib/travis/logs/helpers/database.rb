@@ -56,6 +56,10 @@ module Travis
           @db[:logs].where(id: log_id).update(archived_at: Time.now.utc, archive_verified: true)
         end
 
+        def mark_not_archived(log_id)
+          @db[:logs].where(id: log_id).update(archived_at: nil, archive_verified: false)
+        end
+
         def mark_purged(log_id)
           @db[:logs].where(id: log_id).update(purged_at: Time.now.utc)
         end

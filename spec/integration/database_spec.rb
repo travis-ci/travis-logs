@@ -192,5 +192,25 @@ module Travis::Logs::Helpers
         expect(purged_at).not_to be_nil
       end
     end
+
+    describe "#mark_not_archived" do
+      before do
+        @log_id = sequel[:logs].insert(archived_at: Time.now.utc, archive_verified: true)
+      end
+
+      it "nils out archived_at" do
+        database.mark_not_archived(@log_id)
+
+        archived_at = sequel[:logs].where(id: @log_id).get(:archived_at)
+        expect(archived_at).to be_nil
+      end
+
+      it "marks archive as not verified" do
+        database.mark_not_archived(@log_id)
+
+        verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
+        expect(verified).to be_false
+      end
+    end
   end
 end
