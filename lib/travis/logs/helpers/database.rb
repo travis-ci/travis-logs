@@ -59,8 +59,8 @@ module Travis
           @db[:logs].where(id: log_id).update(archived_at: nil, archive_verified: false)
         end
 
-        def mark_purged(log_id)
-          @db[:logs].where(id: log_id).update(purged_at: Time.now.utc)
+        def purge(log_id)
+          @db[:logs].where(id: log_id).update(purged_at: Time.now.utc, content: nil)
         end
 
         def create_log(job_id)

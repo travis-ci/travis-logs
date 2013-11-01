@@ -180,16 +180,23 @@ module Travis::Logs::Helpers
       end
     end
 
-    describe "#mark_purged" do
+    describe "#purge" do
       before(:each) do
-        @log_id = sequel[:logs].insert(purged_at: nil)
+        @log_id = sequel[:logs].insert(purged_at: nil, content: "hello, world!")
       end
 
       it "sets purged_at" do
-        database.mark_purged(@log_id)
+        database.purge(@log_id)
 
         purged_at = sequel[:logs].where(id: @log_id).get(:purged_at)
         expect(purged_at).not_to be_nil
+      end
+
+      it "clears the content" do
+        database.purge(@log_id)
+
+        content = sequel[:logs].where(id: @log_id).get(:content)
+        expect(content).to be_nil
       end
     end
 
