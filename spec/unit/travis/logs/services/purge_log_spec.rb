@@ -11,6 +11,7 @@ module Travis::Logs::Services
           @storage_service = double("storage", content_length: 1)
           @log = { id: 1, job_id: 2, content: nil }
           allow(@database).to receive(:log_for_id).with(1).and_return(@log)
+          allow(@database).to receive(:transaction).and_yield
         end
 
         it "marks log as archived" do
