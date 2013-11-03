@@ -68,6 +68,18 @@ module Travis::Logs::Helpers
         end
       end
 
+      context "with a multi-byte string" do
+        let(:log) { { content: "\u20AC123" } }
+
+        before do
+          @log_id = sequel[:logs].insert(log)
+        end
+
+        it "returns the number of bytes in the string" do
+          expect(database.log_content_length_for_id(@log_id)).to eq({ content_length: log[:content].bytesize })
+        end
+      end
+
       context "when the log does not exist" do
         it "returns nil" do
           expect(database.log_content_length_for_id(1)).to be_nil
