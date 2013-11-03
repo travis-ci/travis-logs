@@ -23,7 +23,7 @@ module Travis
         end
 
         def run
-          if content_length_from_db.nil?
+          if db_content_length_empty?
             process_empty_log_content
           else
             process_log_content
@@ -31,6 +31,10 @@ module Travis
         end
 
         private
+
+        def db_content_length_empty?
+          content_length_from_db.nil? || content_length_from_db == 0
+        end
 
         def process_empty_log_content
           if content_length_from_s3.nil?
