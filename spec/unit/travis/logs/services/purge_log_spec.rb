@@ -9,8 +9,8 @@ module Travis::Logs::Services
         before(:each) do
           @database = double("database", mark_archive_verified: nil, purge: nil)
           @storage_service = double("storage", content_length: 1)
-          @log = { id: 1, job_id: 2, content: nil }
-          allow(@database).to receive(:log_for_id).with(1).and_return(@log)
+          @log = { content_length: nil }
+          allow(@database).to receive(:log_content_length_for_id).with(1).and_return(@log)
           allow(@database).to receive(:transaction).and_yield
         end
 
@@ -29,8 +29,8 @@ module Travis::Logs::Services
         before(:each) do
           @database = double("database")
           @storage_service = double("storage", content_length: nil)
-          @log = { id: 1, job_id: 2, content: nil }
-          allow(@database).to receive(:log_for_id).with(1).and_return(@log)
+          @log = { content_length: nil }
+          allow(@database).to receive(:log_content_length_for_id).with(1).and_return(@log)
         end
 
         it "prints a warning" do
@@ -45,8 +45,8 @@ module Travis::Logs::Services
         before(:each) do
           @database = double("database", mark_archive_verified: nil, purge: nil, clear_log_content: nil)
           @storage_service = double("storage", content_length: 13)
-          @log = { id: 1, job_id: 2, content: "hello, world!" }
-          allow(@database).to receive(:log_for_id).with(1).and_return(@log)
+          @log = { content_length: 13 }
+          allow(@database).to receive(:log_content_length_for_id).with(1).and_return(@log)
         end
 
         it "purges the log" do
@@ -59,8 +59,8 @@ module Travis::Logs::Services
         before do
           @database = double("database", mark_not_archived: nil)
           @storage_service = double("storage", content_length: 1)
-          @log = { id: 1, job_id: 2, content: "hello, world!" }
-          allow(@database).to receive(:log_for_id).with(1).and_return(@log)
+          @log = { content_length: 13 }
+          allow(@database).to receive(:log_content_length_for_id).with(1).and_return(@log)
         end
 
         it "marks the log as not archived" do
