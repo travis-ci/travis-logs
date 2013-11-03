@@ -120,7 +120,7 @@ module Travis
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
           @db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
-          @db[:logs].select("char_length(content) as content_length").where(id: :$log_id).prepare(:select, :log_content_length)
+          @db[:logs].select(:"char_length(content) as content_length").where(id: :$log_id).prepare(:select, :log_content_length)
           @db[:logs].prepare(:insert, :create_log, {
             job_id: :$job_id,
             created_at: :$created_at,
