@@ -39,30 +39,30 @@ module Travis
         def process_empty_log_content
           if content_length_from_s3.nil?
             Travis.logger.warn("[warn] log with id:#{@log_id} missing in database or on S3")
-            mark('log.content_empty')
+            mark("log.content_empty")
           else
-            measure('already_purged') do
+            measure("already_purged") do
               @database.transaction do
                 @database.mark_archive_verified(@log_id)
                 @database.purge(@log_id)
               end
             end
-            Travis.logger.info "log with id:#{@log_id} was already archived, has now been purged"
+            Travis.logger.info("log with id:#{@log_id} was already archived, has now been purged")
           end
         end
 
         def process_log_content
           if content_lengths_match?
-            measure('purged') do
+            measure("purged") do
               @database.purge(@log_id)
             end
-            Travis.logger.info "log with id:#{@log_id} purged from db (db and s3 content lengths match content_length:#{content_length_from_db})"
+            Travis.logger.info("log with id:#{@log_id} purged from db (db and s3 content lengths match content_length:#{content_length_from_db})")
           else
-            measure('requeued_for_achiving') do
+            measure("requeued_for_achiving") do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
-            Travis.logger.info "log with id:#{@log_id} queued to be reachived as db and s3 content lengths don't match (db:#{content_length_from_db} s3:#{content_length_from_s3})"
+            Travis.logger.info("log with id:#{@log_id} queued to be reachived as db and s3 content lengths don't match (db:#{content_length_from_db} s3:#{content_length_from_s3})")
           end
         end
 
@@ -76,13 +76,11 @@ module Travis
 
         def content_length_from_s3
           @content_length_from_s3 ||= begin
-            begin
-              measure('check_content_length') do
-                @storage_service.content_length(log_url)
-              end
-            rescue => e
-              mark('check_content_length.failed')
+            measure("check_content_length") do
+              @storage_service.content_length(log_url)
             end
+          rescue
+            mark("check_content_length.failed")
           end
         end
 
