@@ -23,3 +23,4 @@ Travis::Logs::Sidekiq.setup
 
 # load the workers
 require 'travis/logs/sidekiq/archive'
+require 'travis/logs/sidekiq/purge'
