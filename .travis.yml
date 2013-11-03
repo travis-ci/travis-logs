@@ -1,6 +1,6 @@
 language: ruby
 rvm:
-  - jruby-19mode
+  - jruby-1.7.6
 jdk: openjdk7
 services:
   - redis
