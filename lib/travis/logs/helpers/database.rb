@@ -47,14 +47,8 @@ module Travis
           @db.call(:find_log_id, job_id: job_id).first
         end
 
-        LOG_CONTENT_LENGTH_SELECT_SQL = <<-SQL.squish
-          SELECT id, char_length(content) AS content_length
-            FROM logs
-           WHERE id = ?
-        SQL
-
         def log_content_length_for_id(log_id)
-          @db[LOG_CONTENT_LENGTH_SELECT_SQL, log_id].first
+          @db[:logs].select{char_length(content).as(content_length)}.where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
