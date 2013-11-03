@@ -23,7 +23,7 @@ module Travis
         end
 
         def run
-          if content.nil?
+          if content_length_from_db.nil?
             process_empty_log_content
           else
             process_log_content
@@ -33,7 +33,7 @@ module Travis
         private
 
         def process_empty_log_content
-          if content_length.nil?
+          if content_length_from_s3.nil?
             Travis.logger.warn("[warn] log with id:#{@log_id} missing in database or on S3")
             mark('log.content_empty')
           else
@@ -48,26 +48,30 @@ module Travis
         end
 
         def process_log_content
-          if content_length == content.length
+          if content_lengths_match?
             measure('purged') do
               @database.purge(@log_id)
             end
-            Travis.logger.info "log with id:#{@log_id} purged from db (db and s3 content lengths match content_length:#{content_length})"
+            Travis.logger.info "log with id:#{@log_id} purged from db (db and s3 content lengths match content_length:#{content_length_from_db})"
           else
             measure('requeued_for_achiving') do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
-            Travis.logger.info "log with id:#{@log_id} queued to be reachived as db and s3 content lengths don't match (db:#{content.length} s3:#{content_length})"
+            Travis.logger.info "log with id:#{@log_id} queued to be reachived as db and s3 content lengths don't match (db:#{content_length_from_db} s3:#{content_length_from_s3})"
           end
         end
 
-        def content
-          log[:content]
+        def content_lengths_match?
+          content_length_from_db == content_length_from_s3
         end
 
-        def content_length
-          @content_length ||= begin
+        def content_length_from_db
+          log[:content_length]
+        end
+
+        def content_length_from_s3
+          @content_length_from_s3 ||= begin
             begin
               measure('check_content_length') do
                 @storage_service.content_length(log_url)
@@ -80,7 +84,7 @@ module Travis
 
         def log
           unless defined?(@log)
-            @log = @database.log_for_id(@log_id)
+            @log = @database.log_content_length_for_id(@log_id)
             unless @log
               Travis.logger.warn("[warn] log with id:#{@log_id} could not be found")
               mark("log.not_found")

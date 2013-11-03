@@ -55,6 +55,26 @@ module Travis::Logs::Helpers
       end
     end
 
+    describe "#log_content_length_for_id" do
+      context "when the log exists" do
+        let(:log) { { content: "hello, world", job_id: 2 } }
+
+        before(:each) do
+          @log_id = sequel[:logs].insert(log)
+        end
+
+        it "returns the content length of the log in a Hash" do
+          expect(database.log_content_length_for_id(2)).to eq({ content_length: log[:content].length })
+        end
+      end
+
+      context "when the log does not exist" do
+        it "returns nil" do
+          expect(database.log_content_length_for_id(1)).to be_nil
+        end
+      end
+    end
+
     describe "#update_archiving_status" do
       before(:each) do
         @log_id = sequel[:logs].insert(archiving: false)
