@@ -37,7 +37,7 @@ module Travis
             Travis.logger.warn("[warn] log with id:#{@log_id} missing in database or on S3")
             mark('log.content_empty')
           else
-            meter('already_purged') do
+            measure('already_purged') do
               @database.transaction do
                 @database.mark_archive_verified(@log_id)
                 @database.purge(@log_id)
@@ -49,12 +49,12 @@ module Travis
 
         def process_log_content
           if content_length == content.length
-            meter('purged') do
+            measure('purged') do
               @database.purge(@log_id)
             end
             Travis.logger.info "log with id:#{log_id} purged from db (db and s3 content lengths match content_length:#{content_length})"
           else
-            meter('requeued_for_achiving') do
+            measure('requeued_for_achiving') do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
@@ -69,7 +69,7 @@ module Travis
         def content_length
           @content_length ||= begin
             begin
-              meter('check_content_length') do
+              measure('check_content_length') do
                 @storage_service.content_length(log_url)
               end
             rescue => e
