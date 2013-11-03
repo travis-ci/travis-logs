@@ -52,13 +52,13 @@ module Travis
             measure('purged') do
               @database.purge(@log_id)
             end
-            Travis.logger.info "log with id:#{log_id} purged from db (db and s3 content lengths match content_length:#{content_length})"
+            Travis.logger.info "log with id:#{@log_id} purged from db (db and s3 content lengths match content_length:#{content_length})"
           else
             measure('requeued_for_achiving') do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
-            Travis.logger.info "log with id:#{log_id} queued to be reachived as db and s3 content lengths don't match (db:#{content.length} s3:#{content_length})"
+            Travis.logger.info "log with id:#{@log_id} queued to be reachived as db and s3 content lengths don't match (db:#{content.length} s3:#{content_length})"
           end
         end
 
