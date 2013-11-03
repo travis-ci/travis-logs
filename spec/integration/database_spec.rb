@@ -64,7 +64,7 @@ module Travis::Logs::Helpers
         end
 
         it "returns the content length of the log in a Hash" do
-          expect(database.log_content_length_for_id(2)).to eq({ content_length: log[:content].length })
+          expect(database.log_content_length_for_id(@log_id)).to eq({ content_length: log[:content].length })
         end
       end
 
