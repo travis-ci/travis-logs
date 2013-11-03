@@ -48,7 +48,7 @@ module Travis
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs].select{octet_length(content).as(content_length)}.where(id: log_id).first
+          @db[:logs].select{id, job_id, octet_length(content).as(content_length)}.where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
