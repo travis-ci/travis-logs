@@ -64,25 +64,27 @@ module Travis::Logs::Helpers
         end
 
         it "returns the content length of the log in a Hash" do
-          expect(database.log_content_length_for_id(@log_id)).to eq({ content_length: log[:content].length })
+          expect(database.log_content_length_for_id(@log_id))
+            .to eq({ id: @log_id, job_id: 2, content_length: log[:content].length })
         end
       end
 
       context "with a multi-byte string" do
-        let(:log) { { content: "\u20AC123" } }
+        let(:log) { { content: "\u20AC123", job_id: 2 } }
 
         before do
           @log_id = sequel[:logs].insert(log)
         end
 
         it "returns the number of bytes in the string" do
-          expect(database.log_content_length_for_id(@log_id)).to eq({ content_length: log[:content].bytesize })
+          expect(database.log_content_length_for_id(@log_id))
+            .to eq({ id: @log_id, job_id: 2, content_length: log[:content].bytesize })
         end
       end
 
       context "when the log does not exist" do
         it "returns nil" do
-          expect(database.log_content_length_for_id(1)).to be_nil
+          expect(database.log_content_length_for_id(2)).to be_nil
         end
       end
     end
