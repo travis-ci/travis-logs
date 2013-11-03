@@ -43,7 +43,7 @@ module Travis
                 @database.purge(@log_id)
               end
             end
-            Travis.logger.info "log with id:#{log_id} was already archived, has now been purged"
+            Travis.logger.info "log with id:#{@log_id} was already archived, has now been purged"
           end
         end
 
