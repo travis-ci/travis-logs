@@ -55,6 +55,40 @@ module Travis::Logs::Helpers
       end
     end
 
+    describe "#log_content_length_for_id" do
+      context "when the log exists" do
+        let(:log) { { content: "hello, world", job_id: 2 } }
+
+        before(:each) do
+          @log_id = sequel[:logs].insert(log)
+        end
+
+        it "returns the content length of the log in a Hash" do
+          expect(database.log_content_length_for_id(@log_id))
+            .to eq({ id: @log_id, job_id: 2, content_length: log[:content].length })
+        end
+      end
+
+      context "with a multi-byte string" do
+        let(:log) { { content: "\u20AC123", job_id: 2 } }
+
+        before do
+          @log_id = sequel[:logs].insert(log)
+        end
+
+        it "returns the number of bytes in the string" do
+          expect(database.log_content_length_for_id(@log_id))
+            .to eq({ id: @log_id, job_id: 2, content_length: log[:content].bytesize })
+        end
+      end
+
+      context "when the log does not exist" do
+        it "returns nil" do
+          expect(database.log_content_length_for_id(2)).to be_nil
+        end
+      end
+    end
+
     describe "#update_archiving_status" do
       before(:each) do
         @log_id = sequel[:logs].insert(archiving: false)
@@ -177,6 +211,46 @@ module Travis::Logs::Helpers
         database.aggregate(@log_id)
 
         expect(sequel[:logs][id: @log_id][:aggregated_at]).not_to be_nil
+      end
+    end
+
+    describe "#purge" do
+      before(:each) do
+        @log_id = sequel[:logs].insert(purged_at: nil, content: "hello, world!")
+      end
+
+      it "sets purged_at" do
+        database.purge(@log_id)
+
+        purged_at = sequel[:logs].where(id: @log_id).get(:purged_at)
+        expect(purged_at).not_to be_nil
+      end
+
+      it "clears the content" do
+        database.purge(@log_id)
+
+        content = sequel[:logs].where(id: @log_id).get(:content)
+        expect(content).to be_nil
+      end
+    end
+
+    describe "#mark_not_archived" do
+      before do
+        @log_id = sequel[:logs].insert(archived_at: Time.now.utc, archive_verified: true)
+      end
+
+      it "nils out archived_at" do
+        database.mark_not_archived(@log_id)
+
+        archived_at = sequel[:logs].where(id: @log_id).get(:archived_at)
+        expect(archived_at).to be_nil
+      end
+
+      it "marks archive as not verified" do
+        database.mark_not_archived(@log_id)
+
+        verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
+        expect(verified).to be_false
       end
     end
   end

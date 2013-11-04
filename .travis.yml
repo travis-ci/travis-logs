@@ -1,6 +1,7 @@
 language: ruby
 rvm:
-  - jruby-19mode
+  - jruby-1.7.6
+  - jruby-head
 jdk: openjdk7
 services:
   - redis
@@ -10,3 +11,7 @@ before_script:
   - cp config/travis.example.yml config/travis.yml
   - bundle exec rake db:setup
 script: bundle exec rspec spec
+matrix:
+  allow_failures:
+    - rvm: jruby-head
+      jdk: openjdk7

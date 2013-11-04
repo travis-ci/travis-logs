@@ -16,7 +16,6 @@ module Travis
         def self.create_sequel
           config = { username: ENV["USER"] }.merge(Travis::Logs.config.database)
           Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
-            db.logger = Travis.logger unless Travis::Logs.config.env == 'production'
             db.timezone = :utc
           end
         end
@@ -48,12 +47,24 @@ module Travis
           @db.call(:find_log_id, job_id: job_id).first
         end
 
+        def log_content_length_for_id(log_id)
+          @db[:logs].select{[id, job_id, octet_length(content).as(content_length)]}.where(id: log_id).first
+        end
+
         def update_archiving_status(log_id, archiving)
           @db[:logs].where(id: log_id).update(archiving: archiving)
         end
 
         def mark_archive_verified(log_id)
           @db[:logs].where(id: log_id).update(archived_at: Time.now.utc, archive_verified: true)
+        end
+
+        def mark_not_archived(log_id)
+          @db[:logs].where(id: log_id).update(archived_at: nil, archive_verified: false)
+        end
+
+        def purge(log_id)
+          @db[:logs].where(id: log_id).update(purged_at: Time.now.utc, content: nil)
         end
 
         def create_log(job_id)

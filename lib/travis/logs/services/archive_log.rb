@@ -36,6 +36,7 @@ module Travis
           store
           verify
           confirm
+          queue_purge
         ensure
           mark_as_archiving(false)
         end
@@ -88,6 +89,13 @@ module Travis
 
         def confirm
           database.mark_archive_verified(log_id)
+        end
+
+        def queue_purge
+          if Travis::Logs.config.logs.purge
+            delay = Travis::Logs.config.logs.intervals.purge
+            Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
+          end
         end
 
         def target_url
