@@ -56,7 +56,7 @@ module Travis
 
           def assert_not_empty(id)
             log = database.log_for_id(id)
-            if log.content.empty?
+            if log[:content].empty?
               fail "Log #{id} is empty, not vacuuming the log parts."
             end
           end

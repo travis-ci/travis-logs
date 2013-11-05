@@ -15,7 +15,7 @@ module Travis::Logs::Services
       allow(archiver).to receive(:perform_async)
       allow(database).to receive(:transaction) { |&block| block.call }
       allow(database).to receive(:aggregatable_log_parts).and_return([1, 2])
-      allow(database).to receive(:log_for_id) { |id| { id: id } }
+      allow(database).to receive(:log_for_id) { |id| { id: id, content: "foo" } }
       allow(database).to receive(:aggregate)
       allow(database).to receive(:delete_log_parts)
     end
