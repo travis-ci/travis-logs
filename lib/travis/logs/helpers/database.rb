@@ -14,7 +14,7 @@ module Travis
         # This method should only be called for "maintenance" tasks (such as
         # creating the tables or debugging).
         def self.create_sequel
-          config = { username: ENV["USER"] }.merge(Travis::Logs.config.database)
+          config = { username: ENV["USER"] }.merge(Travis::Logs.config.logs_database || Travis::Logs.config.database)
           Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
             db.timezone = :utc
           end
