@@ -42,5 +42,37 @@ module Travis::Logs::Services
         expect(archiver).to have_received(:perform_async).with(2)
       end
     end
+
+    context "when log content is ''" do
+      before do
+        allow(database).to receive(:log_for_id) { |id| { id: id, content: '' } }
+      end
+
+      it "does not vacuum log parts" do
+        begin
+          service.run
+        rescue
+        end
+
+        expect(database).not_to have_received(:delete_log_parts).with(1)
+        expect(database).not_to have_received(:delete_log_parts).with(2)
+      end
+    end
+
+    context "when log content is nil" do
+      before do
+        allow(database).to receive(:log_for_id) { |id| { id: id, content: nil } }
+      end
+
+      it "does not vacuum log parts" do
+        begin
+          service.run
+        rescue
+        end
+
+        expect(database).not_to have_received(:delete_log_parts).with(1)
+        expect(database).not_to have_received(:delete_log_parts).with(2)
+      end
+    end
   end
 end
