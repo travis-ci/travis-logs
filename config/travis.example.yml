@@ -7,11 +7,11 @@ database_defaults: &database_defaults
   port: 5432
 
 development:
-  database:
+  logs_database:
     <<: *database_defaults
     database: travis_development
 
 test:
-  database:
+  logs_database:
     <<: *database_defaults
     database: travis_test
