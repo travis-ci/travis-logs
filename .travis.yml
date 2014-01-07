@@ -1,5 +1,5 @@
 language: ruby
-rvm: jruby-1.7.6
+rvm: jruby
 jdk: openjdk7
 services:
   - redis
