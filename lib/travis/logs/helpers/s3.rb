@@ -14,8 +14,6 @@ module Travis
 
         def initialize
           @s3 = AWS::S3.new
-          @objects = {}
-          @buckets = {}
         end
 
         def store(data, url)
@@ -23,29 +21,17 @@ module Travis
         end
 
         def content_length(url)
-          response = http.head(url)
-          if (200...300).cover?(response.status)
-            Integer(response.headers["content-length"])
-          else
-            nil
-          end
+          object(url).content_length
         end
 
         private
 
         def object(url)
-          @objects.fetch(url) { bucket(url).objects[URI.parse(url).path[1..-1]] }
+          bucket(url).objects[URI.parse(url).path[1..-1]]
         end
 
         def bucket(url)
-          @buckets.fetch(url) { s3.buckets[URI.parse(url).host] }
-        end
-
-        def http
-          Faraday.new(ssl: Travis.config.ssl.compact) do |f|
-            f.request :url_encoded
-            f.adapter :net_http
-          end
+          s3.buckets[URI.parse(url).host]
         end
       end
     end
