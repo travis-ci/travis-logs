@@ -36,6 +36,7 @@ module Travis
           store
           verify
           confirm
+          Travis.logger.info("Archived log with id:#{log_id}")
           queue_purge
         ensure
           mark_as_archiving(false)
