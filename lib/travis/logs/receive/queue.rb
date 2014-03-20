@@ -42,7 +42,7 @@ module Travis
             retry_count = 0
             begin
               Timeout::timeout(3, &block)
-            rescue Timeout::Error => e
+            rescue Timeout::Error, Sequel::PoolTimeout  => e
               if retry_count < 2
                 retry_count += 1
                 Travis.logger.error "[queue] Processing of AMQP message exceeded 3 seconds, retrying #{retry_count} of 2"
