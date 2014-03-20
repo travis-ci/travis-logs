@@ -32,11 +32,10 @@ module Travis
               payload = decode(payload) || return
               Travis.uuid = payload.delete('uuid')
               handler.run(payload)
+              message.ack
             end
           rescue => e
             log_exception(e, payload)
-          ensure
-            message.ack
           end
 
           def smart_retry(&block)
@@ -69,7 +68,6 @@ module Travis
 
           def log_exception(error, payload)
             Travis.logger.error "[queue] Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
-            super(error)
             Travis::Exceptions.handle(error)
           rescue Exception => e
             Travis.logger.error "!!!FAILSAFE!!! #{e.message}"
