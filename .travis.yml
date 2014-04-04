@@ -8,6 +8,7 @@ before_script:
   - psql -c "CREATE DATABASE travis_test;" -U postgres
   - cp config/travis.example.yml config/travis.yml
   - bundle exec rake db:setup
+  - bundle exec rake db:add_log_remove_data
 script: bundle exec rspec spec
 matrix:
   allow_failures:
