@@ -43,4 +43,12 @@ namespace :db do
     db.drop_table(:logs)
     db.drop_table(:log_parts)
   end
+
+  task :add_log_remove_data, [:version] do |t, args|
+    db = Travis::Logs::Helpers::Database.create_sequel
+    db.alter_table(:logs) do
+      add_column :removed_by, :integer
+      add_column :removed_at, DateTime
+    end
+  end
 end
