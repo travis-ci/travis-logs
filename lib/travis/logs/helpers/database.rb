@@ -21,10 +21,10 @@ module Travis
         end
 
         def self.jdbc_uri_from_config(config)
-          host = config.fetch(:host) { 'localhost' }
-          port = config.fetch(:port) { 5432 }
-          database = config.fetch(:database)
-          username = config.fetch(:username) { ENV["USER"] }
+          host = config[:host] || 'localhost'
+          port = config[:port] || 5432
+          database = config[:database]
+          username = config[:username] || ENV["USER"]
 
           "jdbc:postgresql://#{host}:#{port}/#{database}?username=#{username}&password=#{config[:password]}"
         end
