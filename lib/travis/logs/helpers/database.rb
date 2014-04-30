@@ -14,14 +14,19 @@ module Travis
         # This method should only be called for "maintenance" tasks (such as
         # creating the tables or debugging).
         def self.create_sequel
-          config = { username: ENV["USER"] }.merge(Travis::Logs.config.logs_database)
+          config = Travis::Logs.config.logs_database
           Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
             db.timezone = :utc
           end
         end
 
         def self.jdbc_uri_from_config(config)
-          "jdbc:postgresql://#{config[:host]}:#{config[:port]}/#{config[:database]}?user=#{config[:username]}&password=#{config[:password]}"
+          host = config[:host] || 'localhost'
+          port = config[:port] || 5432
+          database = config[:database]
+          username = config[:username] || ENV["USER"]
+
+          "jdbc:postgresql://#{host}:#{port}/#{database}?user=#{username}&password=#{config[:password]}"
         end
 
         def self.connect

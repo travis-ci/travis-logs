@@ -9,9 +9,9 @@ database_defaults: &database_defaults
 development:
   logs_database:
     <<: *database_defaults
-    database: travis_development
+    database: travis_logs_development
 
 test:
   logs_database:
     <<: *database_defaults
-    database: travis_test
+    database: travis_logs_test

@@ -5,9 +5,9 @@ services:
   - redis
   - rabbitmq
 before_script:
-  - psql -c "CREATE DATABASE travis_test;" -U postgres
+  - psql -c "CREATE DATABASE travis_logs_test;" -U postgres
   - cp config/travis.example.yml config/travis.yml
-  - bundle exec rake db:setup
+  - bundle exec rake db:migrate
 script: bundle exec rspec spec
 matrix:
   allow_failures:

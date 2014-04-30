@@ -21,9 +21,7 @@ gem 'aws-sdk'
 gem 'faraday',            '~> 0.8.8'
 gem 'sentry-raven',       github: 'getsentry/raven-ruby'
 
-group :development do
-  gem 'rake'
-end
+gem 'rake'
 
 group :test do
   gem 'rspec',            '~> 2.14.1'
