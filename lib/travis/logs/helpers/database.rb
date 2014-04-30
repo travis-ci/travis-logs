@@ -26,7 +26,7 @@ module Travis
           database = config[:database]
           username = config[:username] || ENV["USER"]
 
-          "jdbc:postgresql://#{host}:#{port}/#{database}?username=#{username}&password=#{config[:password]}"
+          "jdbc:postgresql://#{host}:#{port}/#{database}?user=#{username}&password=#{config[:password]}"
         end
 
         def self.connect
