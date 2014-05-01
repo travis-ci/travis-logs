@@ -29,9 +29,10 @@ module Travis
 
           def receive(message, payload)
             smart_retry do
-              payload = decode(payload) || return
-              Travis.uuid = payload.delete('uuid')
-              handler.run(payload)
+              if payload = decode(payload)
+                Travis.uuid = payload.delete('uuid')
+                handler.run(payload)
+              end
               message.ack
             end
           rescue => e
