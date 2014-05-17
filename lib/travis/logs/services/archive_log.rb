@@ -1,6 +1,7 @@
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
 require 'active_support/core_ext/object/try'
+require 'active_support/core_ext/numeric/time'
 require 'uri'
 
 module Travis
