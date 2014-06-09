@@ -44,7 +44,7 @@ module Travis
               end
             end
             queue_archiving(id)
-            Travis.logger.info "action=aggregate id=#{id} result=successful"
+            Travis.logger.debug "action=aggregate id=#{id} result=successful"
           rescue => e
             Travis::Exceptions.handle(e)
           end

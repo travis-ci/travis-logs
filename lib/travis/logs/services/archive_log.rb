@@ -37,7 +37,7 @@ module Travis
           store
           verify
           confirm
-          Travis.logger.info "action=archive id=#{log_id} result=successful"
+          Travis.logger.debug "action=archive id=#{log_id} result=successful"
           queue_purge
         ensure
           mark_as_archiving(false)

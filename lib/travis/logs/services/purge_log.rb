@@ -56,13 +56,13 @@ module Travis
             measure("purged") do
               @database.purge(@log_id)
             end
-            Travis.logger.info("action=purge id=#{@log_id} result=successful content_length=#{content_length_from_db})")
+            Travis.logger.debug("action=purge id=#{@log_id} result=successful content_length=#{content_length_from_db}")
           else
             measure("requeued_for_achiving") do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
-            Travis.logger.info("action=purge id=#{@log_id} result=requeued db_content_length=#{content_length_from_db} s3_content_length=#{content_length_from_s3})")
+            Travis.logger.info("action=purge id=#{@log_id} result=requeued db_content_length=#{content_length_from_db} s3_content_length=#{content_length_from_s3}")
           end
         end
 
