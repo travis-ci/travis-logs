@@ -34,7 +34,7 @@ module Travis::Logs::Services
         end
 
         it "prints a warning" do
-          expect(Travis.logger).to receive(:warn).with(/id:1.+missing/i)
+          expect(Travis.logger).to receive(:warn).with(/id=1.+result=content_missing/i)
           PurgeLog.new(@log_id, @storage_service, @database).run
         end
       end
