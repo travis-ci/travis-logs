@@ -15,7 +15,7 @@ module Travis
     class Receive
       def setup
         Travis.logger.info('** Starting Log Parts Processor **')
-        Travis::Amqp.config = Travis::Logs.config.amqp
+        Travis::Amqp.config = amqp_config
         Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
 
@@ -27,6 +27,12 @@ module Travis
         1.upto(Logs.config.logs.threads) do
           Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
         end
+      end
+
+      def amqp_config
+        Travis::Logs.config.amqp.merge({
+          :thread_pool_size => (Logs.config.logs.threads * 2 + 3)
+        })
       end
     end
   end
