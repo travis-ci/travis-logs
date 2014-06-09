@@ -9,8 +9,12 @@ module Travis
       module Reporting
 
         def self.setup
-          Travis.logger.info('Setting up Metriks and Memory reporting')
-          Metriks::Reporter::Logger.new.start
+          Travis.logger.info('Setting up Metriks')
+          if Travis.config.librato
+            email, token, source = Travis.config.librato.email, Travis.config.librato.token, Travis.config.librato_source
+            reporter = Metriks::LibratoMetricsReporter.new(email, token, source: source)
+            reporter.start
+          end
         end
 
       end
