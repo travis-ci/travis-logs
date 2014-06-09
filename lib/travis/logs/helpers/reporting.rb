@@ -1,5 +1,4 @@
-require 'metriks'
-require 'metriks/reporter/logger'
+require 'metriks/librato_metrics_reporter'
 require 'travis/support/log_subscriber/active_record_metrics'
 require 'travis/support/memory'
 
