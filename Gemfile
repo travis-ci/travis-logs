@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '1.9.3', engine: 'jruby', engine_version: '1.7.12'
 
 gem 'activesupport'
-gem 'travis-support',     github: 'travis-ci/travis-support'
+gem 'travis-support',     github: 'travis-ci/travis-support', ref: 'f1cbac9'
 
 gem 'sequel',             '~> 4.0.0'
 gem 'jdbc-postgres',      '9.3.1101'
