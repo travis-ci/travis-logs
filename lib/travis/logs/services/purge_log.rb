@@ -38,7 +38,7 @@ module Travis
 
         def process_empty_log_content
           if content_length_from_s3.nil?
-            Travis.logger.warn("[warn] log with id:#{@log_id} missing in database or on S3")
+            Travis.logger.warn("action=purge id=#{@log_id} result=content_missing")
             mark("log.content_empty")
           else
             measure("already_purged") do
@@ -47,7 +47,7 @@ module Travis
                 @database.purge(@log_id)
               end
             end
-            Travis.logger.info("log with id:#{@log_id} was already archived, has now been purged")
+            Travis.logger.info("action=purge id=#{@log_id} result=already_archived")
           end
         end
 
@@ -56,13 +56,13 @@ module Travis
             measure("purged") do
               @database.purge(@log_id)
             end
-            Travis.logger.info("log with id:#{@log_id} purged from db (db and s3 content lengths match content_length:#{content_length_from_db})")
+            Travis.logger.info("action=purge id=#{@log_id} result=successful content_length=#{content_length_from_db})")
           else
             measure("requeued_for_achiving") do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
-            Travis.logger.info("log with id:#{@log_id} queued to be reachived as db and s3 content lengths don't match (db:#{content_length_from_db} s3:#{content_length_from_s3})")
+            Travis.logger.info("action=purge id=#{@log_id} result=requeued db_content_length=#{content_length_from_db} s3_content_length=#{content_length_from_s3})")
           end
         end
 
@@ -88,7 +88,7 @@ module Travis
           unless defined?(@log)
             @log = @database.log_content_length_for_id(@log_id)
             unless @log
-              Travis.logger.warn("[warn] log with id:#{@log_id} could not be found")
+              Travis.logger.warn("action=purge id=#{@log_id} result=not_found")
               mark("log.not_found")
             end
           end

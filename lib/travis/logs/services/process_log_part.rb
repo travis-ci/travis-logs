@@ -53,7 +53,7 @@ module Travis
 
           def valid_log_id?
             if log_id == 0
-              Travis.logger.warn "[warn] log.id is #{log_id.inspect} in create_part (job_id: #{payload['id']})"
+              Travis.logger.warn "action=process job_id=#{payload['id']} result=invalid_id log_id=#{log_id.inspect}"
               mark('log.id_invalid')
             end
           end
@@ -77,7 +77,7 @@ module Travis
           end
 
           def create_log
-            Travis.logger.warn "Had to create a log for job_id: #{payload['id']}!"
+            Travis.logger.warn "action=process job_id=#{payload['id']} message=log_created"
             mark('log.create')
             database.create_log(payload["id"])
           end

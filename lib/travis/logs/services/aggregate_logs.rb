@@ -44,7 +44,7 @@ module Travis
               end
             end
             queue_archiving(id)
-            Travis.logger.info "Finished aggregating Log with id:#{id}"
+            Travis.logger.info "action=aggregate id=#{id} result=successful"
           rescue => e
             Travis::Exceptions.handle(e)
           end
@@ -58,7 +58,7 @@ module Travis
           def log_empty?(id)
             log = database.log_for_id(id)
             if log[:content].nil? || log[:content].empty?
-              warn "Log #{id} is empty, not vacuuming the log parts."
+              warn "action=aggregate id=#{id} result=empty"
               true
             end
           end
@@ -78,7 +78,7 @@ module Travis
               Sidekiq::Archive.perform_async(log[:id])
             else
               mark('log.record_not_found')
-              Travis.logger.warn "Could not queue Log with id:#{id} for archiving as it could not be found"
+              Travis.logger.warn "action=aggregate id=#{id} result=not_found"
             end
           end
 

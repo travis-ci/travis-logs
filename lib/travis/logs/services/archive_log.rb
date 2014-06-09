@@ -37,7 +37,7 @@ module Travis
           store
           verify
           confirm
-          Travis.logger.info("Archived log with id:#{log_id}")
+          Travis.logger.info "action=archive id=#{log_id} result=successful"
           queue_purge
         ensure
           mark_as_archiving(false)
@@ -47,7 +47,7 @@ module Travis
           @log ||= begin
             log = database.log_for_id(log_id)
             unless log
-              Travis.logger.warn "[warn] log with id:#{log_id} could not be found"
+              Travis.logger.warn "action=archive id=#{log_id} result=not_found"
               mark('log.not_found')
             end
             log
@@ -61,7 +61,7 @@ module Travis
 
         def content_blank?
           if content.blank?
-            Travis.logger.warn "[warn] log with id:#{log_id} was blank"
+            Travis.logger.warn "action=archive id=#{log_id} result=empty"
             mark("log.empty")
             true
           else
