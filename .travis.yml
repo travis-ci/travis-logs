@@ -6,6 +6,8 @@ jdk: openjdk7
 
 super_user: false
 
+cache: bundler
+
 services:
   - redis
   - rabbitmq
