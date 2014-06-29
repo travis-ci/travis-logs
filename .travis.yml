@@ -4,6 +4,8 @@ rvm: jruby-1.7.13
 
 jdk: openjdk7
 
+super_user: false
+
 services:
   - redis
   - rabbitmq
