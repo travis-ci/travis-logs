@@ -11,6 +11,7 @@ cache: bundler
 services:
   - redis
   - rabbitmq
+  - postgresql
 
 before_script:
   - psql -c "CREATE DATABASE travis_logs_test;" -U postgres
