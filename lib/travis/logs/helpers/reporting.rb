@@ -11,6 +11,7 @@ module Travis
           Travis.logger.info('Setting up Metriks')
           if Travis.config.librato
             email, token, source = Travis.config.librato.email, Travis.config.librato.token, Travis.config.librato_source
+            source = "#{source}.#{ENV['DYNO']}"
             reporter = Metriks::LibratoMetricsReporter.new(email, token, source: source)
             reporter.start
           end
