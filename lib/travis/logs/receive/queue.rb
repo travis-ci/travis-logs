@@ -37,6 +37,8 @@ module Travis
             end
           rescue => e
             log_exception(e, payload)
+            message.reject(requeue: true)
+            error "[queue:receive] message requeued"
           end
 
           def smart_retry(&block)
