@@ -8,7 +8,7 @@ gem 'travis-support',     github: 'travis-ci/travis-support', ref: 'f1cbac9'
 gem 'sequel',             '~> 4.0.0'
 gem 'jdbc-postgres',      '9.3.1101'
 
-gem 'march_hare',         '~> 2.2.0'
+gem 'march_hare',         '~> 2.3.0'
 gem 'jruby-openssl',      '~> 0.8.8'
 
 gem 'json',               '~> 1.8.0'

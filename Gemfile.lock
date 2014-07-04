@@ -47,7 +47,7 @@ GEM
     jruby-openssl (0.8.10)
       bouncy-castle-java (>= 1.5.0147)
     json (1.8.1-java)
-    march_hare (2.2.0-java)
+    march_hare (2.3.0-java)
     metriks (0.9.9.6)
       atomic (~> 1.0)
       avl_tree (~> 1.1.2)
@@ -96,7 +96,7 @@ DEPENDENCIES
   jdbc-postgres (= 9.3.1101)
   jruby-openssl (~> 0.8.8)
   json (~> 1.8.0)
-  march_hare (~> 2.2.0)
+  march_hare (~> 2.3.0)
   metriks
   metriks-librato_metrics
   pusher (~> 0.12.0)
