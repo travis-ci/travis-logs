@@ -33,8 +33,8 @@ module Travis
                 Travis.uuid = payload.delete('uuid')
                 handler.run(payload)
               end
-              message.ack
             end
+            message.ack
           rescue => e
             log_exception(e, payload)
             message.reject(requeue: true)
