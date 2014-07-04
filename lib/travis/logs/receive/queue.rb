@@ -38,6 +38,7 @@ module Travis
           rescue => e
             log_exception(e, payload)
             message.reject(requeue: true)
+            Metriks.meter("#{METRIKS_PREFIX}.receive.retry").mark
             error "[queue:receive] message requeued"
           end
 
