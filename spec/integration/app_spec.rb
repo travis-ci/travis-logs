@@ -10,7 +10,7 @@ module Travis::Logs
     include Rack::Test::Methods
 
     def app
-      Travis::Logs::App.new(nil, nil, pusher)
+      Travis::Logs::App.new(nil, pusher)
     end
 
     let(:pusher) { double(:pusher) }
