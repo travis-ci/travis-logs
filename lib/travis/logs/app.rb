@@ -11,7 +11,7 @@ module Travis
       Rack.autoload :SSL, 'rack/ssl'
       before do
         env['rack.logger'] = Logger.new(STDOUT)
-        env['rack.errors'] = ENV['RACK_ENV'] != 'test'
+        env['rack.errors'] = Logger.new(STDOUT)
       end
 
       attr_reader :existence, :pusher
