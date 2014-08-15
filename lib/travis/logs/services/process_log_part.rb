@@ -63,10 +63,12 @@ module Travis
           def notify
             measure('pusher') do
               channel_name = pusher_client.pusher_channel_name(payload)
-              if existence.occupied?(channel_name)
-                mark("logs.pusher.send")
-              else
-                mark("logs.pusher.ignore")
+              if Logs.config.pusher.log_channels_existence_check
+                if existence.occupied?(channel_name)
+                  mark("logs.pusher.send")
+                else
+                  mark("logs.pusher.ignore")
+                end
               end
               pusher_client.push(pusher_payload)
             end
