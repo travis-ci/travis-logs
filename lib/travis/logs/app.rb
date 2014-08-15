@@ -2,6 +2,7 @@ require 'json'
 require 'sinatra'
 require 'logger'
 
+require 'travis/logs'
 require 'travis/logs/existence'
 
 module Travis
