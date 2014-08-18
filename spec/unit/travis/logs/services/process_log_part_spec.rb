@@ -38,6 +38,7 @@ module Travis::Logs::Services
 
     before(:each) do
       allow(Metriks).to receive(:meter).and_return(double("meter", mark: nil))
+      allow(service).to receive(:channel_occupied?) { true }
     end
 
     context "without an existing log" do
@@ -86,6 +87,28 @@ module Travis::Logs::Services
       service.run
 
       expect(database.log_parts.last).to include(content: "hello, world", number: 1, final: false)
+    end
+
+    describe 'existence check' do
+      it 'ignores a part if channel is not occupied' do
+        expect(service).to receive(:channel_occupied?) { false }
+        expect(service).to receive(:mark).with(any_args)
+        expect(service).to receive(:mark).with('logs.pusher.ignore')
+
+        service.run
+
+        pusher_client.should_not have_received(:push)
+      end
+
+      it 'sends a part if channel is occupied' do
+        expect(service).to receive(:channel_occupied?) { true }
+        expect(service).to receive(:mark).with(any_args)
+        expect(service).to receive(:mark).with('logs.pusher.send')
+
+        service.run
+
+        pusher_client.should have_received(:push).with(any_args)
+      end
     end
 
     context "when pusher.secure is true" do
