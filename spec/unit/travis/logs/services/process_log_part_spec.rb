@@ -32,13 +32,14 @@ module Travis::Logs::Services
   describe ProcessLogPart do
     let(:payload) { { "id" => 2, "log" => "hello, world", "number" => 1 } }
     let(:database) { FakeDatabase.new }
-    let(:pusher_client) { double("pusher-client", push: nil, pusher_channel_name: 'channel') }
+    let(:pusher_client) { double("pusher-client", push: nil) }
 
     let(:service) { described_class.new(payload, database, pusher_client) }
 
     before(:each) do
       allow(Metriks).to receive(:meter).and_return(double("meter", mark: nil))
       allow(service).to receive(:channel_occupied?) { true }
+      allow(service).to receive(:channel_name) { 'channel' }
     end
 
     context "without an existing log" do
