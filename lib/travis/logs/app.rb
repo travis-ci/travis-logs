@@ -40,6 +40,10 @@ module Travis
           status 401
         end
       end
+
+      get "/uptime" do
+        status 204
+      end
     end
   end
 end

@@ -21,6 +21,13 @@ module Travis::Logs
       existence.vacant!('bar')
     end
 
+    describe 'GET /uptime' do
+      it 'returns 204' do
+        response = post '/uptime'
+        response.status.should == 204
+      end
+    end
+
     describe 'POST /pusher/existence' do
       it 'sets proper properties on channel' do
         existence.occupied?('foo').should be_false
