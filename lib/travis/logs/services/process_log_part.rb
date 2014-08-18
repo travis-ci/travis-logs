@@ -1,5 +1,6 @@
 require 'travis/logs/helpers/metrics'
 require "travis/logs/helpers/pusher"
+require 'travis/logs/existence'
 require 'pusher'
 require 'coder'
 
@@ -25,10 +26,11 @@ module Travis
 
         attr_reader :payload
 
-        def initialize(payload, database = nil, pusher_client = nil)
+        def initialize(payload, database = nil, pusher_client = nil, existence = nil)
           @payload = payload
           @database = database || Travis::Logs.database_connection
           @pusher_client = pusher_client || Travis::Logs::Helpers::Pusher.new
+          @existence = existence || Travis::Logs::Existence.new
         end
 
         def run
@@ -41,7 +43,7 @@ module Travis
 
         private
 
-          attr_reader :database, :pusher_client
+          attr_reader :database, :pusher_client, :existence
 
           def create_part
             valid_log_id?
@@ -60,6 +62,18 @@ module Travis
 
           def notify
             measure('pusher') do
+              if existence_check_metrics? || existence_check?
+                if channel_occupied?(channel_name)
+                  mark("logs.pusher.send")
+                else
+                  mark("logs.pusher.ignore")
+
+                  if existence_check?
+                    return
+                  end
+                end
+              end
+
               pusher_client.push(pusher_payload)
             end
           rescue => e
@@ -106,6 +120,22 @@ module Travis
               "number" => number,
               "final" => final?
             }
+          end
+
+          def channel_occupied?(channel_name)
+            existence.occupied?(channel_name)
+          end
+
+          def channel_name
+            pusher_client.pusher_channel_name(payload)
+          end
+
+          def existence_check_metrics?
+            Logs.config.pusher.channels_existence_metrics
+          end
+
+          def existence_check?
+            Logs.config.pusher.channels_existence_check
           end
       end
     end

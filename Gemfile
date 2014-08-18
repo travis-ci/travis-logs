@@ -26,4 +26,9 @@ gem 'rake'
 
 group :test do
   gem 'rspec',            '~> 2.14.1'
+  gem 'rack-test'
 end
+
+gem 'sinatra', '~> 1.4'
+gem 'puma'
+gem 'rack-ssl'

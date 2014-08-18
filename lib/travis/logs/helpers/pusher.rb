@@ -15,17 +15,17 @@ module Travis
           pusher_channel(payload).trigger("job:log", pusher_payload(payload))
         end
 
-        private
-
-        def pusher_channel(payload)
-          @pusher_client[pusher_channel_name(payload)]
-        end
-
         def pusher_channel_name(payload)
           channel = ""
           channel << "private-" if Logs.config.pusher.secure
           channel << "job-#{payload["id"]}"
           channel
+        end
+
+        private
+
+        def pusher_channel(payload)
+          @pusher_client[pusher_channel_name(payload)]
         end
 
         def pusher_payload(payload)
