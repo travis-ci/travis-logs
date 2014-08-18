@@ -91,6 +91,17 @@ module Travis::Logs::Services
     end
 
     describe 'existence check' do
+      it 'sends a part if channel is not occupied but the existence check is disabled' do
+        expect(service).to receive(:existence_check?) { false }
+        expect(service).to receive(:channel_occupied?) { false }
+        expect(service).to receive(:mark).with(any_args)
+        expect(service).to receive(:mark).with('logs.pusher.ignore')
+
+        service.run
+
+        pusher_client.should have_received(:push).with(any_args)
+      end
+
       it 'ignores a part if channel is not occupied' do
         expect(service).to receive(:channel_occupied?) { false }
         expect(service).to receive(:mark).with(any_args)
