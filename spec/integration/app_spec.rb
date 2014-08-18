@@ -23,7 +23,7 @@ module Travis::Logs
 
     describe 'GET /uptime' do
       it 'returns 204' do
-        response = post '/uptime'
+        response = get '/uptime'
         response.status.should == 204
       end
     end
