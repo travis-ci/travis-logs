@@ -1,12 +1,23 @@
 require 'redis'
+require 'travis/redis_pool'
 
 module Travis
   module Logs
     class Existence
       attr_reader :redis
 
+      class << self
+        def redis
+          @redis ||= RedisPool.new(redis_config)
+        end
+
+        def redis_config
+          Logs.config.logs_redis || Logs.config.redis
+        end
+      end
+
       def initialize
-        @redis  = Redis.new(url: redis_url)
+        @redis = self.class.redis
       end
 
       def occupied!(channel_name)
@@ -27,11 +38,6 @@ module Travis
 
       def key(channel_name)
         "logs:channel-occupied:#{channel_name}"
-      end
-
-      def redis_url
-        config = Logs.config.logs_redis || Logs.config.redis
-        config.url
       end
     end
   end
