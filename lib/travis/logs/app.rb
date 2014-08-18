@@ -1,5 +1,6 @@
 require 'json'
-require 'sinatra'
+require 'raven'
+require 'sinatra/base'
 require 'logger'
 
 require 'travis/logs'
@@ -8,11 +9,31 @@ require 'rack/ssl'
 
 module Travis
   module Logs
+    class SentryMiddleware < Sinatra::Base
+      configure do
+        Raven.configure do |config|
+          config.tags = {
+            environment: environment,
+          }
+        end
+
+        use Raven::Rack
+      end
+    end
+
     class App < Sinatra::Base
       attr_reader :existence, :pusher
 
       configure(:production, :staging) do
         use Rack::SSL
+      end
+
+      configure do
+        if ENV["SENTRY_DSN"]
+          require "travis/build/app_middleware/sentry"
+
+          use Travis::Build::AppMiddleware::Sentry
+        end
       end
 
       def initialize(existence = nil, pusher = nil)
