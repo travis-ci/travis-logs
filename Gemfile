@@ -31,7 +31,3 @@ end
 
 gem 'sinatra', '~> 1.4'
 gem 'puma'
-
-group :development do
-  gem 'rerun'
-end
