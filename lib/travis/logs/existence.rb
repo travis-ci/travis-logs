@@ -6,7 +6,7 @@ module Travis
       attr_reader :redis
 
       def initialize
-        @redis  = Redis.new(url: Logs.config.redis.url)
+        @redis  = Redis.new(url: redis_url)
       end
 
       def occupied!(channel_name)
@@ -27,6 +27,11 @@ module Travis
 
       def key(channel_name)
         "logs:channel-occupied:#{channel_name}"
+      end
+
+      def redis_url
+        config = Logs.config.logs_redis || Logs.config.redis
+        config.url
       end
     end
   end
