@@ -9,11 +9,6 @@ require 'rack/ssl'
 module Travis
   module Logs
     class App < Sinatra::Base
-      before do
-        env['rack.logger'] = Logger.new(STDOUT)
-        env['rack.errors'] = Logger.new(STDOUT)
-      end
-
       attr_reader :existence, :pusher
 
       def initialize(existence = nil, pusher = nil)
