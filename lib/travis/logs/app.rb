@@ -4,11 +4,11 @@ require 'logger'
 
 require 'travis/logs'
 require 'travis/logs/existence'
+require 'rack/ssl'
 
 module Travis
   module Logs
     class App < Sinatra::Base
-      Rack.autoload :SSL, 'rack/ssl'
       before do
         env['rack.logger'] = Logger.new(STDOUT)
         env['rack.errors'] = Logger.new(STDOUT)
