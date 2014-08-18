@@ -26,7 +26,7 @@ module Travis
       end
 
       def key(channel_name)
-        "logs:ch-occ:#{channel_name}"
+        "logs:channel-occupied:#{channel_name}"
       end
     end
   end
