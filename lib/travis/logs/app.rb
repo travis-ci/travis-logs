@@ -11,6 +11,10 @@ module Travis
     class App < Sinatra::Base
       attr_reader :existence, :pusher
 
+      configure(:production, :staging) do
+        use Rack::SSL
+      end
+
       def initialize(existence = nil, pusher = nil)
         super()
         @existence = existence || Travis::Logs::Existence.new
