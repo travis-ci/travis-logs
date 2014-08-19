@@ -95,7 +95,7 @@ module Travis::Logs::Services
         expect(service).to receive(:existence_check?) { false }
         expect(service).to receive(:channel_occupied?) { false }
         expect(service).to receive(:mark).with(any_args)
-        expect(service).to receive(:mark).with('logs.pusher.ignore')
+        expect(service).to receive(:mark).with('pusher.ignore')
 
         service.run
 
@@ -105,7 +105,7 @@ module Travis::Logs::Services
       it 'ignores a part if channel is not occupied' do
         expect(service).to receive(:channel_occupied?) { false }
         expect(service).to receive(:mark).with(any_args)
-        expect(service).to receive(:mark).with('logs.pusher.ignore')
+        expect(service).to receive(:mark).with('pusher.ignore')
 
         service.run
 
@@ -115,7 +115,7 @@ module Travis::Logs::Services
       it 'sends a part if channel is occupied' do
         expect(service).to receive(:channel_occupied?) { true }
         expect(service).to receive(:mark).with(any_args)
-        expect(service).to receive(:mark).with('logs.pusher.send')
+        expect(service).to receive(:mark).with('pusher.send')
 
         service.run
 

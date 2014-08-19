@@ -64,9 +64,9 @@ module Travis
             measure('pusher') do
               if existence_check_metrics? || existence_check?
                 if channel_occupied?(channel_name)
-                  mark("logs.pusher.send")
+                  mark("pusher.send")
                 else
-                  mark("logs.pusher.ignore")
+                  mark("pusher.ignore")
 
                   if existence_check?
                     return
