@@ -21,7 +21,9 @@ module Travis
       end
 
       def occupied!(channel_name)
-        redis.set(key(channel_name), true)
+        key = self.key(channel_name)
+        redis.set(key, true)
+        redis.expire(key, 6 * 3600)
       end
 
       def occupied?(channel_name)
