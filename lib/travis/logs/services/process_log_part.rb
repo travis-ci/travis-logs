@@ -61,19 +61,19 @@ module Travis
           end
 
           def notify
-            measure('pusher') do
-              if existence_check_metrics? || existence_check?
-                if channel_occupied?(channel_name)
-                  mark("pusher.send")
-                else
-                  mark("pusher.ignore")
+            if existence_check_metrics? || existence_check?
+              if channel_occupied?(channel_name)
+                mark("pusher.send")
+              else
+                mark("pusher.ignore")
 
-                  if existence_check?
-                    return
-                  end
+                if existence_check?
+                  return
                 end
               end
+            end
 
+            measure('pusher') do
               pusher_client.push(pusher_payload)
             end
           rescue => e
