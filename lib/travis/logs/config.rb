@@ -89,9 +89,7 @@ module Travis
               :logs          => { :archive => true, :purge => false, :threads => 10, :intervals => { :vacuum => 10, :regular => 180, :force => 3 * 60 * 60, :purge => 6 } },
               :redis         => { :url => 'redis://localhost:6379' },
               :ssl           => { },
-              :sentry        => { },
-              :channels_existence_check => true,
-              :channels_existence_metrics => true
+              :sentry        => { }
 
       default :_access => [:key]
 

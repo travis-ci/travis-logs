@@ -37,6 +37,8 @@ module Travis::Logs::Services
     let(:service) { described_class.new(payload, database, pusher_client) }
 
     before(:each) do
+      Travis::Logs.config.channels_existence_check = true
+      Travis::Logs.config.channels_existence_metrics = true
       allow(Metriks).to receive(:meter).and_return(double("meter", mark: nil))
       allow(service).to receive(:channel_occupied?) { true }
       allow(service).to receive(:channel_name) { 'channel' }
