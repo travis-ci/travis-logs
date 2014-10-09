@@ -3,7 +3,6 @@ require "travis/support"
 require "travis/logs/sidekiq"
 require "travis/logs/services/aggregate_logs"
 require "travis/logs/helpers/database"
-require "travis/logs/helpers/reporting"
 
 module Travis::Logs::Services
   describe AggregateLogs do

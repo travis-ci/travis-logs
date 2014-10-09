@@ -2,10 +2,10 @@ require 'travis/logs'
 require 'travis/support'
 require 'travis/support/amqp'
 require 'travis/support/exceptions/reporter'
+require 'travis/support/metrics'
 require 'travis/logs/receive/queue'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/helpers/database'
-require 'travis/logs/helpers/reporting'
 require 'active_support/core_ext/logger'
 
 $stdout.sync = true
@@ -16,8 +16,8 @@ module Travis
       def setup
         Travis.logger.info('** Starting Log Parts Processor **')
         Travis::Amqp.config = amqp_config
-        Travis::Logs::Helpers::Reporting.setup
         Travis::Exceptions::Reporter.start
+        Travis::Metrics.setup
 
         db = Travis::Logs::Helpers::Database.connect
         Logs.database_connection = db

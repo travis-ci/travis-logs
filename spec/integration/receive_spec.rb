@@ -4,7 +4,6 @@ require "travis/support/amqp"
 require "travis/logs/receive/queue"
 require "travis/logs/services/process_log_part"
 require "travis/logs/helpers/database"
-require "travis/logs/helpers/reporting"
 
 class FakeAmqpQueue
   def subscribe(opts, &block)
