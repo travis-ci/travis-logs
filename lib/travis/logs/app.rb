@@ -11,12 +11,7 @@ module Travis
   module Logs
     class SentryMiddleware < Sinatra::Base
       configure do
-        Raven.configure do |config|
-          config.tags = {
-            environment: environment,
-          }
-        end
-
+        Raven.configure { |c| config.tags = { environment: environment } }
         use Raven::Rack
       end
     end
@@ -29,11 +24,7 @@ module Travis
       end
 
       configure do
-        if ENV["SENTRY_DSN"]
-          require "travis/build/app_middleware/sentry"
-
-          use Travis::Build::AppMiddleware::Sentry
-        end
+        use SentryMiddleware if ENV["SENTRY_DSN"]
       end
 
       def initialize(existence = nil, pusher = nil)
