@@ -13,7 +13,6 @@ module Travis
     class Aggregate
       def setup
         Travis.logger.info('** Starting Logs Aggregation **')
-        Travis::Logs::Helpers::Reporting.setup
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
 
