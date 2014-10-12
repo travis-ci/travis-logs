@@ -88,6 +88,7 @@ module Travis
               :sidekiq       => { :namespace => 'sidekiq', :pool_size => 3 },
               :logs          => { :archive => true, :purge => false, :threads => 10, :intervals => { :vacuum => 10, :regular => 180, :force => 3 * 60 * 60, :purge => 6 } },
               :redis         => { :url => 'redis://localhost:6379' },
+              :metrics       => { :reporter => 'librato' },
               :ssl           => { },
               :sentry        => { }
 
