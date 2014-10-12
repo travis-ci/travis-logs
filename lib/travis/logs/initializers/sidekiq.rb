@@ -4,7 +4,6 @@ require 'travis/logs'
 require 'travis/support'
 require 'travis/support/exceptions/reporter'
 require 'travis/logs/helpers/database'
-require 'travis/logs/helpers/reporting'
 require 'travis/logs/helpers/s3'
 require 'active_support/core_ext/logger'
 require 'travis/logs/sidekiq'
@@ -14,8 +13,8 @@ $stdout.sync = true
 Travis.logger.info('** Setting up Sidekiq **')
 
 Travis::Logs::Helpers::S3.setup
-Travis::Logs::Helpers::Reporting.setup
 Travis::Exceptions::Reporter.start
+Travis::Metrics.setup
 
 Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
 

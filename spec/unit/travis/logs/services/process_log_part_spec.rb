@@ -2,7 +2,6 @@ require "travis/logs"
 require "travis/support"
 require "travis/logs/services/process_log_part"
 require "travis/logs/helpers/database"
-require "travis/logs/helpers/reporting"
 
 class FakeDatabase
   attr_reader :logs, :log_parts

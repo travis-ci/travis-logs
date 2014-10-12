@@ -2,7 +2,6 @@ require "travis/logs"
 require "travis/support"
 require "travis/logs/services/archive_log"
 require "travis/logs/helpers/database"
-require "travis/logs/helpers/reporting"
 require "faraday"
 
 class FakeStorageService
