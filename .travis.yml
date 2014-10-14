@@ -1,21 +1,14 @@
 language: ruby
-
-rvm: jruby-1.7.13
-
+rvm: jruby-1.7.16
 jdk: openjdk7
-
 sudo: false
-
 cache: bundler
-
 services:
   - redis
   - rabbitmq
   - postgresql
-
 before_script:
   - psql -c "CREATE DATABASE travis_logs_test;" -U postgres
   - cp config/travis.example.yml config/travis.yml
   - bundle exec rake db:migrate
-
 script: bundle exec rspec spec

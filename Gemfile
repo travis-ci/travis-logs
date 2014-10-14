@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '1.9.3', engine: 'jruby', engine_version: '1.7.13'
+ruby '1.9.3', engine: 'jruby', engine_version: '1.7.16' if ENV.key?('DYNO')
 
 gem 'activesupport',      '~> 3.2'
 gem 'travis-support',     github: 'travis-ci/travis-support'
