@@ -22,7 +22,6 @@ gem 'aws-sdk'
 gem 'faraday',            '~> 0.8.8'
 gem 'sentry-raven',       github: 'getsentry/raven-ruby'
 
-gem 'unlimited-jce-policy-jdk7', github: 'travis-ci/unlimited-jce-policy-jdk7'
 gem 'rails_12factor'
 
 gem 'rake'

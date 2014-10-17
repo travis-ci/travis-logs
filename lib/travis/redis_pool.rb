@@ -1,4 +1,3 @@
-require 'unlimited-jce-policy-jdk7'
 require 'connection_pool'
 require 'redis'
 require 'metriks'
