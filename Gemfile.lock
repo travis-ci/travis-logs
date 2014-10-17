@@ -15,9 +15,15 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-support.git
-  revision: 352419335e9b78cf087dbd8523879498d6177db4
+  revision: 40365216662f639d36fc3a0463c4e189ee1563dd
   specs:
     travis-support (0.0.1)
+
+GIT
+  remote: git://github.com/travis-ci/unlimited-jce-policy-jdk7.git
+  revision: f731c852f69191a94be5d0578b73dc8abe99aa97
+  specs:
+    unlimited-jce-policy-jdk7 (0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -69,6 +75,11 @@ GEM
       rack
     rack-test (0.6.2)
       rack (>= 1.0)
+    rails_12factor (0.0.3)
+      rails_serve_static_assets
+      rails_stdout_logging
+    rails_serve_static_assets (0.0.2)
+    rails_stdout_logging (0.0.3)
     rake (10.3.2)
     redis (3.1.0)
     redis-namespace (1.5.0)
@@ -117,6 +128,7 @@ DEPENDENCIES
   pusher (~> 0.12.0)
   rack-ssl
   rack-test
+  rails_12factor
   rake
   rspec (~> 2.14.1)
   sentry-raven!
@@ -124,3 +136,4 @@ DEPENDENCIES
   sidekiq
   sinatra (~> 1.4)
   travis-support!
+  unlimited-jce-policy-jdk7!

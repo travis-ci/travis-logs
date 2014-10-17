@@ -1,3 +1,4 @@
+require 'unlimited-jce-policy-jdk7'
 require 'hashr'
 require 'yaml'
 
