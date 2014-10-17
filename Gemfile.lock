@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/unlimited-jce-policy-jdk7.git
-  revision: f731c852f69191a94be5d0578b73dc8abe99aa97
+  revision: 6a6c5786b9493c44078bb696435c6984318ffdb3
   specs:
     unlimited-jce-policy-jdk7 (0.1.0)
 
