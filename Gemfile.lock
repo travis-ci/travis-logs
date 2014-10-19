@@ -14,6 +14,13 @@ GIT
     coder (0.4.0)
 
 GIT
+  remote: git://github.com/travis-ci/travis-config.git
+  revision: 98b4beccd1088d20edc6bcdb94d23a0bb044c65c
+  specs:
+    travis-config (0.0.1)
+      rspec
+
+GIT
   remote: git://github.com/travis-ci/travis-support.git
   revision: 352419335e9b78cf087dbd8523879498d6177db4
   specs:
@@ -123,4 +130,5 @@ DEPENDENCIES
   sequel (~> 4.0.0)
   sidekiq
   sinatra (~> 1.4)
+  travis-config!
   travis-support!

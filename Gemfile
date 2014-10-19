@@ -4,6 +4,7 @@ ruby '1.9.3', engine: 'jruby', engine_version: '1.7.13'
 
 gem 'activesupport',      '~> 3.2'
 gem 'travis-support',     github: 'travis-ci/travis-support'
+gem 'travis-config',      github: 'travis-ci/travis-config'
 
 gem 'sequel',             '~> 4.0.0'
 gem 'jdbc-postgres',      '9.3.1101'
