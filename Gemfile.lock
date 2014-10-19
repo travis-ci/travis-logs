@@ -15,10 +15,10 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-config.git
-  revision: 98b4beccd1088d20edc6bcdb94d23a0bb044c65c
+  revision: e25aeb4164709d0da255cf9ef325ab45daedcbdb
   specs:
     travis-config (0.0.1)
-      rspec
+      hashr
 
 GIT
   remote: git://github.com/travis-ci/travis-support.git
