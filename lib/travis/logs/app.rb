@@ -2,6 +2,7 @@ require 'json'
 require 'raven'
 require 'sinatra/base'
 require 'logger'
+require 'pusher'
 
 require 'travis/logs'
 require 'travis/logs/existence'

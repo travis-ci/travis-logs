@@ -7,7 +7,7 @@ module Travis
 
   module Logs
     def self.config
-      @config ||= Config.new
+      @config ||= Config.load
     end
 
     def self.database_connection=(connection)
