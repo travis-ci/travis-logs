@@ -22,10 +22,18 @@ module Travis
         end
 
         def subscribe
-          Travis::Amqp::Consumer.jobs(name).subscribe(:ack => true, declare: true, &method(:receive))
+          consumer.subscribe(ack: true, declare: true, &method(:receive))
         end
 
         private
+
+          def consumer
+            Travis::Amqp::Consumer.jobs(name, channel: { prefetch: prefetch })
+          end
+
+          def prefetch
+            Travis::Logs.config.amqp.prefetch
+          end
 
           def receive(message, payload)
             smart_retry do
