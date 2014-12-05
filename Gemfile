@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '1.9.3', engine: 'jruby', engine_version: '1.7.16' if ENV.key?('DYNO')
 
 gem 'activesupport',      '~> 3.2'
-gem 'travis-support',     github: 'travis-ci/travis-support', ref: 'sf-amqp-use-prefix-option'
+gem 'travis-support',     github: 'travis-ci/travis-support'
 gem 'travis-config',      '~> 0.1.0'
 
 gem 'sequel',             '~> 4.0.0'
