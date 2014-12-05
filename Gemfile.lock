@@ -15,7 +15,8 @@ GIT
 
 GIT
   remote: git://github.com/travis-ci/travis-support.git
-  revision: 40365216662f639d36fc3a0463c4e189ee1563dd
+  revision: 37ee32d9656d23645512f1938cce8182fcd0d100
+  ref: sf-amqp-use-prefix-option
   specs:
     travis-support (0.0.1)
 
