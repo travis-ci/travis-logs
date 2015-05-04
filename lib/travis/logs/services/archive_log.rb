@@ -1,5 +1,5 @@
 require 'travis/logs/helpers/metrics'
-require 'travis/logs/helpers/s3'
+require 'travis/logs/helpers/log_storage_provider'
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
 require 'uri'
@@ -17,16 +17,17 @@ module Travis
         end
 
         class VerificationFailed < StandardError
-          def initialize(log_id, target_url, expected, actual)
-            super("Expected #{target_url} (from log id: #{log_id}) to have the content length #{expected.inspect}, but had #{actual.inspect}")
+          def initialize(log_id, target_uri, expected, actual)
+            super("Expected #{target_uri} (from log id: #{log_id}) to have the content length #{expected.inspect}, but had #{actual.inspect}")
           end
         end
 
         attr_reader :log_id
 
-        def initialize(log_id, storage_service=Helpers::S3.new, database=Travis::Logs.database_connection)
+
+        def initialize(log_id, storage_service=nil, database=Travis::Logs.database_connection)
           @log_id = log_id
-          @storage_service = storage_service
+          @storage_service = storage_service || Travis::Logs::Helpers::LogStorageProvider.provider.new
           @database = database
         end
 
@@ -72,7 +73,7 @@ module Travis
         def store
           retrying(:store) do
             measure('store') do
-              storage_service.store(content, target_url)
+              storage_service.store(content, log[:job_id])
             end
           end
         end
@@ -83,7 +84,7 @@ module Travis
               actual = archived_content_length
               expected = content.bytesize
               unless actual == expected
-                raise VerificationFailed.new(log_id, target_url, expected, actual)
+                raise VerificationFailed.new(log_id, target_uri, expected, actual)
               end
             end
           end
@@ -100,8 +101,8 @@ module Travis
           end
         end
 
-        def target_url
-          "http://#{hostname}/jobs/#{log[:job_id]}/log.txt"
+        def target_uri
+          storage_service.target_uri(log[:job_id])
         end
 
         private
@@ -109,7 +110,7 @@ module Travis
           attr_reader :storage_service, :database
 
           def archived_content_length
-            storage_service.content_length(target_url)
+            storage_service.content_length(log[:job_id])
           end
 
           def content

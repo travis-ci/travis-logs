@@ -16,12 +16,16 @@ class FakeStorageService
     @content_length_offset = -1
   end
 
-  def store(content, url)
-    @objects[url] = content
+  def store(content, log_id)
+    @objects[log_id] = content
   end
 
-  def content_length(url)
-    @objects[url].length + @content_length_offset
+  def content_length(log_id)
+    @objects[log_id].length + @content_length_offset
+  end
+
+  def target_uri(log_id)
+    "protocol://#{log_id}"
   end
 end
 
@@ -35,7 +39,7 @@ module Travis::Logs::Services
     it "pushes the log to S3" do
       service.run
 
-      expect(storage_service.objects["http://archive.travis-ci.org/jobs/#{log[:job_id]}/log.txt"]).to eq(log[:content])
+      expect(storage_service.objects[log[:job_id]]).to eq(log[:content])
     end
 
     it "marks the log as archiving, then unmarks" do

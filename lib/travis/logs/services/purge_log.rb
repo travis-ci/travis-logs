@@ -1,5 +1,5 @@
 require "travis/logs/helpers/metrics"
-require "travis/logs/helpers/s3"
+require "travis/logs/helpers/log_storage_provider"
 require "travis/logs/sidekiq"
 require "travis/logs/sidekiq/archive"
 
@@ -17,7 +17,7 @@ module Travis
 
         def initialize(log_id, storage_service = nil, database = nil, archiver = nil)
           @log_id = log_id
-          @storage_service = storage_service || Helpers::S3.new
+          @storage_service = storage_service || Travis::Logs::Helpers::LogStorageProvider.provider.new
           @database = database || Travis::Logs.database_connection
           @archiver = archiver || ->(log_id) { Sidekiq::Archive.perform_async(log_id) }
         end
@@ -37,7 +37,7 @@ module Travis
         end
 
         def process_empty_log_content
-          if content_length_from_s3.nil?
+          if content_length_from.nil?
             Travis.logger.warn("action=purge id=#{@log_id} result=content_missing")
             mark("log.content_empty")
           else
@@ -62,22 +62,22 @@ module Travis
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
-            Travis.logger.info("action=purge id=#{@log_id} result=requeued db_content_length=#{content_length_from_db} s3_content_length=#{content_length_from_s3}")
+            Travis.logger.info("action=purge id=#{@log_id} result=requeued db_content_length=#{content_length_from_db} content_length=#{content_length_from}")
           end
         end
 
         def content_lengths_match?
-          content_length_from_db == content_length_from_s3
+          content_length_from_db == content_length_from
         end
 
         def content_length_from_db
           log[:content_length]
         end
 
-        def content_length_from_s3
-          @content_length_from_s3 ||= begin
+        def content_length_from
+          @content_length_from ||= begin
             measure("check_content_length") do
-              @storage_service.content_length(log_url)
+              @storage_service.content_length(log[:job_id])
             end
           rescue
             mark("check_content_length.failed")
@@ -96,9 +96,6 @@ module Travis
           @log
         end
 
-        def log_url
-          "http://#{Travis.config.s3.hostname}/jobs/#{log[:job_id]}/log.txt"
-        end
       end
     end
   end
