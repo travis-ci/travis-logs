@@ -13,7 +13,7 @@ gem 'march_hare',         '~> 2.3.0'
 gem 'jruby-openssl',      '~> 0.8.8'
 
 gem 'json',               '~> 1.8.0'
-gem 'pusher',             '~> 0.14.0'
+gem 'pusher',             '~> 0.14.5'
 gem 'metriks'
 gem 'metriks-librato_metrics'
 gem 'coder',              github: 'rkh/coder' # '~> 0.3.0'
