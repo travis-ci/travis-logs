@@ -15,9 +15,7 @@ module Travis
         # creating the tables or debugging).
         def self.create_sequel
           config = Travis::Logs.config.logs_database
-          Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
-            db.timezone = :utc
-          end
+          Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool])
         end
 
         def self.jdbc_uri_from_config(config)
@@ -40,7 +38,6 @@ module Travis
         def connect
           @db.test_connection
           @db << "SET application_name = 'logs'"
-          @db << "SET TIME ZONE 'UTC'"
           prepare_statements
         end
 
