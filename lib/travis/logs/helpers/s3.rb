@@ -10,28 +10,33 @@ module Travis
           end
         end
 
-        attr_reader :s3, :url
+        attr_reader :s3
 
         def initialize
           @s3 = AWS::S3.new
         end
 
-        def store(data, url)
-          object(url).write(data, content_type: 'text/plain', acl: Travis::Logs.config.s3.acl)
+        def store(data, log_id)
+          object(target_uri(log_id)).write(data, content_type: 'text/plain', acl: Travis::Logs.config.s3.acl)
         end
 
-        def content_length(url)
-          object(url).content_length
+        def content_length(log_id)
+          object(target_uri(log_id)).content_length
         end
 
-        private
-
-        def object(url)
-          bucket(url).objects[URI.parse(url).path[1..-1]]
+        def target_uri(log_id)
+          hostname = Travis::Logs.config.s3.hostname;
+          "http://#{hostname}/jobs/#{log_id}/log.txt"
         end
 
-        def bucket(url)
-          s3.buckets[URI.parse(url).host]
+      private
+
+        def object(log_id)
+          bucket(log_id).objects[URI.parse(log_id).path[1..-1]]
+        end
+
+        def bucket(log_id)
+          s3.buckets[URI.parse(log_id).host]
         end
       end
     end
