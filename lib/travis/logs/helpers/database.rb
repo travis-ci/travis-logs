@@ -1,7 +1,6 @@
 require 'sequel'
-require 'jdbc/postgres'
-require "delegate"
-require "active_support/core_ext/string/filters"
+require 'delegate'
+require 'active_support/core_ext/string/filters'
 
 module Travis
   module Logs
@@ -15,9 +14,19 @@ module Travis
         # creating the tables or debugging).
         def self.create_sequel
           config = Travis::Logs.config.logs_database
-          Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
+          Sequel.connect(database_url, max_connections: config[:pool] || 25).tap do |db|
             db.timezone = :utc
           end
+          # Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
+          #   db.timezone = :utc
+          # end
+        end
+
+        def self.database_url
+          Travis::Logs.config.logs_database.fetch(
+            :url,
+            ENV['DATABASE_URL'] || 'postgres://localhost:5432/travis_logs_test'
+          )
         end
 
         def self.jdbc_uri_from_config(config)

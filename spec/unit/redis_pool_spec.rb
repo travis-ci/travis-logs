@@ -12,18 +12,16 @@ describe Travis::RedisPool do
 
   it "forwards operations to redis" do
     redis.set("some-key", 100)
-    unpooled_redis.get('some-key').should == "100"
+    expect(unpooled_redis.get('some-key')).to eql "100"
   end
 
   it "fails when a non-supported operation is called" do
-    expect {
-      redis.setssss
-    }.to raise_error
+    expect { redis.setssss }.to raise_error(NoMethodError)
   end
 
   it "adds a wait time for the pool checkout" do
     expect {
       redis.get('test')
-    }.to change{Metriks.timer('redis.pool.wait').count}.by(1)
+    }.to change { Metriks.timer('redis.pool.wait').count }.by(1)
   end
 end

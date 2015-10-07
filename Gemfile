@@ -1,37 +1,28 @@
 source 'https://rubygems.org'
 
-ruby '1.9.3', engine: 'jruby', engine_version: '1.7.16' if ENV.key?('DYNO')
+ruby '2.2.3' if ENV.key?('DYNO')
 
-gem 'activesupport',      '~> 3.2'
-gem 'travis-support',     github: 'travis-ci/travis-support'
-gem 'travis-config',      '~> 0.1.0'
-
-gem 'sequel',             '~> 4.0.0'
-gem 'jdbc-postgres',      '9.3.1101'
-
-gem 'march_hare',         '~> 2.3.0'
-gem 'jruby-openssl',      '~> 0.8.8'
-
-gem 'json',               '~> 1.8.0'
-gem 'pusher',             '~> 0.14.5'
+gem 'activesupport', '~> 3.2'
+gem 'aws-sdk-v1'
+gem 'bunny'
+gem 'coder', github: 'rkh/coder'
+gem 'connection_pool'
+gem 'jemalloc'
 gem 'metriks'
 gem 'metriks-librato_metrics'
-gem 'coder',              github: 'rkh/coder' # '~> 0.3.0'
-gem 'sidekiq'
-gem 'aws-sdk'
-gem 'faraday',            '~> 0.8.8'
-gem 'sentry-raven',       github: 'getsentry/raven-ruby'
-
-gem 'rails_12factor'
-
-gem 'rake'
-
-group :test do
-  gem 'rspec',            '~> 2.14.1'
-  gem 'rack-test'
-end
-
-gem 'sinatra', '~> 1.4'
+gem 'pg'
+gem 'pry', group: %i(development test)
 gem 'puma'
+gem 'pusher', '~> 0.14.5'
 gem 'rack-ssl'
-gem 'connection_pool'
+gem 'rack-test', group: %i(development test)
+gem 'rake'
+gem 'rspec', group: %i(development test)
+gem 'rubocop', group: %i(development test)
+gem 'sentry-raven', github: 'getsentry/raven-ruby'
+gem 'sequel', '~> 4.0.0'
+gem 'sidekiq'
+gem 'simplecov', group: %i(development test)
+gem 'sinatra'
+gem 'travis-config'
+gem 'travis-support', github: 'travis-ci/travis-support'

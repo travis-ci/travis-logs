@@ -55,7 +55,7 @@ module Travis::Logs::Services
       it "raises an error" do
         storage_service.return_incorrect_content_length!
 
-        expect { service.run }.to raise_error
+        expect { service.run }.to raise_error(StandardError)
       end
     end
   end

@@ -7,11 +7,15 @@ database_defaults: &database_defaults
   port: 5432
 
 development:
+  log_level: fatal
   logs_database:
     <<: *database_defaults
     database: travis_logs_development
+    url: 'postgres:///travis_logs_development'
 
 test:
+  log_level: fatal
   logs_database:
     <<: *database_defaults
     database: travis_logs_test
+    url: 'postgres:///travis_logs_test'

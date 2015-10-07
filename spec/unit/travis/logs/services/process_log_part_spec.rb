@@ -97,30 +97,26 @@ module Travis::Logs::Services
         expect(service).to receive(:channel_occupied?) { false }
         expect(service).to receive(:mark).with(any_args)
         expect(service).to receive(:mark).with('pusher.ignore')
+        expect(pusher_client).to receive(:push)
 
         service.run
-
-        pusher_client.should have_received(:push).with(any_args)
       end
 
       it 'ignores a part if channel is not occupied' do
         expect(service).to receive(:channel_occupied?) { false }
-        expect(service).to receive(:mark).with(any_args)
+        expect(service).to receive(:mark)
         expect(service).to receive(:mark).with('pusher.ignore')
 
         service.run
-
-        pusher_client.should_not have_received(:push)
       end
 
       it 'sends a part if channel is occupied' do
         expect(service).to receive(:channel_occupied?) { true }
-        expect(service).to receive(:mark).with(any_args)
+        expect(service).to receive(:mark)
         expect(service).to receive(:mark).with('pusher.send')
+        expect(pusher_client).to receive(:push)
 
         service.run
-
-        pusher_client.should have_received(:push).with(any_args)
       end
     end
 
@@ -130,14 +126,14 @@ module Travis::Logs::Services
       end
 
       it "notifies pusher on a private channel" do
-        service.run
-
-        pusher_client.should have_received(:push).with({
+        expect(pusher_client).to receive(:push).with({
           "id" => 2,
           "chars" => "hello, world",
           "number" => 1,
           "final" => false
         })
+
+        service.run
       end
     end
 
@@ -147,14 +143,14 @@ module Travis::Logs::Services
       end
 
       it "notifies pusher on a regular channel" do
-        service.run
-
-        pusher_client.should have_received(:push).with({
+        expect(pusher_client).to receive(:push).with({
           "id" => 2,
           "chars" => "hello, world",
           "number" => 1,
           "final" => false
         })
+
+        service.run
       end
     end
   end

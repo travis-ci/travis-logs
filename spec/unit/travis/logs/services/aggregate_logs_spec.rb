@@ -48,13 +48,10 @@ module Travis::Logs::Services
       end
 
       it "does not vacuum log parts" do
-        begin
-          service.run
-        rescue
-        end
+        expect(database).to_not receive(:delete_log_parts).with(1)
+        expect(database).to_not receive(:delete_log_parts).with(2)
 
-        expect(database).not_to have_received(:delete_log_parts).with(1)
-        expect(database).not_to have_received(:delete_log_parts).with(2)
+        service.run
       end
     end
 
@@ -64,13 +61,10 @@ module Travis::Logs::Services
       end
 
       it "does not vacuum log parts" do
-        begin
-          service.run
-        rescue
-        end
+        expect(database).to_not receive(:delete_log_parts).with(1)
+        expect(database).to_not receive(:delete_log_parts).with(2)
 
-        expect(database).not_to have_received(:delete_log_parts).with(1)
-        expect(database).not_to have_received(:delete_log_parts).with(2)
+        service.run
       end
     end
   end
