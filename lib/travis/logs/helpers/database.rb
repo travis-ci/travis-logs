@@ -33,7 +33,7 @@ module Travis
           host = config[:host] || 'localhost'
           port = config[:port] || 5432
           database = config[:database]
-          username = config[:username] || ENV["USER"]
+          username = config[:username] || ENV['USER']
 
           "jdbc:postgresql://#{host}:#{port}/#{database}?user=#{username}&password=#{config[:password]}"
         end
@@ -62,7 +62,7 @@ module Travis
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs].select{[id, job_id, octet_length(content).as(content_length)]}.where(id: log_id).first
+          @db[:logs].select { [id, job_id, octet_length(content).as(content_length)] }.where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
@@ -82,15 +82,17 @@ module Travis
         end
 
         def create_log(job_id)
-          @db.call(:create_log, {
-            job_id: job_id,
-            created_at: Time.now.utc,
-            updated_at: Time.now.utc
-          })
+          @db.call(
+            :create_log,
+            job_id: job_id, created_at: Time.now.utc, updated_at: Time.now.utc
+          )
         end
 
         def create_log_part(params)
-          @db.call(:create_log_part, params.merge(created_at: Time.now.utc))
+          @db.call(
+            :create_log_part,
+            params.merge(created_at: Time.now.utc)
+          )
         end
 
         def delete_log_parts(log_id)
@@ -134,18 +136,15 @@ module Travis
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
           @db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
-          @db[:logs].prepare(:insert, :create_log, {
-            job_id: :$job_id,
-            created_at: :$created_at,
-            updated_at: :$updated_at,
-          })
-          @db[:log_parts].prepare(:insert, :create_log_part, {
-            log_id: :$log_id,
-            content: :$content,
-            number: :$number,
-            final: :$final,
-            created_at: :$created_at,
-          })
+          @db[:logs].prepare(
+            :insert, :create_log, 
+            job_id: :$job_id, created_at: :$created_at, updated_at: :$updated_at
+          )
+          @db[:log_parts].prepare(
+            :insert, :create_log_part,
+            log_id: :$log_id, content: :$content, number: :$number,
+            final: :$final, created_at: :$created_at
+          )
           @db[:log_parts].where(log_id: :$log_id).prepare(:delete, :delete_log_parts)
         end
       end

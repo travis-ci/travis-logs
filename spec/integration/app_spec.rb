@@ -50,7 +50,7 @@ module Travis::Logs
 
         webhook = OpenStruct.new(valid?: true, events: [
           { 'name' => 'channel_vacated', 'channel' => 'foo' },
-          { 'name' => 'channel_occupied',  'channel' => 'bar' }
+          { 'name' => 'channel_occupied', 'channel' => 'bar' }
         ])
         expect(pusher).to receive(:webhook) { |request|
           request.path_info == '/pusher/existence'

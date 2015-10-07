@@ -25,20 +25,20 @@ module Travis
       end
 
       configure do
-        use SentryMiddleware if ENV["SENTRY_DSN"]
+        use SentryMiddleware if ENV['SENTRY_DSN']
       end
 
       def initialize(existence = nil, pusher = nil)
         super()
         @existence = existence || Travis::Logs::Existence.new
-        @pusher    = pusher    || ::Pusher::Client.new(Travis::Logs.config.pusher)
+        @pusher    = pusher || ::Pusher::Client.new(Travis::Logs.config.pusher)
       end
 
       post '/pusher/existence' do
         webhook = pusher.webhook(request)
         if webhook.valid?
           webhook.events.each do |event|
-            case event["name"]
+            case event['name']
             when 'channel_occupied'
               existence.occupied!(event['channel'])
             when 'channel_vacated'
@@ -53,7 +53,7 @@ module Travis
         end
       end
 
-      get "/uptime" do
+      get '/uptime' do
         status 204
       end
     end

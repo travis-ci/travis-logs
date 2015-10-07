@@ -4,8 +4,8 @@ require 'travis/logs/existence'
 describe Travis::Logs::Existence do
   subject(:existence) { described_class.new }
 
-  describe "#occupied!" do
-    it "sets channel to occupied state" do
+  describe '#occupied!' do
+    it 'sets channel to occupied state' do
       existence.occupied!('foo')
       expect(existence.occupied?('foo')).to be_truthy
 
@@ -14,13 +14,13 @@ describe Travis::Logs::Existence do
     end
   end
 
-  describe "#vacant!" do
+  describe '#vacant!' do
     before do
       existence.occupied!('foo')
       expect(existence.occupied?('foo')).to be_truthy
     end
 
-    it "sets channel to vacant state" do
+    it 'sets channel to vacant state' do
       existence.vacant!('foo')
       expect(existence.occupied?('foo')).to be_falsey
 

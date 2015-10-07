@@ -37,22 +37,23 @@ class StringCleaner
 
   private
 
-    def clear_buffer
-      start_buffer(nil, 0)
-    end
+  def clear_buffer
+    start_buffer(nil, 0)
+  end
 
-    def start_buffer(byte, size)
-      @buffer, @outstanding = Array(byte), size
-    end
+  def start_buffer(byte, size)
+    @buffer = Array(byte)
+    @outstanding = size
+  end
 
-    def fill_buffer(byte)
-      buffer << byte
-      add(buffer)  if buffer.size == outstanding
-      clear_buffer if buffer.size > outstanding
-    end
+  def fill_buffer(byte)
+    buffer << byte
+    add(buffer)  if buffer.size == outstanding
+    clear_buffer if buffer.size > outstanding
+  end
 
-    def add(input)
-      clear_buffer
-      bytes.concat Array(input)
-    end
+  def add(input)
+    clear_buffer
+    bytes.concat Array(input)
+  end
 end
