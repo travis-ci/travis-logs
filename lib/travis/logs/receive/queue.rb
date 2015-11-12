@@ -22,30 +22,43 @@ module Travis
         end
 
         def subscribe
-          consumer.subscribe(ack: true, declare: true, &method(:receive))
+          consumer.subscribe(&method(:receive))
         end
 
         private
 
         def consumer
-          Travis::Amqp::Consumer.jobs(name, channel: { prefetch: prefetch })
+          channel.queue(
+            "reporting.jobs.#{name}",
+            durable: true, exclusive: false, channel: { prefetch: prefetch }
+          ).bind(exchange, routing_key: "reporting.jobs.#{name}")
+        end
+
+        def channel
+          @channel ||= Travis::Amqp.connection.create_channel
+        end
+
+        def exchange
+          @exchange ||= channel.topic('reporting', durable: true, auto_delete: false)
         end
 
         def prefetch
           Travis::Logs.config.amqp.prefetch
         end
 
-        def receive(message, payload)
+        def receive(delivery_info, message, payload)
+          decoded_payload = nil
           smart_retry do
-            if payload = decode(payload)
-              Travis.uuid = payload.delete('uuid')
-              handler.run(payload)
+            decoded_payload = decode(payload)
+            if decoded_payload
+              Travis.uuid = decoded_payload.delete('uuid')
+              handler.run(decoded_payload)
             end
           end
-          message.ack
+          channel.ack(delivery_info.delivery_tag, false)
         rescue => e
-          log_exception(e, payload)
-          message.reject(requeue: true)
+          log_exception(e, decoded_payload)
+          channel.reject(delivery_info.delivery_tag, true)
           Metriks.meter("#{METRIKS_PREFIX}.receive.retry").mark
           error '[queue:receive] message requeued'
         end

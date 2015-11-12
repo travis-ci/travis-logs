@@ -1,3 +1,4 @@
+require 'uri'
 require 'travis/logs'
 require 'travis/support'
 require 'travis/support/amqp'
@@ -30,15 +31,25 @@ module Travis
         1.upto(Logs.config.logs.threads) do
           Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
         end
+        sleep
       end
 
       def amqp_config
-        Travis::Logs.config.amqp.merge(thread_pool_size: (Logs.config.logs.threads * 2 + 3))
+        url = URI(Travis::Logs.config.amqp.fetch(:url))
+
+        Travis::Logs.config.amqp.merge(
+          thread_pool_size: (Logs.config.logs.threads * 2 + 3),
+          host: url.hostname,
+          vhost: url.path.gsub('/', ''),
+          port: url.port,
+          username: url.user,
+          password: url.password
+        )
       end
 
       def declare_exchanges
         channel = Travis::Amqp.connection.create_channel
-        channel.exchange 'reporting', durable: true, auto_delete: false, type: :topic
+        channel.topic('reporting', durable: true, auto_delete: false)
       end
     end
   end

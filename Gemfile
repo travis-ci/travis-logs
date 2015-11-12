@@ -11,7 +11,7 @@ gem 'jemalloc'
 gem 'metriks'
 gem 'metriks-librato_metrics'
 gem 'pg'
-gem 'pry', group: %i(development test)
+gem 'pry', require: false
 gem 'puma'
 gem 'pusher', '~> 0.14.5'
 gem 'rack-ssl'
