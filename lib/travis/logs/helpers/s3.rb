@@ -7,6 +7,7 @@ module Travis
         class << self
           def setup
             AWS.config(Travis::Logs.config.s3.to_hash.slice(:access_key_id, :secret_access_key))
+            :alldone
           end
         end
 
