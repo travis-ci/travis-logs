@@ -19,12 +19,17 @@ module Travis
         db = Travis::Logs::Helpers::Database.connect
         Logs.database_connection = db
         Travis::Logs::Services::AggregateLogs.prepare(db)
+        :alldone
       end
 
       def run
-        run_periodically(Travis.config.logs.intervals.vacuum) do
+        thr = run_periodically(Travis.config.logs.intervals.vacuum) do
           aggregate_logs
-        end.join
+        end
+
+        thr.join if thr.respond_to?(:join)
+
+        :ran
       end
 
       def aggregate_logs
