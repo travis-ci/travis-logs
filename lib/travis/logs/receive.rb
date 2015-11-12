@@ -23,6 +23,7 @@ module Travis
         Logs.database_connection = db
 
         declare_exchanges
+        :alldone
       end
 
       def run

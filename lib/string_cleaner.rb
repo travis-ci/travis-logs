@@ -3,7 +3,7 @@ class StringCleaner
   attr_reader :bytes, :buffer, :outstanding
 
   def self.clean!(str)
-    str.replace clean(str)
+    str.replace(clean(str))
   end
 
   def self.clean(str)
