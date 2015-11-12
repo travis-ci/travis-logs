@@ -6,6 +6,18 @@ class FakeMarkable
   end
 end
 
+class FakeErrorLogger
+  attr_reader :errors
+
+  def initialize
+    @errors = []
+  end
+
+  def error(message)
+    @errors << message
+  end
+end
+
 describe Travis::Logs::Receive::Queue do
   subject { described_class.new('test', handler) }
 
@@ -34,6 +46,31 @@ describe Travis::Logs::Receive::Queue do
       expect do
         subject.send(:smart_retry, &:puts)
       end.to raise_error(Timeout::Error)
+    end
+  end
+
+  context 'when decoding explodes with StandardError descendant' do
+    before do
+      allow(Metriks).to receive(:meter).and_return(FakeMarkable.new)
+    end
+
+    it 'rescues and returns nil' do
+      expect(subject.send(:decode, '{.')).to eql(nil)
+    end
+  end
+
+  context 'when Travis::Exceptions.handle explodes' do
+    before do
+      allow(Travis::Exceptions).to receive(:handle)
+        .and_raise(Exception.new('boom'))
+      allow(Travis).to receive(:logger).and_return(logger)
+    end
+
+    let(:logger) { FakeErrorLogger.new }
+
+    it 'logs a failsafe message' do
+      subject.send(:log_exception, :tofurkey, { pay: :load })
+      expect(logger.errors).to include('!!!FAILSAFE!!! boom')
     end
   end
 end
