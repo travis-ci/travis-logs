@@ -17,9 +17,6 @@ module Travis
           Sequel.connect(database_url, max_connections: config[:pool] || 25).tap do |db|
             db.timezone = :utc
           end
-          # Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
-          #   db.timezone = :utc
-          # end
         end
 
         def self.database_url
@@ -27,15 +24,6 @@ module Travis
             :url,
             ENV['DATABASE_URL'] || 'postgres://localhost:5432/travis_logs_test'
           )
-        end
-
-        def self.jdbc_uri_from_config(config)
-          host = config[:host] || 'localhost'
-          port = config[:port] || 5432
-          database = config[:database]
-          username = config[:username] || ENV['USER']
-
-          "jdbc:postgresql://#{host}:#{port}/#{database}?user=#{username}&password=#{config[:password]}"
         end
 
         def self.connect
