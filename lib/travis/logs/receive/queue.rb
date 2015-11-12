@@ -46,7 +46,7 @@ module Travis
           Travis::Logs.config.amqp.prefetch
         end
 
-        def receive(delivery_info, message, payload)
+        def receive(delivery_info, _message, payload)
           decoded_payload = nil
           smart_retry do
             decoded_payload = decode(payload)

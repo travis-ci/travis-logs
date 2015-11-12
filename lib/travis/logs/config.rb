@@ -14,7 +14,7 @@ module Travis
 
         def default_logs_database_url
           ENV[ENV['DATABASE_PROVIDER'] || ''] ||
-          ENV['LOGS_DATABASE_URL'] ||
+            ENV['LOGS_DATABASE_URL'] ||
             ENV['DATABASE_URL'] ||
             "postgres://localhost:5432/travis_logs_#{Travis.env}"
         end

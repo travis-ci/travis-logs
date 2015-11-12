@@ -32,7 +32,7 @@ describe Travis::Logs::Receive::Queue do
 
     it 'logs the exception' do
       expect(subject).to receive(:log_exception)
-      subject.send(:receive, message, { pay: :load, 'uuid' => 'foo' })
+      subject.send(:receive, message, pay: :load, 'uuid' => 'foo')
     end
   end
 
@@ -69,7 +69,7 @@ describe Travis::Logs::Receive::Queue do
     let(:logger) { FakeErrorLogger.new }
 
     it 'logs a failsafe message' do
-      subject.send(:log_exception, :tofurkey, { pay: :load })
+      subject.send(:log_exception, :tofurkey, pay: :load)
       expect(logger.errors).to include('!!!FAILSAFE!!! boom')
     end
   end

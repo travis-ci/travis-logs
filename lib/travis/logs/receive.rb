@@ -40,7 +40,7 @@ module Travis
         Travis::Logs.config.amqp.merge(
           thread_pool_size: (Logs.config.logs.threads * 2 + 3),
           host: url.hostname,
-          vhost: url.path.gsub('/', ''),
+          vhost: url.path.delete('/'),
           port: url.port,
           username: url.user,
           password: url.password

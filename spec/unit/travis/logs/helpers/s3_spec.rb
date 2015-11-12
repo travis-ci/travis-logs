@@ -1,7 +1,7 @@
 require 'travis/logs/helpers/s3'
 
 class FakeS3Object
-  def write(data, options)
+  def write(_data, _options)
     :written
   end
 

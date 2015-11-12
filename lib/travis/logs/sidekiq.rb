@@ -10,7 +10,7 @@ module Travis
           pool_size = Logs.config.sidekiq.pool_size
 
           Travis.logger.info(
-            "Setting up Sidekiq (pool size: #{pool_size}) and Redis " <<
+            "Setting up Sidekiq (pool size: #{pool_size}) and Redis " \
             "(connecting to host #{URI.parse(url).host})"
           )
 
