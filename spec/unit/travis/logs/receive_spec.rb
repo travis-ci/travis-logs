@@ -5,7 +5,7 @@ class FakeAMQPConn
     self
   end
 
-  def exchange(*)
+  def topic(*)
     true
   end
 end

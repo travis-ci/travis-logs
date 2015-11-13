@@ -18,21 +18,30 @@ class FakeErrorLogger
   end
 end
 
+class FakeDeliveryInfo
+  def delivery_tag
+    'whatebber'
+  end
+end
+
 describe Travis::Logs::Receive::Queue do
   subject { described_class.new('test', handler) }
 
   let(:handler) { double('handler') }
   let(:message) { double('message') }
+  let(:delivery_info) { FakeDeliveryInfo.new }
+  let(:channel) { double('channel') }
 
   context 'when handler#run explodes' do
     before do
+      subject.instance_variable_set(:@channel, channel)
       allow(handler).to receive(:run).and_raise(StandardError)
-      allow(message).to receive(:reject)
+      allow(channel).to receive(:reject)
     end
 
     it 'logs the exception' do
       expect(subject).to receive(:log_exception)
-      subject.send(:receive, message, pay: :load, 'uuid' => 'foo')
+      subject.send(:receive, delivery_info, message, pay: :load, 'uuid' => 'foo')
     end
   end
 

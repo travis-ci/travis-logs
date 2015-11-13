@@ -10,6 +10,10 @@ describe Travis::Logs::Helpers::Pusher do
   subject { described_class.new(fake_pusher_client) }
   let(:fake_pusher_client) { { 'job-1' => FakePusherChannel.new } }
 
+  before do
+    allow(Travis::Logs.config.pusher).to receive(:secure).and_return(false)
+  end
+
   it 'exposes a #push convenience method' do
     expect(subject.push('id' => '1')).to eql(:triggered)
   end

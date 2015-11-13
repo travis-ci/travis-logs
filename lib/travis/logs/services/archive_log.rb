@@ -22,12 +22,15 @@ module Travis
           end
         end
 
-        attr_reader :log_id
+        attr_reader :log_id, :default_retries, :default_sleep_mult
 
-        def initialize(log_id, storage_service = Helpers::S3.new, database = Travis::Logs.database_connection)
+        def initialize(log_id, storage_service = Helpers::S3.new,
+                       database = Travis::Logs.database_connection)
           @log_id = log_id
           @storage_service = storage_service
           @database = database
+          @default_retries = 5
+          @default_sleep_mult = 1
         end
 
         def run
@@ -122,13 +125,14 @@ module Travis
           Travis.config.s3.hostname
         end
 
-        def retrying(header, times = 5)
+        def retrying(header, times = default_retries,
+                     sleep_mult = default_sleep_mult)
           yield
         rescue => e
           count ||= 0
           if times > (count += 1)
             puts "[#{header}] retry #{count} because: #{e.message}"
-            sleep count * 1
+            sleep count * sleep_mult
             retry
           else
             raise

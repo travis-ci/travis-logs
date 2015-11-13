@@ -5,29 +5,42 @@ require 'travis/logs/receive/queue'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/helpers/database'
 
-class FakeAmqpQueue
-  def subscribe(_opts, &block)
-    @block = block
-  end
-
-  def call(*args)
-    @block.call(*args)
-  end
-end
-
-describe 'receive_logs' do
-  let(:queue) { FakeAmqpQueue.new }
-
-  it 'stores the log part in the database' do
-    allow(Travis::Amqp::Consumer).to receive(:jobs) { queue }
-    allow(Travis.config).to receive(:pusher_client) { double('pusher_client', :[] => double('channel', trigger: nil)) }
-    db = Travis::Logs::Helpers::Database.create_sequel
+describe 'receive_logs', integration: true do
+  before do
+    rec = Travis::Logs::Receive.new
+    Travis::Amqp.config = rec.amqp_config
+    allow(Travis.config).to receive(:pusher_client) do
+      double('pusher_client', :[] => double('channel', trigger: nil))
+    end
     db[:logs].delete
     db[:log_parts].delete
     Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
-    Travis::Logs::Receive::Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
-    message = double('message', ack: nil)
-    queue.call(message, '{"id":123,"log":"hello, world","number":1}')
+  end
+
+  let(:db) { Travis::Logs::Helpers::Database.create_sequel }
+  let(:message) { double('message') }
+
+  it 'stores the log part in the database' do
+    queue = Travis::Logs::Receive::Queue.new('logs', Travis::Logs::Services::ProcessLogPart)
+    queue.subscribe
+
+    ex = queue.send(:exchange)
+    ex.publish(
+      JSON.dump(id: 123, log: 'hello, world', number: 1),
+      routing_key: 'reporting.jobs.logs'
+    )
+
+    log = nil
+    times = 0
+
+    loop do
+      break if times > 4
+      log = db[:logs].first
+      break if log != nil
+      sleep 0.2
+      times += 1
+    end
+
     log = db[:logs].first
     log_part = db[:log_parts].first
 
@@ -39,13 +52,11 @@ describe 'receive_logs' do
   end
 
   it 'uses the default prefetch' do
-    expect(Travis::Amqp::Consumer).to receive(:jobs).with('logs', channel: { prefetch: 1 }) { queue }
     Travis::Logs::Receive::Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
   end
 
   it 'uses a custom prefetch given in the config' do
     allow(Travis.config.amqp).to receive(:prefetch) { 2 }
-    expect(Travis::Amqp::Consumer).to receive(:jobs).with('logs', channel: { prefetch: 2 }) { queue }
     Travis::Logs::Receive::Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
   end
 end

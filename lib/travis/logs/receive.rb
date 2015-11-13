@@ -36,11 +36,13 @@ module Travis
 
       def amqp_config
         url = URI(Travis::Logs.config.amqp.fetch(:url))
+        vhost = url.path.delete('/')
+        vhost = '/' if vhost.empty?
 
         Travis::Logs.config.amqp.merge(
           thread_pool_size: (Logs.config.logs.threads * 2 + 3),
           host: url.hostname,
-          vhost: url.path.delete('/'),
+          vhost: vhost,
           port: url.port,
           username: url.user,
           password: url.password
