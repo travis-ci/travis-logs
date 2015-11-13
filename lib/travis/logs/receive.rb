@@ -28,19 +28,20 @@ module Travis
       end
 
       def run
-        1.upto(Logs.config.logs.threads) do
+        1.upto(Travis::Logs.config.logs.threads) do
           Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
         end
         sleep
       end
 
       def amqp_config
-        url = URI(Travis::Logs.config.amqp.fetch(:url))
+        amqp_config_hash = Travis::Logs.config.amqp.to_h
+        url = URI(amqp_config_hash.fetch(:url))
         vhost = url.path.delete('/')
         vhost = '/' if vhost.empty?
 
-        Travis::Logs.config.amqp.merge(
-          thread_pool_size: (Logs.config.logs.threads * 2 + 3),
+        amqp_config_hash.merge(
+          thread_pool_size: (Travis::Logs.config.logs.threads * 2 + 3),
           host: url.hostname,
           vhost: vhost,
           port: url.port,

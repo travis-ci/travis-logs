@@ -129,11 +129,11 @@ module Travis
         end
 
         def existence_check_metrics?
-          Logs.config.channels_existence_metrics
+          Travis::Logs.config.channels_existence_metrics
         end
 
         def existence_check?
-          Logs.config.channels_existence_check
+          Travis::Logs.config.channels_existence_check
         end
       end
     end

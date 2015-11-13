@@ -9,9 +9,10 @@ describe 'receive_logs', integration: true do
   before do
     rec = Travis::Logs::Receive.new
     Travis::Amqp.config = rec.amqp_config
-    allow(Travis.config).to receive(:pusher_client) do
-      double('pusher_client', :[] => double('channel', trigger: nil))
-    end
+    Travis.config.pusher_client = double(
+      'pusher_client',
+      :[] => double('channel', trigger: nil)
+    )
     db[:logs].delete
     db[:log_parts].delete
     Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
@@ -56,7 +57,7 @@ describe 'receive_logs', integration: true do
   end
 
   it 'uses a custom prefetch given in the config' do
-    allow(Travis.config.amqp).to receive(:prefetch) { 2 }
+    Travis.config.amqp.prefetch = 2
     Travis::Logs::Receive::Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
   end
 end

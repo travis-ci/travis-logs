@@ -13,14 +13,14 @@ module Travis
         # This method should only be called for "maintenance" tasks (such as
         # creating the tables or debugging).
         def self.create_sequel
-          config = Travis::Logs.config.logs_database
-          Sequel.connect(database_url, max_connections: config[:pool] || 25).tap do |db|
+          max_connections = Travis::Logs.config.logs_database.to_h.fetch(:pool, 25)
+          Sequel.connect(database_url, max_connections: max_connections).tap do |db|
             db.timezone = :utc
           end
         end
 
         def self.database_url
-          Travis::Logs.config.logs_database.fetch(
+          Travis::Logs.config.logs_database.to_h.fetch(
             :url,
             ENV['DATABASE_URL'] || 'postgres://localhost:5432/travis_logs_test'
           )

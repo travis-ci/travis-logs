@@ -31,7 +31,9 @@ module Travis
       def initialize(existence = nil, pusher = nil)
         super()
         @existence = existence || Travis::Logs::Existence.new
-        @pusher    = pusher || ::Pusher::Client.new(Travis::Logs.config.pusher)
+        @pusher = (
+          pusher || ::Pusher::Client.new(Travis::Logs.config.pusher.to_h)
+        )
       end
 
       post '/pusher/existence' do

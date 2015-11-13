@@ -11,7 +11,7 @@ describe Travis::Logs::Helpers::Pusher do
   let(:fake_pusher_client) { { 'job-1' => FakePusherChannel.new } }
 
   before do
-    allow(Travis::Logs.config.pusher).to receive(:secure).and_return(false)
+    Travis::Logs.config.pusher.secure = false
   end
 
   it 'exposes a #push convenience method' do
