@@ -25,7 +25,6 @@ class FakeStorageService
   end
 end
 
-
 describe Travis::Logs::Services::ArchiveLog do
   let(:log) { { id: 1, job_id: 2, content: 'Hello, world!' } }
   let(:database) { double('database', update_archiving_status: nil, mark_archive_verified: nil, log_for_id: log) }

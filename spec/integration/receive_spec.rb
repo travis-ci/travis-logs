@@ -36,7 +36,7 @@ describe 'receive_logs', integration: true do
     loop do
       break if times > 4
       log = db[:logs].first
-      break if log != nil
+      break unless log.nil?
       sleep 0.2
       times += 1
     end
