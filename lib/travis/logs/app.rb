@@ -63,7 +63,13 @@ module Travis
           halt 403
         end
 
-        database.clear_log(Integer(params[:id]))
+        log_id = Integer(params[:id])
+
+        if database.log_for_id(log_id).nil?
+          halt 404
+        end
+
+        database.clear_log(log_id)
         status 204
       end
     end

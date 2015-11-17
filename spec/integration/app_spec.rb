@@ -82,6 +82,10 @@ module Travis::Logs
         @log_id = 123
         @old_auth_token = ENV["AUTH_TOKEN"]
         @auth_token = ENV["AUTH_TOKEN"] = "very-secret"
+
+        allow(database).to receive(:clear_log)
+        allow(database).to receive(:log_for_id).with(anything()).and_return(nil)
+        allow(database).to receive(:log_for_id).with(@log_id).and_return({ content: "" })
       end
 
       after do
@@ -113,7 +117,6 @@ module Travis::Logs
       it "tells the database to clear the log" do
         header "Authorization", "token #{@auth_token}"
         expect(database).to receive(:clear_log).with(@log_id)
-        database.should_receive(:clear_log)
         post "/logs/#{@log_id}/clear"
       end
     end
