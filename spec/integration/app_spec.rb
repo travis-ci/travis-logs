@@ -79,9 +79,9 @@ module Travis::Logs
 
     describe "POST /logs/:id/clear" do
       before do
-	@log_id = 123
-	@old_auth_token = ENV["AUTH_TOKEN"]
-	@auth_token = ENV["AUTH_TOKEN"] = "very-secret"
+        @log_id = 123
+        @old_auth_token = ENV["AUTH_TOKEN"]
+        @auth_token = ENV["AUTH_TOKEN"] = "very-secret"
       end
 
       after do
@@ -90,30 +90,30 @@ module Travis::Logs
 
       it "returns 403 if the Authorization header isn't set" do
         response = post "/logs/#{@log_id}/clear"
-	expect(response.status).to be == 403
+        expect(response.status).to be == 403
       end
 
       it "returns 403 if the Authorization header is incorrect" do
         response = post "/logs/#{@log_id}/clear", nil, { "HTTP_AUTHORIZATION" => "token not-#{@auth_token}" }
-	expect(response.status).to be == 403
+        expect(response.status).to be == 403
       end
 
       it "returns 204 if the Authorization header is correct" do
-	header "Authorization", "token #{@auth_token}"
+        header "Authorization", "token #{@auth_token}"
         response = post "/logs/#{@log_id}/clear"
-	expect(response.status).to be == 204
+        expect(response.status).to be == 204
       end
 
       it "returns 404 if the log doesn't exist" do
-	header "Authorization", "token #{@auth_token}"
+        header "Authorization", "token #{@auth_token}"
         response = post "/logs/#{@log_id+1}/clear"
-	expect(response.status).to be == 404
+        expect(response.status).to be == 404
       end
 
       it "tells the database to clear the log" do
-	header "Authorization", "token #{@auth_token}"
-	expect(database).to receive(:clear_log).with(@log_id)
-	database.should_receive(:clear_log)
+        header "Authorization", "token #{@auth_token}"
+        expect(database).to receive(:clear_log).with(@log_id)
+        database.should_receive(:clear_log)
         post "/logs/#{@log_id}/clear"
       end
     end

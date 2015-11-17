@@ -262,15 +262,15 @@ module Travis::Logs::Helpers
       it "clears out the content" do
         database.clear_log(@log_id)
 
-	content = sequel[:logs].where(id: @log_id).get(:content)
-	expect(content).to be == ""
+        content = sequel[:logs].where(id: @log_id).get(:content)
+        expect(content).to be == ""
       end
 
       it "nils out the aggregated_at time" do
         database.clear_log(@log_id)
 
-	aggregated_at = sequel[:logs].where(id: @log_id).get(:aggregated_at)
-	expect(aggregated_at).to be_nil
+        aggregated_at = sequel[:logs].where(id: @log_id).get(:aggregated_at)
+        expect(aggregated_at).to be_nil
       end
     end
   end

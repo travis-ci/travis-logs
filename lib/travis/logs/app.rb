@@ -61,10 +61,10 @@ module Travis
       post "/logs/:id/clear" do
         if request.env["HTTP_AUTHORIZATION"] != "token #{ENV["AUTH_TOKEN"]}"
           halt 403
-	end
+        end
 
-	database.clear_log(Integer(params[:id]))
-	status 204
+        database.clear_log(Integer(params[:id]))
+        status 204
       end
     end
   end
