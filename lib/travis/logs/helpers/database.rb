@@ -88,6 +88,11 @@ module Travis
           @db.call(:delete_log_parts, log_id: log_id)
         end
 
+	def clear_log(log_id)
+          delete_log_parts(log_id)
+	  @db[:logs].where(id: log_id).update(content: "", aggregated_at: nil, archived_at: nil, archive_verified: nil)
+	end
+
         AGGREGATEABLE_SELECT_SQL = <<-SQL.squish
           SELECT DISTINCT log_id
             FROM log_parts
