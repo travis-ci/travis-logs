@@ -95,8 +95,7 @@ module Travis::Logs
       it "returns 500 if the auth token isn't set" do
         ENV["AUTH_TOKEN"] = ""
         header "Authorization", "token "
-        response = post "/logs/#{@log_id}/clear"
-        expect(response.status).to be == 500
+        expect { post "/logs/#{@log_id}/clear" }.to raise_error(/token/)
       end
 
       it "returns 403 if the Authorization header isn't set" do
