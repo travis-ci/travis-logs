@@ -92,13 +92,20 @@ module Travis::Logs
         ENV["AUTH_TOKEN"] = @old_auth_token
       end
 
+      it "returns 500 if the auth token isn't set" do
+        ENV["AUTH_TOKEN"] = ""
+        header "Authorization", "token "
+        expect { post "/logs/#{@log_id}/clear" }.to raise_error(/token/)
+      end
+
       it "returns 403 if the Authorization header isn't set" do
         response = post "/logs/#{@log_id}/clear"
         expect(response.status).to be == 403
       end
 
       it "returns 403 if the Authorization header is incorrect" do
-        response = post "/logs/#{@log_id}/clear", nil, { "HTTP_AUTHORIZATION" => "token not-#{@auth_token}" }
+        header "Authorization", "token not-#{@auth_token}"
+        response = post "/logs/#{@log_id}/clear"
         expect(response.status).to be == 403
       end
 
