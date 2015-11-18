@@ -18,7 +18,7 @@ module Travis
     end
 
     class App < Sinatra::Base
-      attr_reader :existence, :pusher
+      attr_reader :existence, :pusher, :database
 
       configure(:production, :staging) do
         use Rack::SSL
@@ -28,10 +28,11 @@ module Travis
         use SentryMiddleware if ENV["SENTRY_DSN"]
       end
 
-      def initialize(existence = nil, pusher = nil)
+      def initialize(existence = nil, pusher = nil, database = nil)
         super()
         @existence = existence || Travis::Logs::Existence.new
         @pusher    = pusher    || ::Pusher::Client.new(Travis::Logs.config.pusher)
+        @database  = database  || Travis::Logs::Helpers::Database.connect
       end
 
       post '/pusher/existence' do
@@ -54,6 +55,21 @@ module Travis
       end
 
       get "/uptime" do
+        status 204
+      end
+
+      post "/logs/:id/clear" do
+        if request.env["HTTP_AUTHORIZATION"] != "token #{ENV["AUTH_TOKEN"]}"
+          halt 403
+        end
+
+        log_id = Integer(params[:id])
+
+        if database.log_for_id(log_id).nil?
+          halt 404
+        end
+
+        database.clear_log(log_id)
         status 204
       end
     end
