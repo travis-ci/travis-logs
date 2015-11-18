@@ -105,7 +105,8 @@ module Travis::Logs
       end
 
       it "returns 403 if the Authorization header is incorrect" do
-        response = post "/logs/#{@log_id}/clear", nil, { "HTTP_AUTHORIZATION" => "token not-#{@auth_token}" }
+        header "Authorization", "token not-#{@auth_token}"
+        response = post "/logs/#{@log_id}/clear"
         expect(response.status).to be == 403
       end
 
