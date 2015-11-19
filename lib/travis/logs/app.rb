@@ -6,6 +6,7 @@ require 'pusher'
 
 require 'travis/logs'
 require 'travis/logs/existence'
+require 'travis/logs/helpers/database'
 require 'rack/ssl'
 
 module Travis
