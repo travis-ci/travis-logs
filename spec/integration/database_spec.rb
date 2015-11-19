@@ -254,20 +254,20 @@ module Travis::Logs::Helpers
       end
     end
 
-    describe "#clear_log" do
+    describe "#set_log_content" do
       before do
         @log_id = sequel[:logs].insert(content: "this is a test", aggregated_at: Time.now.utc)
       end
 
       it "clears out the content" do
-        database.clear_log(@log_id)
+        database.set_log_content(@log_id, "hello world")
 
         content = sequel[:logs].where(id: @log_id).get(:content)
-        expect(content).to be == ""
+        expect(content).to be == "hello world"
       end
 
       it "nils out the aggregated_at time" do
-        database.clear_log(@log_id)
+        database.set_log_content(@log_id, "hello world")
 
         aggregated_at = sequel[:logs].where(id: @log_id).get(:aggregated_at)
         expect(aggregated_at).to be_nil

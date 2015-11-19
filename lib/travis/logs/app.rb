@@ -59,7 +59,7 @@ module Travis
         status 204
       end
 
-      post "/logs/:id/clear" do
+      put "/logs/:job_id" do
         if ENV["AUTH_TOKEN"].strip.empty?
           raise "authentication token is not set"
         end
@@ -68,13 +68,16 @@ module Travis
           halt 403
         end
 
-        log_id = Integer(params[:id])
+        job_id = Integer(params[:job_id])
 
-        if database.log_for_id(log_id).nil?
+        log = database.log_for_job_id(job_id)
+        if log.nil?
           halt 404
         end
 
-        database.clear_log(log_id)
+        request.body.rewind
+        database.set_log_content(log[:id], request.body.read)
+
         status 204
       end
     end

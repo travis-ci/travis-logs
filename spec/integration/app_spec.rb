@@ -77,15 +77,16 @@ module Travis::Logs
       end
     end
 
-    describe "POST /logs/:id/clear" do
+    describe "PUT /logs/:id" do
       before do
-        @log_id = 123
+        @job_id = 123
+        @log_id = 234
         @old_auth_token = ENV["AUTH_TOKEN"]
         @auth_token = ENV["AUTH_TOKEN"] = "very-secret"
 
-        allow(database).to receive(:clear_log)
-        allow(database).to receive(:log_for_id).with(anything()).and_return(nil)
-        allow(database).to receive(:log_for_id).with(@log_id).and_return({ content: "" })
+        allow(database).to receive(:set_log_content)
+        allow(database).to receive(:log_for_job_id).with(anything()).and_return(nil)
+        allow(database).to receive(:log_for_job_id).with(@job_id).and_return({ id: @log_id, job_id: @job_id, content: "" })
       end
 
       after do
@@ -95,36 +96,36 @@ module Travis::Logs
       it "returns 500 if the auth token isn't set" do
         ENV["AUTH_TOKEN"] = ""
         header "Authorization", "token "
-        expect { post "/logs/#{@log_id}/clear" }.to raise_error(/token/)
+        expect { put "/logs/#{@job_id}", "" }.to raise_error(/token/)
       end
 
       it "returns 403 if the Authorization header isn't set" do
-        response = post "/logs/#{@log_id}/clear"
+        response = put "/logs/#{@job_id}", ""
         expect(response.status).to be == 403
       end
 
       it "returns 403 if the Authorization header is incorrect" do
         header "Authorization", "token not-#{@auth_token}"
-        response = post "/logs/#{@log_id}/clear"
+        response = put "/logs/#{@job_id}", ""
         expect(response.status).to be == 403
       end
 
       it "returns 204 if the Authorization header is correct" do
         header "Authorization", "token #{@auth_token}"
-        response = post "/logs/#{@log_id}/clear"
+        response = put "/logs/#{@job_id}"
         expect(response.status).to be == 204
       end
 
       it "returns 404 if the log doesn't exist" do
         header "Authorization", "token #{@auth_token}"
-        response = post "/logs/#{@log_id+1}/clear"
+        response = put "/logs/#{@job_id+1}"
         expect(response.status).to be == 404
       end
 
-      it "tells the database to clear the log" do
+      it "tells the database to set the log content" do
         header "Authorization", "token #{@auth_token}"
-        expect(database).to receive(:clear_log).with(@log_id)
-        post "/logs/#{@log_id}/clear"
+        expect(database).to receive(:set_log_content).with(@log_id, "hello, world")
+        put "/logs/#{@job_id}", "hello, world"
       end
     end
   end
