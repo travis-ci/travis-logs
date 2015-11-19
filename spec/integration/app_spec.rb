@@ -116,10 +116,13 @@ module Travis::Logs
         expect(response.status).to be == 204
       end
 
-      it "returns 404 if the log doesn't exist" do
+      it "creates the log if it doesn't exist" do
         header "Authorization", "token #{@auth_token}"
+
+        expect(database).to receive(:create_log).with(@job_id+1).and_return({ id: @log_id+1, job_id: @job_id+1, content: "" })
+
         response = put "/logs/#{@job_id+1}"
-        expect(response.status).to be == 404
+        expect(response.status).to be == 204
       end
 
       it "tells the database to set the log content" do

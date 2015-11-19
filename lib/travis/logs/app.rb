@@ -70,10 +70,7 @@ module Travis
 
         job_id = Integer(params[:job_id])
 
-        log = database.log_for_job_id(job_id)
-        if log.nil?
-          halt 404
-        end
+        log = database.log_for_job_id(job_id) || database.create_log(job_id)
 
         request.body.rewind
         database.set_log_content(log[:id], request.body.read)
