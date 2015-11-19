@@ -93,6 +93,29 @@ module Travis::Logs
         ENV["AUTH_TOKEN"] = @old_auth_token
       end
 
+      context "with correct authentication" do
+        before do
+          header "Authorization", "token #{@auth_token}"
+        end
+
+        it "returns 204" do
+          response = put "/logs/#{@job_id}"
+          expect(response.status).to be == 204
+        end
+
+        it "creates the log if it doesn't exist" do
+          expect(database).to receive(:create_log).with(@job_id+1).and_return({ id: @log_id+1, job_id: @job_id+1, content: "" })
+
+          response = put "/logs/#{@job_id+1}"
+          expect(response.status).to be == 204
+        end
+
+        it "tells the database to set the log content" do
+          expect(database).to receive(:set_log_content).with(@log_id, "hello, world")
+          put "/logs/#{@job_id}", "hello, world"
+        end
+      end
+
       it "returns 500 if the auth token isn't set" do
         ENV["AUTH_TOKEN"] = ""
         header "Authorization", "token "
@@ -108,27 +131,6 @@ module Travis::Logs
         header "Authorization", "token not-#{@auth_token}"
         response = put "/logs/#{@job_id}", ""
         expect(response.status).to be == 403
-      end
-
-      it "returns 204 if the Authorization header is correct" do
-        header "Authorization", "token #{@auth_token}"
-        response = put "/logs/#{@job_id}"
-        expect(response.status).to be == 204
-      end
-
-      it "creates the log if it doesn't exist" do
-        header "Authorization", "token #{@auth_token}"
-
-        expect(database).to receive(:create_log).with(@job_id+1).and_return({ id: @log_id+1, job_id: @job_id+1, content: "" })
-
-        response = put "/logs/#{@job_id+1}"
-        expect(response.status).to be == 204
-      end
-
-      it "tells the database to set the log content" do
-        header "Authorization", "token #{@auth_token}"
-        expect(database).to receive(:set_log_content).with(@log_id, "hello, world")
-        put "/logs/#{@job_id}", "hello, world"
       end
     end
   end
