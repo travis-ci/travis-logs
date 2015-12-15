@@ -266,11 +266,11 @@ module Travis::Logs::Helpers
         expect(content).to be == "hello world"
       end
 
-      it "nils out the aggregated_at time" do
+      it "sets the aggregated_at time" do
         database.set_log_content(@log_id, "hello world")
 
         aggregated_at = sequel[:logs].where(id: @log_id).get(:aggregated_at)
-        expect(aggregated_at).to be_nil
+        expect(aggregated_at).to_not be_nil
       end
     end
   end
