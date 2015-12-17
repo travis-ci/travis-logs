@@ -1,2 +1,3 @@
--fdoc
 --color
+--format documentation
+--require support
