@@ -60,13 +60,11 @@ module Travis
       end
 
       put "/logs/:job_id" do
-        if ENV["AUTH_TOKEN"].strip.empty?
-          raise "authentication token is not set"
+        if ENV['AUTH_TOKEN'].to_s.strip.empty?
+          raise 'authentication token is not set'
         end
 
-        if request.env["HTTP_AUTHORIZATION"] != "token #{ENV["AUTH_TOKEN"]}"
-          halt 403
-        end
+        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
 
         job_id = Integer(params[:job_id])
 

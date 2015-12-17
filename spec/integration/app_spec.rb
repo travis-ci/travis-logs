@@ -116,10 +116,11 @@ module Travis::Logs
         end
       end
 
-      xit "returns 500 if the auth token isn't set" do
-        ENV["AUTH_TOKEN"] = ""
-        header "Authorization", "token "
-        expect { put "/logs/#{@job_id}", "" }.to raise_error(/token/)
+      it "returns 500 if the auth token isn't set" do
+        ENV['AUTH_TOKEN'] = ''
+        header 'Authorization', 'token '
+        response = put "/logs/#{@job_id}", ''
+        expect(response.status).to be == 500
       end
 
       it "returns 403 if the Authorization header isn't set" do
