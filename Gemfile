@@ -25,6 +25,7 @@ gem 'sentry-raven',       github: 'getsentry/raven-ruby'
 gem 'rails_12factor'
 
 gem 'rake'
+gem 'pry'
 
 group :test do
   gem 'rspec',            '~> 2.14.1'

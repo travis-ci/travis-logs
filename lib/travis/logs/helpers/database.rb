@@ -26,7 +26,17 @@ module Travis
           database = config[:database]
           username = config[:username] || ENV["USER"]
 
-          "jdbc:postgresql://#{host}:#{port}/#{database}?user=#{username}&password=#{config[:password]}"
+          params = {
+            user: username,
+            password: config[:password],
+          }
+
+          params.merge!(
+            ssl: true,
+            sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
+          ) unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+
+          "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
 
         def self.connect
