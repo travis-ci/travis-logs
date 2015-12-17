@@ -31,12 +31,10 @@ module Travis
             password: config[:password],
           }
 
-          unless ENV['PG_DISABLE_SSL']
-            params.merge!(
-              ssl: true,
-              sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
-            )
-          end
+          params.merge!(
+            ssl: true,
+            sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
+          ) unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
 
           "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
