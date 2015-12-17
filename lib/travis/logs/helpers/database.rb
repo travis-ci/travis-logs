@@ -1,7 +1,6 @@
 require 'sequel'
-require 'jdbc/postgres'
-require "delegate"
-require "active_support/core_ext/string/filters"
+require 'delegate'
+require 'active_support/core_ext/string/filters'
 
 module Travis
   module Logs
@@ -14,29 +13,17 @@ module Travis
         # This method should only be called for "maintenance" tasks (such as
         # creating the tables or debugging).
         def self.create_sequel
-          config = Travis::Logs.config.logs_database
-          Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
+          max_connections = Travis::Logs.config.logs_database.to_h.fetch(:pool, 25)
+          Sequel.connect(database_url, max_connections: max_connections).tap do |db|
             db.timezone = :utc
           end
         end
 
-        def self.jdbc_uri_from_config(config)
-          host = config[:host] || 'localhost'
-          port = config[:port] || 5432
-          database = config[:database]
-          username = config[:username] || ENV["USER"]
-
-          params = {
-            user: username,
-            password: config[:password],
-          }
-
-          params.merge!(
-            ssl: true,
-            sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
-          ) unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
-
-          "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
+        def self.database_url
+          Travis::Logs.config.logs_database.to_h.fetch(
+            :url,
+            ENV['DATABASE_URL'] || 'postgres://localhost:5432/travis_logs_test'
+          )
         end
 
         def self.connect
@@ -63,7 +50,7 @@ module Travis
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs].select{[id, job_id, octet_length(content).as(content_length)]}.where(id: log_id).first
+          @db[:logs].select { [id, job_id, octet_length(content).as(content_length)] }.where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
@@ -83,15 +70,17 @@ module Travis
         end
 
         def create_log(job_id)
-          @db.call(:create_log, {
-            job_id: job_id,
-            created_at: Time.now.utc,
-            updated_at: Time.now.utc
-          })
+          @db.call(
+            :create_log,
+            job_id: job_id, created_at: Time.now.utc, updated_at: Time.now.utc
+          )
         end
 
         def create_log_part(params)
-          @db.call(:create_log_part, params.merge(created_at: Time.now.utc))
+          @db.call(
+            :create_log_part,
+            params.merge(created_at: Time.now.utc)
+          )
         end
 
         def delete_log_parts(log_id)
@@ -140,18 +129,15 @@ module Travis
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
           @db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
-          @db[:logs].prepare(:insert, :create_log, {
-            job_id: :$job_id,
-            created_at: :$created_at,
-            updated_at: :$updated_at,
-          })
-          @db[:log_parts].prepare(:insert, :create_log_part, {
-            log_id: :$log_id,
-            content: :$content,
-            number: :$number,
-            final: :$final,
-            created_at: :$created_at,
-          })
+          @db[:logs].prepare(
+            :insert, :create_log,
+            job_id: :$job_id, created_at: :$created_at, updated_at: :$updated_at
+          )
+          @db[:log_parts].prepare(
+            :insert, :create_log_part,
+            log_id: :$log_id, content: :$content, number: :$number,
+            final: :$final, created_at: :$created_at
+          )
           @db[:log_parts].where(log_id: :$log_id).prepare(:delete, :delete_log_parts)
         end
       end

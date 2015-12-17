@@ -44,4 +44,4 @@ def enqueue(count)
 end
 
 sum = 0
-1.upto(37) { count = enqueue(10000); sum += count; puts "queued: #{count}; total: #{sum}"; break if count == 0 }
+1.upto(37) { count = enqueue(10_000); sum += count; puts "queued: #{count}; total: #{sum}"; break if count == 0 }

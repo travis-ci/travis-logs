@@ -1,4 +1,4 @@
-require "pusher"
+require 'pusher'
 
 module Travis
   module Logs
@@ -12,13 +12,13 @@ module Travis
         end
 
         def push(payload)
-          pusher_channel(payload).trigger("job:log", pusher_payload(payload))
+          pusher_channel(payload).trigger('job:log', pusher_payload(payload))
         end
 
         def pusher_channel_name(payload)
-          channel = ""
-          channel << "private-" if Logs.config.pusher.secure
-          channel << "job-#{payload["id"]}"
+          channel = ''
+          channel << 'private-' if Travis::Logs.config.pusher.secure
+          channel << "job-#{payload['id']}"
           channel
         end
 
@@ -30,10 +30,10 @@ module Travis
 
         def pusher_payload(payload)
           {
-            "id" => payload["id"],
-            "_log" => payload["chars"],
-            "number" => payload["number"],
-            "final" => payload["final"],
+            'id' => payload['id'],
+            '_log' => payload['chars'],
+            'number' => payload['number'],
+            'final' => payload['final']
           }
         end
 

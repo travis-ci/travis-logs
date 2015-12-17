@@ -12,7 +12,7 @@ module Travis
         end
 
         def redis_config
-          Logs.config.logs_redis || Logs.config.redis
+          (Logs.config.logs_redis || Logs.config.redis).to_h
         end
       end
 
@@ -44,4 +44,3 @@ module Travis
     end
   end
 end
-

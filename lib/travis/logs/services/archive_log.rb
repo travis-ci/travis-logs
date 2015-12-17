@@ -10,7 +10,7 @@ module Travis
       class ArchiveLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = "logs.archive"
+        METRIKS_PREFIX = 'logs.archive'
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -22,12 +22,15 @@ module Travis
           end
         end
 
-        attr_reader :log_id
+        attr_reader :log_id, :default_retries, :default_sleep_mult
 
-        def initialize(log_id, storage_service=Helpers::S3.new, database=Travis::Logs.database_connection)
+        def initialize(log_id, storage_service = Helpers::S3.new,
+                       database = Travis::Logs.database_connection)
           @log_id = log_id
           @storage_service = storage_service
           @database = database
+          @default_retries = 5
+          @default_sleep_mult = 1
         end
 
         def run
@@ -62,7 +65,7 @@ module Travis
         def content_blank?
           if content.blank?
             Travis.logger.warn "action=archive id=#{log_id} result=empty"
-            mark("log.empty")
+            mark('log.empty')
             true
           else
             false
@@ -83,7 +86,7 @@ module Travis
               actual = archived_content_length
               expected = content.bytesize
               unless actual == expected
-                raise VerificationFailed.new(log_id, target_url, expected, actual)
+                fail VerificationFailed.new(log_id, target_url, expected, actual)
               end
             end
           end
@@ -106,36 +109,35 @@ module Travis
 
         private
 
-          attr_reader :storage_service, :database
+        attr_reader :storage_service, :database
 
-          def archived_content_length
-            storage_service.content_length(target_url)
-          end
+        def archived_content_length
+          storage_service.content_length(target_url)
+        end
 
-          def content
-            @content ||= log[:content]
-          end
+        def content
+          @content ||= log[:content]
+        end
 
-          def content=(new_content)
-            @content = new_content
-          end
+        attr_writer :content
 
-          def hostname
-            Travis.config.s3.hostname
-          end
+        def hostname
+          Travis.config.s3.hostname
+        end
 
-          def retrying(header, times = 5)
-            yield
-          rescue => e
-            count ||= 0
-            if times > (count += 1)
-              puts "[#{header}] retry #{count} because: #{e.message}"
-              sleep count * 1
-              retry
-            else
-              raise
-            end
+        def retrying(header, times = default_retries,
+                     sleep_mult = default_sleep_mult)
+          yield
+        rescue => e
+          count ||= 0
+          if times > (count += 1)
+            puts "[#{header}] retry #{count} because: #{e.message}"
+            sleep count * sleep_mult
+            retry
+          else
+            raise
           end
+        end
       end
     end
   end
