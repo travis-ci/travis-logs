@@ -6,6 +6,7 @@ require 'pusher'
 
 require 'travis/logs'
 require 'travis/logs/existence'
+require 'travis/logs/helpers/database'
 require 'rack/ssl'
 
 module Travis
@@ -60,18 +61,17 @@ module Travis
         status 204
       end
 
-      post "/logs/:id/clear" do
-        if request.env["HTTP_AUTHORIZATION"] != "token #{ENV["AUTH_TOKEN"]}"
-          halt 403
-        end
+      put "/logs/:job_id" do
+        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
+        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
 
-        log_id = Integer(params[:id])
+        job_id = Integer(params[:job_id])
 
-        if database.log_for_id(log_id).nil?
-          halt 404
-        end
+        log = database.log_for_job_id(job_id) || database.create_log(job_id)
 
-        database.clear_log(log_id)
+        request.body.rewind
+        database.set_log_content(log[:id], request.body.read)
+
         status 204
       end
     end

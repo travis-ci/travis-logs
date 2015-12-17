@@ -4,6 +4,10 @@ rvm: 2.2.3
 
 sudo: false
 
+env:
+  global:
+  - PG_DISABLE_SSL='1'
+
 cache: bundler
 
 services:
