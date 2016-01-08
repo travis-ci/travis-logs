@@ -107,9 +107,6 @@ module Travis
         end
 
         def investigate
-          Travis.logger.debug "action=investigate " \
-            "investigators=#{investigators.map(&:name).join(',')} job_id=#{log[:job_id]}"
-
           investigators.each do |investigator|
             result = investigator.investigate(content)
             next if result.nil?
