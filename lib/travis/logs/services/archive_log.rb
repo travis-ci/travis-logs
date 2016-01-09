@@ -38,7 +38,7 @@ module Travis
           store
           verify
           confirm
-          Travis.logger.debug "action=archive id=#{log_id} result=successful"
+          Travis.logger.debug "action=archive id=#{log_id} job_id=#{job_id} result=successful"
           queue_purge
           investigate if investigation_enabled?
         ensure
@@ -103,7 +103,7 @@ module Travis
         end
 
         def target_url
-          "http://#{hostname}/jobs/#{log[:job_id]}/log.txt"
+          "http://#{hostname}/jobs/#{job_id}/log.txt"
         end
 
         def investigate
@@ -114,7 +114,7 @@ module Travis
             mark(result.marking) unless result.marking.empty?
             Travis.logger.warn(
               "action=investigate investigator=#{investigator.name} " \
-              "result=#{result.label} id=#{log_id} job_id=#{log[:job_id]}"
+              "result=#{result.label} id=#{log_id} job_id=#{job_id}"
             )
           end
         end
@@ -129,6 +129,10 @@ module Travis
 
           def content
             @content ||= log[:content]
+          end
+
+          def job_id
+            (log || {}).fetch(:job_id, 'unknown')
           end
 
           def content=(new_content)
