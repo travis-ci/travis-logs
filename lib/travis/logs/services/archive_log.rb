@@ -1,5 +1,6 @@
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
+require 'travis/logs/investigator'
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
 require 'uri'
@@ -37,8 +38,9 @@ module Travis
           store
           verify
           confirm
-          Travis.logger.debug "action=archive id=#{log_id} result=successful"
+          Travis.logger.debug "action=archive id=#{log_id} job_id=#{job_id} result=successful"
           queue_purge
+          investigate if investigation_enabled?
         ensure
           mark_as_archiving(false)
         end
@@ -101,7 +103,20 @@ module Travis
         end
 
         def target_url
-          "http://#{hostname}/jobs/#{log[:job_id]}/log.txt"
+          "http://#{hostname}/jobs/#{job_id}/log.txt"
+        end
+
+        def investigate
+          investigators.each do |investigator|
+            result = investigator.investigate(content)
+            next if result.nil?
+
+            mark(result.marking) unless result.marking.empty?
+            Travis.logger.warn(
+              "action=investigate investigator=#{investigator.name} " \
+              "result=#{result.label} id=#{log_id} job_id=#{job_id}"
+            )
+          end
         end
 
         private
@@ -114,6 +129,10 @@ module Travis
 
           def content
             @content ||= log[:content]
+          end
+
+          def job_id
+            (log || {}).fetch(:job_id, 'unknown')
           end
 
           def content=(new_content)
@@ -134,6 +153,23 @@ module Travis
               retry
             else
               raise
+            end
+          end
+
+          def investigation_enabled?
+            Travis.config.investigation.enabled?
+          end
+
+          def investigators
+            @investigators ||= Travis.config.investigation.investigators.map do |name, h|
+              ::Travis::Logs::Investigator.new(
+                name,
+                Regexp.new(h[:matcher]),
+                h[:marking_tmpl],
+                h[:label_tmpl]
+              )
+            end.sort do |a, b|
+              a.name <=> b.name
             end
           end
       end

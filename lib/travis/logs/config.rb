@@ -13,7 +13,8 @@ module Travis
               redis:         { url: 'redis://localhost:6379' },
               metrics:       { reporter: 'librato' },
               ssl:           { },
-              sentry:        { }
+              sentry:        { },
+              investigation: { enabled: false, investigators: {} }
 
       default _access: [:key]
 
