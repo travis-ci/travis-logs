@@ -51,7 +51,7 @@ module Travis
             password: config[:password]
           }
 
-          unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+          if config[:ssl])
             params[:ssl] = true
             params[:sslfactory] = 'org.postgresql.ssl.NonValidatingFactory'
           end
