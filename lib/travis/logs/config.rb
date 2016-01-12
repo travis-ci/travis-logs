@@ -5,7 +5,7 @@ module Travis
   module Logs
     class Config < Travis::Config
       define amqp:          { username: 'guest', password: 'guest', host: 'localhost', prefetch: 1 },
-             logs_database: { adapter: 'postgresql', database: "travis_logs_#{Travis.env}", encoding: 'unicode', min_messages: 'warning' },
+             logs_database: { adapter: 'postgresql', database: "travis_logs_#{env}", ssl: ssl?, encoding: 'unicode', min_messages: 'warning' },
              s3:            { hostname: 'archive.travis-ci.org', access_key_id: '', secret_access_key: '', acl: :public_read },
              pusher:        { app_id: 'app-id', key: 'key', secret: 'secret', secure: false },
              sidekiq:       { namespace: 'sidekiq', pool_size: 3 },
@@ -20,6 +20,10 @@ module Travis
 
       def env
         Travis.env
+      end
+
+      def ssl?
+        not %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
       end
     end
   end

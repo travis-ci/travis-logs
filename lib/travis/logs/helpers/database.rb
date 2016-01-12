@@ -54,7 +54,7 @@ module Travis
           params.merge!(
             ssl: true,
             sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
-          ) unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+          ) if config[:ssl]
 
           "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
