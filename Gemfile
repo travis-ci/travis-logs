@@ -4,6 +4,7 @@ ruby '2.2.2', engine: 'jruby', engine_version: '9.0.4.0' if ENV.key?('DYNO')
 
 gem 'activesupport',      '~> 3.2'
 gem 'travis-support',     github: 'travis-ci/travis-support'
+gem 'travis-amqp',        github: 'travis-ci/travis-amqp'
 gem 'travis-config'
 
 gem 'sequel',             '~> 4.0.0'

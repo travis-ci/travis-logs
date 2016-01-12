@@ -12,6 +12,12 @@ GIT
     coder (0.4.0)
 
 GIT
+  remote: git://github.com/travis-ci/travis-amqp.git
+  revision: 4eaadb995e44bf41d252b5e903b86e0e3950f3ae
+  specs:
+    travis-amqp (0.0.1)
+
+GIT
   remote: git://github.com/travis-ci/travis-support.git
   revision: 2cd02d2a06fdd1e2fc2f129148c168b56f7c190f
   specs:
@@ -180,6 +186,7 @@ DEPENDENCIES
   sidekiq-unique-jobs (~> 4)
   simplecov
   sinatra (~> 1.4)
+  travis-amqp!
   travis-config
   travis-support!
 
