@@ -83,11 +83,15 @@ module Travis
           end
 
           def aggregateable_ids
-            database.aggregatable_log_parts(intervals[:regular], intervals[:force])
+            database.aggregatable_log_parts(intervals[:regular], intervals[:force], per_aggregate_limit).uniq
           end
 
           def intervals
             Travis.config.logs.intervals
+          end
+
+          def per_aggregate_limit
+            Travis.config.logs.per_aggregate_limit
           end
 
           def transaction(&block)

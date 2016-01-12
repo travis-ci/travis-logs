@@ -104,14 +104,15 @@ module Travis
         end
 
         AGGREGATEABLE_SELECT_SQL = <<-SQL.squish
-          SELECT DISTINCT log_id
+          SELECT log_id
             FROM log_parts
            WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
               OR  created_at <= NOW() - interval '? seconds'
+           LIMIT ?
         SQL
 
-        def aggregatable_log_parts(regular_interval, force_interval)
-          @db[AGGREGATEABLE_SELECT_SQL, regular_interval, true, force_interval].map(:log_id)
+        def aggregatable_log_parts(regular_interval, force_interval, limit)
+          @db[AGGREGATEABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
         end
 
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.squish
