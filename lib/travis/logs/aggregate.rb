@@ -5,7 +5,6 @@ require 'travis/logs/sidekiq'
 require 'travis/support/exceptions/reporter'
 require 'travis/support/metrics'
 require 'travis/logs/services/aggregate_logs'
-require 'core_ext/kernel/run_periodically'
 require 'active_support/core_ext/logger'
 
 module Travis
@@ -22,9 +21,10 @@ module Travis
       end
 
       def run
-        run_periodically(Travis.config.logs.intervals.vacuum) do
+        loop do
           aggregate_logs
-        end.join
+          sleep Travis.config.logs.intervals.vacuum
+        end
       end
 
       def aggregate_logs
