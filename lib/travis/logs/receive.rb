@@ -20,20 +20,22 @@ module Travis
         Travis::Metrics.setup
 
         db = Travis::Logs::Helpers::Database.connect
-        Logs.database_connection = db
+        Travis::Logs.database_connection = db
 
         declare_exchanges
       end
 
       def run
-        1.upto(Logs.config.logs.threads) do
-          Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
+        1.upto(Travis::Logs.config.logs.threads) do
+          Travis::Logs::Receive::Queue.subscribe(
+            'logs', Travis::Logs::Services::ProcessLogPart
+          )
         end
       end
 
       def amqp_config
         Travis::Logs.config.amqp.merge({
-          :thread_pool_size => (Logs.config.logs.threads * 2 + 3)
+          thread_pool_size: (Travis::Logs.config.logs.threads * 2 + 3)
         })
       end
 
