@@ -10,7 +10,7 @@ module Travis
         sidekiq_options queue: 'aggregate', retry: 3
 
         def perform(log_part_ids)
-          Services::AggregateLogs.aggregate_ids(log_part_ids)
+          Travis::Logs::Services::AggregateLogs.aggregate_ids(log_part_ids)
         end
       end
     end
