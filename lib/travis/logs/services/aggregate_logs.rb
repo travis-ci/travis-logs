@@ -28,7 +28,7 @@ module Travis
         end
 
         def run
-          if Travis.config.logs.aggregate_async
+          if aggregate_async?
             Travis.logger.info "action=aggregate async=true"
             Travis::Logs::Sidekiq::Aggregate.perform_async(aggregateable_ids)
             return
@@ -82,7 +82,7 @@ module Travis
         end
 
         def queue_archiving(id)
-          return unless Travis::Logs.config.logs.archive
+          return unless archive?
 
           log = database.log_for_id(id)
 
@@ -108,6 +108,14 @@ module Travis
           Travis.config.logs.per_aggregate_limit
         end
 
+        def archive?
+          Travis.config.logs.archive
+        end
+
+        def aggregate_async?
+          Travis.config.logs.aggregate_async
+        end
+
         def transaction(&block)
           measure do
             database.transaction(&block)
@@ -117,4 +125,3 @@ module Travis
     end
   end
 end
-
