@@ -1,5 +1,4 @@
 require 'travis/logs'
-require 'travis/support'
 require 'travis/logs/helpers/database'
 require 'travis/logs/sidekiq'
 require 'travis/support/exceptions/reporter'
@@ -14,10 +13,7 @@ module Travis
         Travis.logger.info('** Starting Logs Aggregation **')
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
-
-        db = Travis::Logs::Helpers::Database.connect
-        Logs.database_connection = db
-        Travis::Logs::Services::AggregateLogs.prepare(db)
+        Logs.database_connection = Travis::Logs::Helpers::Database.connect
       end
 
       def run
