@@ -89,7 +89,7 @@ module Travis
           log = database.log_for_id(id)
 
           if log
-            Sidekiq::Archive.perform_async(log[:id])
+            Travis::Logs::Sidekiq::Archive.perform_async(log[:id])
           else
             mark('log.record_not_found')
             Travis.logger.warn "action=aggregate id=#{id} result=not_found"

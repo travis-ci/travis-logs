@@ -98,7 +98,7 @@ module Travis
         def queue_purge
           if Travis::Logs.config.logs.purge
             delay = Travis::Logs.config.logs.intervals.purge
-            Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
+            Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
           end
         end
 
