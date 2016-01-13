@@ -28,14 +28,16 @@ module Travis
         end
 
         def run
+          ids = aggregateable_ids
+
           if aggregate_async?
-            Travis.logger.info "action=aggregate async=true"
-            Travis::Logs::Sidekiq::Aggregate.perform_async(aggregateable_ids)
+            Travis.logger.info "action=aggregate async=true n=#{ids.length}"
+            Travis::Logs::Sidekiq::Aggregate.perform_async(ids)
             return
           end
 
-          Travis.logger.info "action=aggregate async=false"
-          aggregate_ids(aggregateable_ids)
+          Travis.logger.info "action=aggregate async=false n=#{ids.length}"
+          aggregate_ids(ids)
         end
 
         def aggregate_ids(log_part_ids)
