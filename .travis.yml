@@ -1,7 +1,7 @@
 language: ruby
 rvm:
 - jruby-9.0.4.0
-- 2.3.0
+- 2.2.2
 jdk: openjdk7
 sudo: false
 env:
