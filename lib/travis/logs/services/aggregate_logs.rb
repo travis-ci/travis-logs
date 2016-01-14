@@ -18,8 +18,8 @@ module Travis
           new.run
         end
 
-        def self.aggregate_ids(log_part_ids)
-          new.aggregate_ids(log_part_ids)
+        def self.aggregate_log(log_id)
+          new.aggregate_log(log_id)
         end
 
         def initialize(database = nil)
@@ -31,67 +31,63 @@ module Travis
 
           if aggregate_async?
             Travis.logger.info "action=aggregate async=true n=#{ids.length}"
-            Travis::Logs::Sidekiq::Aggregate.perform_async(ids)
+
+            ids.each do |log_id|
+              Travis::Logs::Sidekiq::Aggregate.perform_async(log_id)
+            end
+
             return
           end
 
           Travis.logger.info "action=aggregate async=false n=#{ids.length}"
-          aggregate_ids(ids)
+          ids.each { |log_id| aggregate_log(log_id) }
         end
 
-        def aggregate_ids(log_part_ids)
-          log_part_ids.each do |id|
-            aggregate_log(id)
+        def aggregate_log(log_id)
+          transaction do
+            aggregate(log_id)
+            vacuum(log_id) unless log_empty?(log_id)
           end
+          queue_archiving(log_id)
+          Travis.logger.debug "action=aggregate log_id=#{log_id} result=successful"
+        rescue => e
+          Travis::Exceptions.handle(e)
         end
 
         private
 
         attr_reader :database
 
-        def aggregate_log(id)
-          transaction do
-            aggregate(id)
-            unless log_empty?(id)
-              vacuum(id)
-            end
-          end
-          queue_archiving(id)
-          Travis.logger.debug "action=aggregate id=#{id} result=successful"
-        rescue => e
-          Travis::Exceptions.handle(e)
-        end
-
-        def aggregate(id)
+        def aggregate(log_id)
           measure('aggregate') do
-            database.aggregate(id)
+            database.aggregate(log_id)
           end
         end
 
-        def log_empty?(id)
-          log = database.log_for_id(id)
+        def log_empty?(log_id)
+          log = database.log_for_id(log_id)
           if log[:content].nil? || log[:content].empty?
-            warn "action=aggregate id=#{id} result=empty"
+            Travis.logger.warn "action=aggregate log_id=#{log_id} result=empty"
             true
           end
         end
 
-        def vacuum(id)
+        def vacuum(log_id)
           measure('vacuum') do
-            database.delete_log_parts(id)
+            database.delete_log_parts(log_id)
           end
         end
 
-        def queue_archiving(id)
+        def queue_archiving(log_id)
           return unless archive?
 
-          log = database.log_for_id(id)
+          log = database.log_for_id(log_id)
 
           if log
             Travis::Logs::Sidekiq::Archive.perform_async(log[:id])
           else
             mark('log.record_not_found')
-            Travis.logger.warn "action=aggregate id=#{id} result=not_found"
+            Travis.logger.warn "action=aggregate log_id=#{log_id} result=not_found"
           end
         end
 
