@@ -15,9 +15,9 @@ Sequel.migration do
       boolean :archiving
       boolean :archive_verified
 
-      index :archive_verified, name: "index_logs_on_archive_verified"
-      index :archived_at, name: "index_logs_on_archived_at"
-      index :job_id, name: "index_logs_on_job_id"
+      index :archive_verified, name: 'index_logs_on_archive_verified'
+      index :archived_at, name: 'index_logs_on_archived_at'
+      index :job_id, name: 'index_logs_on_job_id'
     end
   end
 end

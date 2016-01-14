@@ -1,4 +1,4 @@
-$: << 'lib'
+$LOAD_PATH << 'lib'
 
 require 'travis/logs'
 require 'travis/support'

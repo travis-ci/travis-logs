@@ -20,7 +20,7 @@ module Travis
       @pool.with do |redis|
         timer.stop
         if redis.respond_to?(name)
-          Metriks.timer("redis.operations").time do
+          Metriks.timer('redis.operations').time do
             redis.send(name, *args)
           end
         else
