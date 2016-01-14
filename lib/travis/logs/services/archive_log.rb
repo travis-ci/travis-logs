@@ -146,7 +146,7 @@ module Travis
         rescue => e
           count ||= 0
           if times > (count += 1)
-            puts "[#{header}] retry #{count} because: #{e.message}"
+            Travis.logger.warn "[#{header}] retry #{count} because: #{e.message}"
             sleep count * 1
             retry
           else
@@ -160,7 +160,7 @@ module Travis
 
         def investigators
           @investigators ||= Travis.config.investigation.investigators.map do |name, h|
-            ::Travis::Logs::Investigator.new(
+            Travis::Logs::Investigator.new(
               name,
               Regexp.new(h[:matcher]),
               h[:marking_tmpl],
