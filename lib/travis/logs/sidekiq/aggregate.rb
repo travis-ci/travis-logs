@@ -8,7 +8,7 @@ module Travis
         include ::Sidekiq::Worker
 
         sidekiq_options queue: 'aggregate', retry: 3,
-                        unique: :while_executing
+                        unique: :until_and_while_executing
 
         def perform(log_id)
           Travis::Logs::Services::AggregateLogs.aggregate_log(log_id)
