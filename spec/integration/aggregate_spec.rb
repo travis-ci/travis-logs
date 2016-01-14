@@ -33,7 +33,7 @@ describe 'aggregation' do
     {
       'id' => job_id,
       'number' => n,
-      'log' => word_salad(10 * (job_id % (n + 1))),
+      'log' => word_salad(10 * (job_id % (n + 1)))
     }
   end
 
