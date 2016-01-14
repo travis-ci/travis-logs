@@ -1,4 +1,3 @@
-require 'active_support/core_ext/string/filters'
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/sidekiq/archive'
 require 'travis/logs/sidekiq/aggregate'

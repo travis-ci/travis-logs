@@ -1,7 +1,6 @@
 require 'sequel'
 require 'jdbc/postgres'
-require "delegate"
-require "active_support/core_ext/string/filters"
+require 'delegate'
 
 module Travis
   module Logs
@@ -103,7 +102,7 @@ module Travis
           @db[:logs].where(id: log_id).update(content: content, aggregated_at: Time.now.utc, archived_at: nil, archive_verified: nil, updated_at: Time.now.utc)
         end
 
-        AGGREGATEABLE_SELECT_SQL = <<-SQL.squish
+        AGGREGATEABLE_SELECT_SQL = <<-SQL.split.join(' ')
           SELECT log_id
             FROM log_parts
            WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
@@ -116,13 +115,13 @@ module Travis
           @db[AGGREGATEABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
         end
 
-        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.squish
+        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ')
           SELECT array_to_string(array_agg(log_parts.content ORDER BY number, id), '')
             FROM log_parts
            WHERE log_id = ?
         SQL
 
-        AGGREGATE_UPDATE_SQL = <<-SQL.squish
+        AGGREGATE_UPDATE_SQL = <<-SQL.split.join(' ')
           UPDATE logs
              SET aggregated_at = ?,
                  content = (COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL}))
