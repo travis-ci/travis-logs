@@ -1,5 +1,10 @@
+def jruby?
+  RUBY_PLATFORM =~ /^java/
+end
+
 require 'sequel'
-require 'jdbc/postgres'
+require 'jdbc/postgres' if jruby?
+require 'pg' unless jruby?
 require 'delegate'
 
 module Travis
@@ -14,20 +19,36 @@ module Travis
         # creating the tables or debugging).
         def self.create_sequel
           config = Travis::Logs.config.logs_database
-          Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
+          uri = jdbc_uri_from_config(config) if jruby?
+          uri = uri_from_config(config) unless jruby?
+          Sequel.connect(uri, max_connections: config[:pool]).tap do |db|
             db.timezone = :utc
           end
+        end
+
+        def self.uri_from_config(config)
+          host = config[:host] || 'localhost'
+          port = config[:port] || 5432
+          database = config[:database]
+          username = config[:username] || ENV['USER']
+
+          params = {
+            user: username,
+            password: config[:password]
+          }
+
+          "postgres://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
 
         def self.jdbc_uri_from_config(config)
           host = config[:host] || 'localhost'
           port = config[:port] || 5432
           database = config[:database]
-          username = config[:username] || ENV["USER"]
+          username = config[:username] || ENV['USER']
 
           params = {
             user: username,
-            password: config[:password],
+            password: config[:password]
           }
 
           params.merge!(
@@ -62,7 +83,7 @@ module Travis
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs].select{[id, job_id, octet_length(content).as(content_length)]}.where(id: log_id).first
+          @db[:logs].select { [id, job_id, octet_length(content).as(content_length)] }.where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
@@ -82,11 +103,9 @@ module Travis
         end
 
         def create_log(job_id)
-          @db.call(:create_log, {
-            job_id: job_id,
-            created_at: Time.now.utc,
-            updated_at: Time.now.utc
-          })
+          @db.call(:create_log,             job_id: job_id,
+                                            created_at: Time.now.utc,
+                                            updated_at: Time.now.utc)
         end
 
         def create_log_part(params)
@@ -141,18 +160,14 @@ module Travis
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
           @db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
-          @db[:logs].prepare(:insert, :create_log, {
-            job_id: :$job_id,
-            created_at: :$created_at,
-            updated_at: :$updated_at,
-          })
-          @db[:log_parts].prepare(:insert, :create_log_part, {
-            log_id: :$log_id,
-            content: :$content,
-            number: :$number,
-            final: :$final,
-            created_at: :$created_at,
-          })
+          @db[:logs].prepare(:insert, :create_log,             job_id: :$job_id,
+                                                               created_at: :$created_at,
+                                                               updated_at: :$updated_at)
+          @db[:log_parts].prepare(:insert, :create_log_part,             log_id: :$log_id,
+                                                                         content: :$content,
+                                                                         number: :$number,
+                                                                         final: :$final,
+                                                                         created_at: :$created_at)
           @db[:log_parts].where(log_id: :$log_id).prepare(:delete, :delete_log_parts)
         end
       end

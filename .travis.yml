@@ -1,7 +1,7 @@
 language: ruby
 rvm:
-  - jruby-1.7.16
-  - jruby-head
+- jruby-9.0.4.0
+- 2.3.0
 jdk: openjdk7
 sudo: false
 env:
@@ -13,10 +13,7 @@ services:
   - rabbitmq
   - postgresql
 before_script:
-  - psql -c "CREATE DATABASE travis_logs_test;" -U postgres
+  - createdb -U postgres travis_logs_test
   - cp config/travis.example.yml config/travis.yml
   - bundle exec rake db:migrate
 script: bundle exec rspec spec
-matrix:
-  allow_failures:
-    - rvm: jruby-head

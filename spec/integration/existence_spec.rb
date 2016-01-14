@@ -5,8 +5,8 @@ module Travis::Logs
   describe Existence do
     let(:existence) { described_class.new }
 
-    describe "#occupied!" do
-      it "sets channel to occupied state" do
+    describe '#occupied!' do
+      it 'sets channel to occupied state' do
         existence.occupied!('foo')
         existence.occupied?('foo').should be_true
 
@@ -15,13 +15,13 @@ module Travis::Logs
       end
     end
 
-    describe "#vacant!" do
+    describe '#vacant!' do
       before do
         existence.occupied!('foo')
         existence.occupied?('foo').should be_true
       end
 
-      it "sets channel to vacant state" do
+      it 'sets channel to vacant state' do
         existence.vacant!('foo')
         existence.occupied?('foo').should be_false
 
@@ -29,7 +29,5 @@ module Travis::Logs
         described_class.new.occupied?('foo').should be_false
       end
     end
-
-
   end
 end
