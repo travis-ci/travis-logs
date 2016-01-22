@@ -5,6 +5,12 @@ GIT
     travis-amqp (0.0.1)
 
 GIT
+  remote: git://github.com/travis-ci/travis-lock.git
+  revision: b418401c79e082aa53a62364f7b01a9be6f0d768
+  specs:
+    travis-lock (0.1.1)
+
+GIT
   remote: https://github.com/getsentry/raven-ruby.git
   revision: d75133cf8f0dfad924bb52f567141ca6bcd9edb8
   specs:
@@ -208,6 +214,7 @@ DEPENDENCIES
   sinatra (~> 1.4)
   travis-amqp!
   travis-config (~> 1.0.12)
+  travis-lock!
   travis-migrations!
   travis-support!
 

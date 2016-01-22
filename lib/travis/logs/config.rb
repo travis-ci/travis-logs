@@ -19,6 +19,7 @@ module Travis
              sidekiq:       { namespace: 'sidekiq', pool_size: 22 },
              logs:          { aggregate_async: false, archive: true, purge: false, threads: 10, per_aggregate_limit: 500, intervals: { vacuum: 10, regular: 180, force: 3 * 60 * 60, purge: 6 } },
              redis:         { url: 'redis://localhost:6379' },
+             lock:          { strategy: :redis, ttl: 150 },
              metrics:       { reporter: 'librato' },
              ssl:           {},
              sentry:        {},

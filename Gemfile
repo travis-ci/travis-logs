@@ -37,5 +37,6 @@ gem 'simplecov', require: false
 gem 'sinatra', '~> 1.4'
 gem 'travis-amqp',        github: 'travis-ci/travis-amqp'
 gem 'travis-config', '~> 1.0.12'
+gem 'travis-lock', github: 'travis-ci/travis-lock'
 gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git', group: :test
 gem 'travis-support', git: 'https://github.com/travis-ci/travis-support.git'
