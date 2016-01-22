@@ -2,19 +2,16 @@ source 'https://rubygems.org'
 
 ruby '2.2.2', engine: 'jruby', engine_version: '9.0.4.0' if ENV.key?('DYNO')
 
-gem 'activesupport',      '~> 3.2'
-gem 'travis-support',     github: 'travis-ci/travis-support'
-gem 'travis-amqp',        github: 'travis-ci/travis-amqp'
-gem 'travis-config'
-
-gem 'sequel',             '~> 4.0.0'
-gem 'jdbc-postgres',      '9.3.1101'
-
-gem 'march_hare',         '~> 2.3.0'
-gem 'jruby-openssl',      '~> 0.8.8'
-
-gem 'json',               '~> 1.8.0'
-gem 'pusher',             '~> 0.14.5'
+gem 'activesupport', '~> 3.2'
+gem 'aws-sdk-v1'
+gem 'bunny', platform: :mri
+gem 'coder', github: 'rkh/coder'
+gem 'connection_pool'
+gem 'faraday'
+gem 'jdbc-postgres', '9.3.1101', platform: :jruby
+gem 'jruby-openssl', '~> 0.8.8', platform: :jruby
+gem 'json'
+gem 'march_hare', '~> 2', platform: :jruby
 gem 'metriks'
 gem 'metriks-librato_metrics'
 gem 'pg', platform: :mri
@@ -33,5 +30,7 @@ gem 'sidekiq'
 gem 'sidekiq-unique-jobs', '~> 4'
 gem 'simplecov', require: false
 gem 'sinatra', '~> 1.4'
+gem 'travis-amqp', github: 'travis-ci/travis-amqp'
 gem 'travis-config'
+gem 'travis-lock', github: 'travis-ci/travis-lock'
 gem 'travis-support', github: 'travis-ci/travis-support'
