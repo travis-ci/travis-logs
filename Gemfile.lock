@@ -58,7 +58,7 @@ GEM
     faraday (0.8.11)
       multipart-post (~> 1.2.0)
     ffi (1.9.10-java)
-    hashr (0.0.22)
+    hashr (2.0.0)
     hitimes (1.2.3)
     hitimes (1.2.3-java)
     httpclient (2.7.1)
@@ -156,8 +156,8 @@ GEM
     thor (0.19.1)
     tilt (2.0.2)
     tins (1.6.0)
-    travis-config (0.1.4)
-      hashr (~> 0.0)
+    travis-config (1.0.3)
+      hashr (~> 2.0.0)
 
 PLATFORMS
   java
