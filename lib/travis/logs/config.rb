@@ -5,7 +5,11 @@ module Travis
   module Logs
     class Config < Travis::Config
       def self.ssl?
-        not %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+        env == 'production' and not disable_ssl?
+      end
+
+      def self.disable_ssl?
+        %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
       end
 
       define  amqp:          { username: 'guest', password: 'guest', host: 'localhost', prefetch: 1 },
