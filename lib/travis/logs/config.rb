@@ -23,7 +23,11 @@ module Travis
       end
 
       def ssl?
-        not %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+        env == 'production' and not disable_ssl?
+      end
+
+      def disable_ssl?
+        %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
       end
     end
   end
