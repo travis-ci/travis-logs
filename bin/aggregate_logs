@@ -2,7 +2,6 @@
 
 $LOAD_PATH << 'lib'
 
-require 'bundler/setup'
 require 'travis/logs/aggregate'
 
 app = Travis::Logs::Aggregate.new
