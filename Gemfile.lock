@@ -12,6 +12,18 @@ GIT
     coder (0.4.0)
 
 GIT
+  remote: git://github.com/travis-ci/travis-amqp.git
+  revision: 4eaadb995e44bf41d252b5e903b86e0e3950f3ae
+  specs:
+    travis-amqp (0.0.1)
+
+GIT
+  remote: git://github.com/travis-ci/travis-lock.git
+  revision: 8aadc4cd7a1c8d89788dfc096507ee96a71fceb6
+  specs:
+    travis-lock (0.1.0)
+
+GIT
   remote: git://github.com/travis-ci/travis-support.git
   revision: 2cd02d2a06fdd1e2fc2f129148c168b56f7c190f
   specs:
@@ -46,7 +58,7 @@ GEM
     faraday (0.8.11)
       multipart-post (~> 1.2.0)
     ffi (1.9.10-java)
-    hashr (0.0.22)
+    hashr (2.0.0)
     hitimes (1.2.3)
     hitimes (1.2.3-java)
     httpclient (2.7.1)
@@ -144,8 +156,8 @@ GEM
     thor (0.19.1)
     tilt (2.0.2)
     tins (1.6.0)
-    travis-config (0.1.4)
-      hashr (~> 0.0)
+    travis-config (1.0.4)
+      hashr (~> 2.0.0)
 
 PLATFORMS
   java
@@ -180,7 +192,9 @@ DEPENDENCIES
   sidekiq-unique-jobs (~> 4)
   simplecov
   sinatra (~> 1.4)
-  travis-config (~> 0.1.0)
+  travis-amqp!
+  travis-config (~> 1.0.4)
+  travis-lock!
   travis-support!
 
 BUNDLED WITH
