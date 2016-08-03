@@ -34,7 +34,7 @@ module Travis
       end
 
       def amqp_config
-        Travis::Logs.config.amqp.merge(thread_pool_size: (Travis::Logs.config.logs.threads * 2 + 3))
+        Travis::Logs.config.amqp.to_h.merge(thread_pool_size: (Travis::Logs.config.logs.threads * 2 + 3))
       end
 
       def declare_exchanges

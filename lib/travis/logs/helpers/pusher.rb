@@ -38,7 +38,7 @@ module Travis
         end
 
         def default_client
-          ::Pusher::Client.new(Travis::Logs.config.pusher)
+          ::Pusher::Client.new(Travis::Logs.config.pusher.to_h)
         end
       end
     end
