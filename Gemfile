@@ -28,5 +28,5 @@ gem 'sidekiq'
 gem 'sidekiq-unique-jobs', '~> 4'
 gem 'simplecov', require: false
 gem 'sinatra', '~> 1.4'
-gem 'travis-config', '~> 0.1.0'
+gem 'travis-config', '~> 1.0.0'
 gem 'travis-support', github: 'travis-ci/travis-support'
