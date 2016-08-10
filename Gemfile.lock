@@ -156,7 +156,7 @@ GEM
     thor (0.19.1)
     tilt (2.0.2)
     tins (1.6.0)
-    travis-config (1.0.6)
+    travis-config (1.0.12)
       hashr (~> 2.0.0)
 
 PLATFORMS
@@ -198,4 +198,4 @@ DEPENDENCIES
   travis-support!
 
 BUNDLED WITH
-   1.11.2
+   1.12.5
