@@ -13,7 +13,8 @@ module Travis
       end
 
       def self.amqp_ssl?
-        /^amqps:\/\//.match(ENV['RABBITMQ_URL']).size > 0
+        match = /^amqps:\/\//.match(ENV['RABBITMQ_URL'])
+        match && match.size > 0
       end
 
       define  amqp:          { username: 'guest', password: 'guest', host: 'localhost', prefetch: 1, ssl: amqp_ssl? },
