@@ -12,7 +12,11 @@ module Travis
         %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
       end
 
-      define  amqp:          { username: 'guest', password: 'guest', host: 'localhost', prefetch: 1 },
+      def self.amqp_ssl?
+        /^amqps:\/\//.match(ENV['RABBITMQ_URL']).size > 0
+      end
+
+      define  amqp:          { username: 'guest', password: 'guest', host: 'localhost', prefetch: 1, ssl: amqp_ssl? },
               logs_database: { adapter: 'postgresql', database: "travis_logs_#{env}", ssl: ssl?, encoding: 'unicode', min_messages: 'warning' },
               s3:            { hostname: "archive.travis-ci.org", access_key_id: '', secret_access_key: '', acl: :public_read },
               pusher:        { app_id: 'app-id', key: 'key', secret: 'secret', secure: false },
