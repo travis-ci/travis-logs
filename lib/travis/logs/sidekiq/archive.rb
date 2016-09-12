@@ -10,7 +10,7 @@ module Travis
         sidekiq_options queue: 'archive', retry: 3
 
         def perform(log_id)
-          Services::ArchiveLog.new(log_id).run
+          Travis::Logs::Services::ArchiveLog.new(log_id).run
         end
       end
     end

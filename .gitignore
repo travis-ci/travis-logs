@@ -3,3 +3,5 @@ config/travis.yml
 config/travis.pro.yml
 play
 .jdk-overlay
+.*env
+coverage/

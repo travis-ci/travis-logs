@@ -1,7 +1,11 @@
+def jruby?
+  RUBY_PLATFORM =~ /^java/
+end
+
 require 'sequel'
-require 'jdbc/postgres'
-require "delegate"
-require "active_support/core_ext/string/filters"
+require 'jdbc/postgres' if jruby?
+require 'pg' unless jruby?
+require 'delegate'
 
 module Travis
   module Logs
@@ -15,18 +19,44 @@ module Travis
         # creating the tables or debugging).
         def self.create_sequel
           config = Travis::Logs.config.logs_database
-          Sequel.connect(jdbc_uri_from_config(config), max_connections: config[:pool]).tap do |db|
+          uri = jdbc_uri_from_config(config) if jruby?
+          uri = uri_from_config(config) unless jruby?
+          Sequel.connect(uri, max_connections: config[:pool]).tap do |db|
             db.timezone = :utc
           end
+        end
+
+        def self.uri_from_config(config)
+          host = config[:host] || 'localhost'
+          port = config[:port] || 5432
+          database = config[:database]
+          username = config[:username] || ENV['USER']
+
+          params = {
+            user: username,
+            password: config[:password]
+          }
+
+          "postgres://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
 
         def self.jdbc_uri_from_config(config)
           host = config[:host] || 'localhost'
           port = config[:port] || 5432
           database = config[:database]
-          username = config[:username] || ENV["USER"]
+          username = config[:username] || ENV['USER']
 
-          "jdbc:postgresql://#{host}:#{port}/#{database}?user=#{username}&password=#{config[:password]}"
+          params = {
+            user: username,
+            password: config[:password]
+          }
+
+          params.merge!(
+            ssl: true,
+            sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
+          ) unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+
+          "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
 
         def self.connect
@@ -53,7 +83,7 @@ module Travis
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs].select{[id, job_id, octet_length(content).as(content_length)]}.where(id: log_id).first
+          @db[:logs].select { [id, job_id, octet_length(content).as(content_length)] }.where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
@@ -73,11 +103,9 @@ module Travis
         end
 
         def create_log(job_id)
-          @db.call(:create_log, {
-            job_id: job_id,
-            created_at: Time.now.utc,
-            updated_at: Time.now.utc
-          })
+          @db.call(:create_log,             job_id: job_id,
+                                            created_at: Time.now.utc,
+                                            updated_at: Time.now.utc)
         end
 
         def create_log_part(params)
@@ -88,24 +116,31 @@ module Travis
           @db.call(:delete_log_parts, log_id: log_id)
         end
 
-        AGGREGATEABLE_SELECT_SQL = <<-SQL.squish
-          SELECT DISTINCT log_id
+        def set_log_content(log_id, content)
+          delete_log_parts(log_id)
+          @db[:logs].where(id: log_id).update(content: content, aggregated_at: Time.now.utc, archived_at: nil, archive_verified: nil, updated_at: Time.now.utc)
+        end
+
+        AGGREGATEABLE_SELECT_SQL = <<-SQL.split.join(' ')
+          SELECT log_id
             FROM log_parts
            WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
               OR  created_at <= NOW() - interval '? seconds'
+        ORDER BY created_at ASC
+           LIMIT ?
         SQL
 
-        def aggregatable_log_parts(regular_interval, force_interval)
-          @db[AGGREGATEABLE_SELECT_SQL, regular_interval, true, force_interval].map(:log_id)
+        def aggregatable_log_parts(regular_interval, force_interval, limit)
+          @db[AGGREGATEABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
         end
 
-        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.squish
+        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ')
           SELECT array_to_string(array_agg(log_parts.content ORDER BY number, id), '')
             FROM log_parts
            WHERE log_id = ?
         SQL
 
-        AGGREGATE_UPDATE_SQL = <<-SQL.squish
+        AGGREGATE_UPDATE_SQL = <<-SQL.split.join(' ')
           UPDATE logs
              SET aggregated_at = ?,
                  content = (COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL}))
@@ -125,18 +160,14 @@ module Travis
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
           @db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
-          @db[:logs].prepare(:insert, :create_log, {
-            job_id: :$job_id,
-            created_at: :$created_at,
-            updated_at: :$updated_at,
-          })
-          @db[:log_parts].prepare(:insert, :create_log_part, {
-            log_id: :$log_id,
-            content: :$content,
-            number: :$number,
-            final: :$final,
-            created_at: :$created_at,
-          })
+          @db[:logs].prepare(:insert, :create_log,             job_id: :$job_id,
+                                                               created_at: :$created_at,
+                                                               updated_at: :$updated_at)
+          @db[:log_parts].prepare(:insert, :create_log_part,             log_id: :$log_id,
+                                                                         content: :$content,
+                                                                         number: :$number,
+                                                                         final: :$final,
+                                                                         created_at: :$created_at)
           @db[:log_parts].where(log_id: :$log_id).prepare(:delete, :delete_log_parts)
         end
       end

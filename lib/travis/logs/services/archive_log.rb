@@ -1,5 +1,6 @@
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
+require 'travis/logs/investigator'
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
 require 'uri'
@@ -10,7 +11,7 @@ module Travis
       class ArchiveLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = "logs.archive"
+        METRIKS_PREFIX = 'logs.archive'
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -24,7 +25,7 @@ module Travis
 
         attr_reader :log_id
 
-        def initialize(log_id, storage_service=Helpers::S3.new, database=Travis::Logs.database_connection)
+        def initialize(log_id, storage_service = Helpers::S3.new, database = Travis::Logs.database_connection)
           @log_id = log_id
           @storage_service = storage_service
           @database = database
@@ -37,8 +38,9 @@ module Travis
           store
           verify
           confirm
-          Travis.logger.debug "action=archive id=#{log_id} result=successful"
+          Travis.logger.debug "action=archive id=#{log_id} job_id=#{job_id} result=successful"
           queue_purge
+          investigate if investigation_enabled?
         ensure
           mark_as_archiving(false)
         end
@@ -62,7 +64,7 @@ module Travis
         def content_blank?
           if content.blank?
             Travis.logger.warn "action=archive id=#{log_id} result=empty"
-            mark("log.empty")
+            mark('log.empty')
             true
           else
             false
@@ -83,7 +85,7 @@ module Travis
               actual = archived_content_length
               expected = content.bytesize
               unless actual == expected
-                raise VerificationFailed.new(log_id, target_url, expected, actual)
+                fail VerificationFailed.new(log_id, target_url, expected, actual)
               end
             end
           end
@@ -96,46 +98,78 @@ module Travis
         def queue_purge
           if Travis::Logs.config.logs.purge
             delay = Travis::Logs.config.logs.intervals.purge
-            Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
+            Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
           end
         end
 
         def target_url
-          "http://#{hostname}/jobs/#{log[:job_id]}/log.txt"
+          "http://#{hostname}/jobs/#{job_id}/log.txt"
+        end
+
+        def investigate
+          investigators.each do |investigator|
+            result = investigator.investigate(content)
+            next if result.nil?
+
+            mark(result.marking) unless result.marking.empty?
+            Travis.logger.warn(
+              "action=investigate investigator=#{investigator.name} " \
+              "result=#{result.label} id=#{log_id} job_id=#{job_id}"
+            )
+          end
         end
 
         private
 
-          attr_reader :storage_service, :database
+        attr_reader :storage_service, :database
 
-          def archived_content_length
-            storage_service.content_length(target_url)
-          end
+        def archived_content_length
+          storage_service.content_length(target_url)
+        end
 
-          def content
-            @content ||= log[:content]
-          end
+        def content
+          @content ||= log[:content]
+        end
 
-          def content=(new_content)
-            @content = new_content
-          end
+        def job_id
+          (log || {}).fetch(:job_id, 'unknown')
+        end
 
-          def hostname
-            Travis.config.s3.hostname
-          end
+        attr_writer :content
 
-          def retrying(header, times = 5)
-            yield
-          rescue => e
-            count ||= 0
-            if times > (count += 1)
-              puts "[#{header}] retry #{count} because: #{e.message}"
-              sleep count * 1
-              retry
-            else
-              raise
-            end
+        def hostname
+          Travis.config.s3.hostname
+        end
+
+        def retrying(header, times = 5)
+          yield
+        rescue => e
+          count ||= 0
+          if times > (count += 1)
+            puts "[#{header}] retry #{count} because: #{e.message}"
+            sleep count * 1
+            retry
+          else
+            raise
           end
+        end
+
+        def investigation_enabled?
+          Travis.config.investigation.enabled?
+        end
+
+        def investigators
+          @investigators ||= Travis.config.investigation.investigators.map do |name, h|
+            ::Travis::Logs::Investigator.new(
+              name,
+              Regexp.new(h[:matcher]),
+              h[:marking_tmpl],
+              h[:label_tmpl]
+            )
+          end.sort do |a, b|
+            a.name <=> b.name
+          end
+        end
       end
     end
   end

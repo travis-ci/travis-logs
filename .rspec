@@ -1,2 +1,5 @@
--fdoc
 --color
+--format documentation
+--order rand
+--require support
+--require pry

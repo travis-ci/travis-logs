@@ -43,7 +43,6 @@ def purge(from, to, options = {})
   end
 end
 
-
 options = {}
 
 OptionParser.new do |o|
@@ -54,8 +53,7 @@ OptionParser.new do |o|
 end
 
 from = options[:from] || ARGV[0] || 0
-to   = options[:to]   || ARGV[1] || 3280461
+to   = options[:to] || ARGV[1] || 3_280_461
 
 puts "Going to purge logs for ids #{from}-#{to} #{'(dry run)' if options[:dry]}"
 purge(from.to_i, to.to_i, dry: options[:dry])
-

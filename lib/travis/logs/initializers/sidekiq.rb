@@ -1,4 +1,4 @@
-$: << 'lib'
+$LOAD_PATH << 'lib'
 
 require 'travis/logs'
 require 'travis/support'
@@ -20,6 +20,6 @@ Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
 
 Travis::Logs::Sidekiq.setup
 
-# load the workers
+require 'travis/logs/sidekiq/aggregate'
 require 'travis/logs/sidekiq/archive'
 require 'travis/logs/sidekiq/purge'

@@ -8,7 +8,7 @@ Sequel.migration do
       boolean :final
       timestamp :created_at
 
-      index [:log_id, :number], name: "index_log_parts_on_log_id_and_number"
+      index [:log_id, :number], name: 'index_log_parts_on_log_id_and_number'
     end
   end
 end

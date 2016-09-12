@@ -48,7 +48,7 @@ ensure
   else
     puts "\n[report][id: #{log.id}, job_id: #{log.job_id}] #{report.join(', ')}"
 
-    Sidekiq::Client.push('queue' => 'archive_past', 'class' => Archiver, 'args' => [{ id: log.id, job_id: log.job_id}])
+    Sidekiq::Client.push('queue' => 'archive_past', 'class' => Archiver, 'args' => [{ id: log.id, job_id: log.job_id }])
 
     attrs = { archiving: Time.now }
     attrs[:archived_at] = nil      if log.archived_at
@@ -66,5 +66,5 @@ def verify_all(from, to)
 end
 
 from = 0
-to = 3280461
+to = 3_280_461
 verify_all(from, to)

@@ -1,7 +1,7 @@
-require "travis/logs/helpers/metrics"
-require "travis/logs/helpers/s3"
-require "travis/logs/sidekiq"
-require "travis/logs/sidekiq/archive"
+require 'travis/logs/helpers/metrics'
+require 'travis/logs/helpers/s3'
+require 'travis/logs/sidekiq'
+require 'travis/logs/sidekiq/archive'
 
 module Travis
   module Logs
@@ -9,7 +9,7 @@ module Travis
       class PurgeLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = "logs.purge"
+        METRIKS_PREFIX = 'logs.purge'
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -19,7 +19,7 @@ module Travis
           @log_id = log_id
           @storage_service = storage_service || Helpers::S3.new
           @database = database || Travis::Logs.database_connection
-          @archiver = archiver || ->(log_id) { Sidekiq::Archive.perform_async(log_id) }
+          @archiver = archiver || ->(log_id) { Travis::Logs::Sidekiq::Archive.perform_async(log_id) }
         end
 
         def run
@@ -39,9 +39,9 @@ module Travis
         def process_empty_log_content
           if content_length_from_s3.nil?
             Travis.logger.warn("action=purge id=#{@log_id} result=content_missing")
-            mark("log.content_empty")
+            mark('log.content_empty')
           else
-            measure("already_purged") do
+            measure('already_purged') do
               @database.transaction do
                 @database.mark_archive_verified(@log_id)
                 @database.purge(@log_id)
@@ -53,12 +53,12 @@ module Travis
 
         def process_log_content
           if content_lengths_match?
-            measure("purged") do
+            measure('purged') do
               @database.purge(@log_id)
             end
             Travis.logger.debug("action=purge id=#{@log_id} result=successful content_length=#{content_length_from_db}")
           else
-            measure("requeued_for_achiving") do
+            measure('requeued_for_achiving') do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
@@ -76,11 +76,11 @@ module Travis
 
         def content_length_from_s3
           @content_length_from_s3 ||= begin
-            measure("check_content_length") do
+            measure('check_content_length') do
               @storage_service.content_length(log_url)
             end
           rescue
-            mark("check_content_length.failed")
+            mark('check_content_length.failed')
           end
         end
 
@@ -89,7 +89,7 @@ module Travis
             @log = @database.log_content_length_for_id(@log_id)
             unless @log
               Travis.logger.warn("action=purge id=#{@log_id} result=not_found")
-              mark("log.not_found")
+              mark('log.not_found')
             end
           end
 
