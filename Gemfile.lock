@@ -105,6 +105,8 @@ GEM
     rainbow (2.0.0)
     rake (10.5.0)
     redis (3.2.2)
+    redis-namespace (1.5.2)
+      redis (~> 3.0, >= 3.0.4)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
@@ -172,6 +174,7 @@ DEPENDENCIES
   rack-test
   rails_12factor
   rake
+  redis-namespace
   rspec
   rubocop
   sentry-raven!
@@ -184,4 +187,4 @@ DEPENDENCIES
   travis-support!
 
 BUNDLED WITH
-   1.11.2
+   1.13.1
