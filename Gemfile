@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby '2.2.2', engine: 'jruby', engine_version: '9.0.4.0' if ENV.key?('DYNO')
+
 gem 'activesupport', '~> 3.2'
 gem 'aws-sdk-v1'
 gem 'bunny', platform: :mri
