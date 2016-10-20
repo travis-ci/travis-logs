@@ -2,6 +2,7 @@ require 'ostruct'
 require 'travis/logs'
 require 'travis/logs/app'
 require 'rack/test'
+require 'openssl'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -10,12 +11,13 @@ module Travis::Logs
     include Rack::Test::Methods
 
     def app
-      Travis::Logs::App.new(nil, pusher, database)
+      Travis::Logs::App.new(existence, pusher, database, log_part_service)
     end
 
     let(:pusher) { double(:pusher) }
     let(:existence) { Travis::Logs::Existence.new }
     let(:database) { double(:database) }
+    let(:log_part_service) { double(:log_part_service) }
 
     before do
       existence.vacant!('foo')
@@ -132,6 +134,76 @@ module Travis::Logs
         header 'Authorization', "token not-#{@auth_token}"
         response = put "/logs/#{@job_id}", ''
         expect(response.status).to be == 403
+      end
+    end
+
+    describe 'PUT /log-parts/:job_id/:log_part_id' do
+      before do
+        # 1024 is bad but this is just a test
+        @rsa_key = OpenSSL::PKey::RSA.new(1024) 
+        ENV['JWT_RSA_PUBLIC_KEY'] = @rsa_key.public_key.to_pem
+
+        @job_id = 1
+        @log_id = 456
+
+        allow(log_part_service).to receive(:new).with(
+          {
+            'id' => @job_id,
+            'log' => 'fafafaf',
+            'number' => 1,
+            'final' => false,
+          },
+          database,
+          pusher,
+          existence,
+        ).and_return(double(:log_part_service_instance, run: nil))
+      end
+
+      context 'with valid authorization header' do
+        before do
+          payload = { sub: @job_id.to_s }
+          token = JWT.encode(payload, @rsa_key, 'RS512')
+          header 'Authorization', "Bearer #{token}"
+        end
+
+        it 'returns 204' do
+          response = put "/log-parts/#{@job_id}/1", JSON.dump({
+            "@type" => "log_part",
+            "final" => false,
+            "content" => Base64.encode64("fafafaf"),
+            "encoding" => "base64",
+          })
+          expect(response.status).to be == 204
+        end
+      end
+
+      context 'with no authorization header' do
+        it 'returns 403' do
+          response = put "/log-parts/#{@job_id}/1", ''
+          expect(response.status).to be == 403
+        end
+      end
+
+      context 'with invalid authorization header' do
+        it 'returns 403' do
+          header 'Authorization', 'Bearer fafafafafaf'
+
+          response = put "/log-parts/#{@job_id}/1", ''
+          expect(response.status).to be == 403
+        end
+      end
+
+      context 'with invalid JWT subject' do
+        before do
+          payload = { sub: (@job_id + 1).to_s }
+          token = JWT.encode(payload, @rsa_key, 'RS512')
+          header 'Authorization', "Bearer #{token}"
+        end
+
+        it 'returns 403' do
+          response = put "/log-parts/#{@job_id}/1", ''
+          expect(response.status).to be == 403
+        end
       end
     end
   end
