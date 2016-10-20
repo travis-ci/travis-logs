@@ -169,7 +169,6 @@ oRLuY9cp8DkPGlJ2P7sxugWnMyoIUEXIVwAwWJJ/Qwd2nOUMbYKr
 -----END RSA PRIVATE KEY-----
 EOF
 
-        # 1024 is bad but this is just a test
         @rsa_key = OpenSSL::PKey.read(rsa_private_key)
         ENV['JWT_RSA_PUBLIC_KEY'] = @rsa_key.public_key.to_pem
 

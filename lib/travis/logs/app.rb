@@ -86,7 +86,7 @@ module Travis
           halt 403
         end
 
-        rsa_public_key = OpenSSL::PKey.read(ENV['JWT_RSA_PUBLIC_KEY'])
+        rsa_public_key = OpenSSL::PKey::RSA.new(ENV['JWT_RSA_PUBLIC_KEY'])
 
         begin
           JWT.decode(auth_header[7..-1], rsa_public_key, true, { algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id] })
