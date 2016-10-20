@@ -8,6 +8,7 @@ require 'jwt'
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/process_log_part'
 require 'rack/ssl'
 
@@ -34,7 +35,7 @@ module Travis
       def initialize(existence = nil, pusher = nil, database = nil, log_part_service = nil)
         super()
         @existence = existence || Travis::Logs::Existence.new
-        @pusher    = pusher || ::Pusher::Client.new(Travis::Logs.config.pusher)
+        @pusher    = pusher || Travis::Logs::Helpers::Pusher.new
         @database  = database || Travis::Logs::Helpers::Database.connect
         @log_part_service = log_part_service || Travis::Logs::Services::ProcessLogPart
       end

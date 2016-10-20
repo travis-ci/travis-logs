@@ -22,6 +22,10 @@ module Travis
           channel
         end
 
+        def webhook(request)
+          @pusher_client.webhook(request)
+        end
+
         private
 
         def pusher_channel(payload)
