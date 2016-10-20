@@ -3,6 +3,7 @@ require 'raven'
 require 'sinatra/base'
 require 'logger'
 require 'pusher'
+require 'jwt'
 
 require 'travis/logs'
 require 'travis/logs/existence'
@@ -71,6 +72,40 @@ module Travis
         database.set_log_content(log[:id], request.body.read)
 
         status 204
+      end
+
+      put '/log-parts/:job_id/:log_part_id' do
+        Travis.uuid = request.env['HTTP_X_REQUEST_ID']
+
+        auth_header = request.env['HTTP_AUTHORIZATION']
+        if auth_header.nil? || !request.env['HTTP_AUTHORIZATION'].starts_with?('Bearer ')
+          halt 403
+        end
+
+        begin
+          JWT.decode(auth_header[7..-1], rsa_public_key, true, { algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id] })
+        rescue JWT::DecodeError
+          halt 403
+        end
+
+        data = JSON.parse(request.body.read)
+        if data['@type'] != 'log_part'
+          halt 400, JSON.dump({ 'error' => '@type should be log_part' })
+        end
+
+        content = case data['encoding']
+        when 'base64'
+          Base64.decode64(data['content']) 
+        else
+          halt 400, JSON.dump({ 'error' => 'invalid encoding, only base64 supported' })
+        end
+
+        Travis::Logs::Services::ProcessLogPart.run({
+          'id' => Integer(params[:job_id]),
+          'log' => content,
+          'number' => params[:log_part_id],
+          'final' => data['final'],
+        })
       end
     end
   end
