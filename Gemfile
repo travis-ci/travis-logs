@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby '2.2.2', engine: 'jruby', engine_version: '9.0.4.0' if ENV.key?('DYNO')
+
 gem 'activesupport', '~> 3.2'
 gem 'aws-sdk-v1'
 gem 'bunny', platform: :mri
@@ -20,6 +22,7 @@ gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rails_12factor'
 gem 'rake'
+gem 'redis-namespace'
 gem 'rspec', group: :test
 gem 'rubocop', require: false
 gem 'sentry-raven', github: 'getsentry/raven-ruby'
