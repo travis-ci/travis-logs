@@ -63,14 +63,12 @@ module Travis
         halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
         halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
 
-        p params
         job_id = Integer(params[:job_id])
 
-        log = database.log_for_job_id(job_id) || database.create_log(job_id)
-        p log
+        log_id = database.log_for_job_id(job_id) || database.create_log(job_id)
 
         request.body.rewind
-        database.set_log_content(log[:id], request.body.read)
+        database.set_log_content(log_id, request.body.read)
 
         status 204
       end

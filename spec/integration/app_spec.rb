@@ -86,7 +86,7 @@ module Travis::Logs
 
         allow(database).to receive(:set_log_content)
         allow(database).to receive(:log_for_job_id).with(anything).and_return(nil)
-        allow(database).to receive(:log_for_job_id).with(@job_id).and_return(id: @log_id, job_id: @job_id, content: '')
+        allow(database).to receive(:log_for_job_id).with(@job_id).and_return(@log_id)
       end
 
       after do
