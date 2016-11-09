@@ -35,7 +35,7 @@ module Travis::Logs::Helpers
       end
     end
 
-    describe '#log_for_job_id' do
+    describe '#log_id_for_job_id' do
       context 'when the log exists' do
         let(:log) { { content: 'hello, world', job_id: 2 } }
 
@@ -43,14 +43,14 @@ module Travis::Logs::Helpers
           @log_id = sequel[:logs].insert(log)
         end
 
-        it 'returns the id of the log in a Hash' do
-          expect(database.log_for_job_id(2)).to eq(id: @log_id)
+        it 'returns the id of the log' do
+          expect(database.log_id_for_job_id(2)).to eq(@log_id)
         end
       end
 
       context 'when the log does not exist' do
         it 'returns nil' do
-          expect(database.log_for_job_id(1)).to be_nil
+          expect(database.log_id_for_job_id(1)).to be_nil
         end
       end
     end
