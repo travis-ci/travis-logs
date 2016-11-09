@@ -68,7 +68,9 @@ module Travis
         log_id = database.log_for_job_id(job_id) || database.create_log(job_id)
 
         request.body.rewind
-        database.set_log_content(log_id, request.body.read)
+        content = request.body.read
+        content = nil if content.empty?
+        database.set_log_content(log_id, content)
 
         status 204
       end

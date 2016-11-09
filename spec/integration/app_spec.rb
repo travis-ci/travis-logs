@@ -114,6 +114,11 @@ module Travis::Logs
           expect(database).to receive(:set_log_content).with(@log_id, 'hello, world')
           put "/logs/#{@job_id}", 'hello, world'
         end
+
+        it 'does not set log content if the given body was empty' do
+          expect(database).to receive(:set_log_content).with(@log_id, nil)
+          put "/logs/#{@job_id}", ''
+        end
       end
 
       it "returns 500 if the auth token isn't set" do
