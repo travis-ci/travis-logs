@@ -85,8 +85,8 @@ module Travis::Logs
         @auth_token = ENV['AUTH_TOKEN'] = 'very-secret'
 
         allow(database).to receive(:set_log_content)
-        allow(database).to receive(:log_for_job_id).with(anything).and_return(nil)
-        allow(database).to receive(:log_for_job_id).with(@job_id).and_return(@log_id)
+        allow(database).to receive(:log_id_for_job_id).with(anything).and_return(nil)
+        allow(database).to receive(:log_id_for_job_id).with(@job_id).and_return(@log_id)
       end
 
       after do

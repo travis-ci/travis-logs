@@ -65,7 +65,7 @@ module Travis
 
         job_id = Integer(params[:job_id])
 
-        log_id = database.log_for_job_id(job_id) || database.create_log(job_id)
+        log_id = database.log_id_for_job_id(job_id) || database.create_log(job_id)
 
         request.body.rewind
         content = request.body.read

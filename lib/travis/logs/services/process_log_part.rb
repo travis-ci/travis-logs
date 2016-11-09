@@ -84,8 +84,7 @@ module Travis
         alias_method :find_or_create_log, :log_id
 
         def find_log_id
-          log = database.log_for_job_id(payload['id'])
-          log ? log[:id] : nil
+          database.log_id_for_job_id(payload['id'])
         end
 
         def create_log

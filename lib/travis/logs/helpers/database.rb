@@ -78,8 +78,13 @@ module Travis
           @db.call(:find_log, log_id: log_id).first
         end
 
-        def log_for_job_id(job_id)
-          @db.call(:find_log_id, job_id: job_id).first
+        def log_id_for_job_id(job_id)
+          log = @db.call(:find_log_id, job_id: job_id)
+          if log
+            log[:id]
+          else
+            nil
+          end
         end
 
         def log_content_length_for_id(log_id)
@@ -160,7 +165,7 @@ module Travis
 
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
-          @db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
+          @db[:logs].select(:id).where(job_id: :$job_id).prepare(:first, :find_log_id)
           @db[:logs].prepare(:insert, :create_log,             job_id: :$job_id,
                                                                created_at: :$created_at,
                                                                updated_at: :$updated_at)
