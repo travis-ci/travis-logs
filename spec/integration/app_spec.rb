@@ -86,7 +86,7 @@ module Travis::Logs
 
         allow(database).to receive(:set_log_content)
         allow(database).to receive(:log_for_job_id).with(anything).and_return(nil)
-        allow(database).to receive(:log_for_job_id).with(@job_id).and_return(@log_id)
+        allow(database).to receive(:log_for_job_id).with(@job_id).and_return(id: @log_id, job_id: @job_id, content: '')
       end
 
       after do
@@ -104,7 +104,7 @@ module Travis::Logs
         end
 
         it "creates the log if it doesn't exist" do
-          expect(database).to receive(:create_log).with(@job_id + 1).and_return(id: @log_id + 1, job_id: @job_id + 1, content: '')
+          expect(database).to receive(:create_log).with(@job_id + 1).and_return(id: @log_id + 1)
 
           response = put "/logs/#{@job_id + 1}"
           expect(response.status).to be == 204
