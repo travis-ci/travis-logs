@@ -64,13 +64,13 @@ module Travis
         halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
 
         job_id = Integer(params[:job_id])
-
-        log_id = database.log_for_job_id(job_id) || database.create_log(job_id)
+        log = database.log_for_job_id(job_id)
+        log ||= { id: database.create_log(job_id) }
 
         request.body.rewind
         content = request.body.read
         content = nil if content.empty?
-        database.set_log_content(log_id, content)
+        database.set_log_content(log[:id], content)
 
         status 204
       end
