@@ -22,8 +22,8 @@ class FakeDatabase
     log_part_id
   end
 
-  def log_for_job_id(job_id)
-    @logs.find { |log| log[:job_id] == job_id }
+  def log_id_for_job_id(job_id)
+    @logs.select { |log| log[:job_id] == job_id }.map { |log| log[:id] }.first
   end
 end
 
@@ -47,7 +47,7 @@ module Travis::Logs::Services
       it 'creates a log' do
         service.run
 
-        expect(database.log_for_job_id(2)).not_to be_nil
+        expect(database.log_id_for_job_id(2)).not_to be_nil
       end
 
       it 'marks the log.create metric' do
