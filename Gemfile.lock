@@ -185,6 +185,3 @@ DEPENDENCIES
   sinatra (~> 1.4)
   travis-config (~> 0.1.0)
   travis-support!
-
-BUNDLED WITH
-   1.13.1
