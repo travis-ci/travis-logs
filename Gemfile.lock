@@ -12,6 +12,13 @@ GIT
     coder (0.4.0)
 
 GIT
+  remote: git://github.com/travis-ci/travis-migrations.git
+  revision: c5ad3c002f63c105b684197da80faac9e77d183c
+  branch: igor-logs-migrations
+  specs:
+    travis-migrations (0.0.3)
+
+GIT
   remote: git://github.com/travis-ci/travis-support.git
   revision: 2cd02d2a06fdd1e2fc2f129148c168b56f7c190f
   specs:
@@ -184,4 +191,8 @@ DEPENDENCIES
   simplecov
   sinatra (~> 1.4)
   travis-config (~> 0.1.0)
+  travis-migrations!
   travis-support!
+
+BUNDLED WITH
+   1.13.6
