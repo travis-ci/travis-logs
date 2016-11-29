@@ -38,6 +38,9 @@ module Travis
         @pusher    = pusher || Travis::Logs::Helpers::Pusher.new
         @database  = database || Travis::Logs::Helpers::Database.connect
         @log_part_service = log_part_service || Travis::Logs::Services::ProcessLogPart
+        if !ENV['JWT_RSA_PUBLIC_KEY'].to_s.strip.empty?
+          @rsa_public_key = OpenSSL::PKey::RSA.new(ENV['JWT_RSA_PUBLIC_KEY'])
+        end
       end
 
       post '/pusher/existence' do
@@ -80,7 +83,7 @@ module Travis
       end
 
       put '/log-parts/:job_id/:log_part_id' do
-        halt 500, 'key is not set' if ENV['JWT_RSA_PUBLIC_KEY'].to_s.strip.empty?
+        halt 500, 'key is not set' if @rsa_public_key.nil?
 
         Travis.uuid = request.env['HTTP_X_REQUEST_ID']
 
@@ -89,10 +92,8 @@ module Travis
           halt 403
         end
 
-        rsa_public_key = OpenSSL::PKey::RSA.new(ENV['JWT_RSA_PUBLIC_KEY'])
-
         begin
-          JWT.decode(auth_header[7..-1], rsa_public_key, true, { algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id] })
+          JWT.decode(auth_header[7..-1], @rsa_public_key, true, { algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id] })
         rescue JWT::DecodeError
           halt 403
         end
