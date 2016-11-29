@@ -34,3 +34,7 @@ gem 'sinatra', '~> 1.4'
 gem 'travis-config', '~> 0.1.0'
 gem 'travis-support', github: 'travis-ci/travis-support'
 gem 'jwt'
+
+group :test do
+  gem 'travis-migrations', github: 'travis-ci/travis-migrations'
+end

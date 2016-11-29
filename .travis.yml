@@ -15,5 +15,5 @@ services:
 before_script:
   - createdb -U postgres travis_logs_test
   - cp config/travis.example.yml config/travis.yml
-  - bundle exec rake db:migrate
+  - psql -q travis_logs_test < $(bundle show travis-migrations)/db/logs/structure.sql
 script: bundle exec rspec spec
