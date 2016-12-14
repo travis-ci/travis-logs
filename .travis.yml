@@ -4,6 +4,7 @@ rvm:
 - 2.3.3
 jdk: openjdk7
 sudo: false
+dist: trusty
 env:
   global:
   - PG_DISABLE_SSL='1'
