@@ -12,7 +12,8 @@ cache: bundler
 services:
   - redis
   - rabbitmq
-  - postgresql
+addons:
+  postgresql: 9.3
 before_script:
   - createdb -U postgres travis_logs_test
   - cp config/travis.example.yml config/travis.yml
