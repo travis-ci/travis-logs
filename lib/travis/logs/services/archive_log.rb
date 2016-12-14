@@ -73,9 +73,9 @@ module Travis
 
         def store
           retrying(:store) do
-            measure('store') do
-              storage_service.store(content, target_url)
-            end
+            # measure('store') do
+            storage_service.store(content, target_url)
+            # end
           end
         end
 
