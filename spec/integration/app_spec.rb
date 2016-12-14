@@ -33,7 +33,7 @@ module Travis::Logs
 
     describe 'POST /pusher/existence' do
       it 'sets proper properties on channel' do
-        expect(existence.occupied?('foo')).to be false
+        expect(existence.occupied?('foo')).to be nil
         expect(existence.occupied?('bar')).to be false
 
         webhook = OpenStruct.new(valid?: true, events: [

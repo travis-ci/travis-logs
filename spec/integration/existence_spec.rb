@@ -8,7 +8,7 @@ module Travis::Logs
     describe '#occupied!' do
       it 'sets channel to occupied state' do
         existence.occupied!('foo')
-        expect(existence.occupied?('foo')).to be true
+        expect(existence.occupied?('foo')).to eq('true')
 
         # check new instance
         expect(described_class.new.occupied?('foo')).to be true
@@ -18,7 +18,7 @@ module Travis::Logs
     describe '#vacant!' do
       before do
         existence.occupied!('foo')
-        expect(existence.occupied?('foo')).to be true
+        expect(existence.occupied?('foo')).to eq('true')
       end
 
       it 'sets channel to vacant state' do
