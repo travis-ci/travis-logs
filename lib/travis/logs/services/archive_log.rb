@@ -73,9 +73,9 @@ module Travis
 
         def store
           retrying(:store) do
-            # measure('store') do
-            storage_service.store(content, target_url)
-            # end
+            measure('store') do
+              storage_service.store(content, target_url)
+            end
           end
         end
 
@@ -146,7 +146,14 @@ module Travis
         rescue => e
           count ||= 0
           if times > (count += 1)
-            puts "[#{header}] retry #{count} because: #{e.message}"
+            Travis.logger.debug(
+              "action=archive retrying=#{header} " \
+              "error=#{JSON.dump(e.backtrace)}"
+            )
+            Travis.logger.warn(
+              "action=archive retrying=#{header} " \
+              "reason=#{e.message} id=#{log_id} job_id=#{job_id}"
+            )
             sleep count * 1
             retry
           else
