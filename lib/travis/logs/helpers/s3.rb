@@ -15,7 +15,11 @@ module Travis
         end
 
         def store(data, url)
-          object(url).put(body: data, content_type: 'text/plain', acl: Travis::Logs.config.s3.acl)
+          object(url).put(
+            body: data,
+            content_type: 'text/plain',
+            acl: Travis::Logs.config.s3.acl.to_s.tr('_', '-')
+          )
         end
 
         def content_length(url)
