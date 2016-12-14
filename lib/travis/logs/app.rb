@@ -38,7 +38,7 @@ module Travis
         @pusher    = pusher || Travis::Logs::Helpers::Pusher.new
         @database  = database || Travis::Logs::Helpers::Database.connect
         @log_part_service = log_part_service || Travis::Logs::Services::ProcessLogPart
-        if !ENV['JWT_RSA_PUBLIC_KEY'].to_s.strip.empty?
+        unless ENV['JWT_RSA_PUBLIC_KEY'].to_s.strip.empty?
           @rsa_public_key = OpenSSL::PKey::RSA.new(ENV['JWT_RSA_PUBLIC_KEY'])
         end
       end
@@ -93,21 +93,21 @@ module Travis
         end
 
         begin
-          JWT.decode(auth_header[7..-1], @rsa_public_key, true, { algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id] })
+          JWT.decode(auth_header[7..-1], @rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
         rescue JWT::DecodeError
           halt 403
         end
 
         data = JSON.parse(request.body.read)
         if data['@type'] != 'log_part'
-          halt 400, JSON.dump({ 'error' => '@type should be log_part' })
+          halt 400, JSON.dump('error' => '@type should be log_part')
         end
 
         content = case data['encoding']
-        when 'base64'
-          Base64.decode64(data['content']) 
-        else
-          halt 400, JSON.dump({ 'error' => 'invalid encoding, only base64 supported' })
+                  when 'base64'
+                    Base64.decode64(data['content'])
+                  else
+                    halt 400, JSON.dump('error' => 'invalid encoding, only base64 supported')
         end
 
         @log_part_service.new(
@@ -115,11 +115,11 @@ module Travis
             'id' => Integer(params[:job_id]),
             'log' => content,
             'number' => Integer(params[:log_part_id]),
-            'final' => data['final'],
+            'final' => data['final']
           },
           database,
           pusher,
-          existence,
+          existence
         ).run
 
         status 204

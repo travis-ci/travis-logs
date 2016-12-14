@@ -13,11 +13,7 @@ module Travis
 
           Travis.logger.info("Setting up Sidekiq (pool size: #{pool_size}) and Redis (connecting to host #{redis_host})")
           ::Sidekiq.redis = ::Sidekiq::RedisConnection.create(url: url, namespace: namespace, size: pool_size)
-          if Travis.config.log_level == :debug
-            ::Sidekiq.logger = Travis.logger
-          else
-            ::Sidekiq.logger = nil
-          end
+          ::Sidekiq.logger = (Travis.logger if Travis.config.log_level == :debug)
         end
       end
     end

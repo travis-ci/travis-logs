@@ -12,7 +12,7 @@ describe Travis::RedisPool do
 
   it 'forwards operations to redis' do
     redis.set('some-key', 100)
-    unpooled_redis.get('some-key').should == '100'
+    expect(unpooled_redis.get('some-key')).to eq('100')
   end
 
   it 'fails when a non-supported operation is called' do

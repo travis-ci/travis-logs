@@ -11,7 +11,7 @@ module Travis
       class ArchiveLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.archive'
+        METRIKS_PREFIX = 'logs.archive'.freeze
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -55,7 +55,7 @@ module Travis
             log
           end
         end
-        alias_method :fetch, :log
+        alias fetch log
 
         def mark_as_archiving(archiving = true)
           database.update_archiving_status(log_id, archiving)
@@ -85,7 +85,7 @@ module Travis
               actual = archived_content_length
               expected = content.bytesize
               unless actual == expected
-                fail VerificationFailed.new(log_id, target_url, expected, actual)
+                raise VerificationFailed.new(log_id, target_url, expected, actual)
               end
             end
           end
@@ -166,9 +166,7 @@ module Travis
               h[:marking_tmpl],
               h[:label_tmpl]
             )
-          end.sort do |a, b|
-            a.name <=> b.name
-          end
+          end.sort_by(&:name)
         end
       end
     end
