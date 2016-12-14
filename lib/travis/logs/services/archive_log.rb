@@ -148,7 +148,7 @@ module Travis
           if times > (count += 1)
             Travis.logger.debug(
               "action=archive retrying=#{header} " \
-              "error=#{JSON.dump(e.backtrace)}"
+              "error=#{JSON.dump(e.backtrace)} type=#{e.class.name}"
             )
             Travis.logger.warn(
               "action=archive retrying=#{header} " \
