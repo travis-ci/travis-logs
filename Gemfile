@@ -11,6 +11,7 @@ gem 'faraday'
 gem 'jdbc-postgres', platform: :jruby
 gem 'jruby-openssl', platform: :jruby
 gem 'json'
+gem 'jwt'
 gem 'march_hare', '~> 2', platform: :jruby
 gem 'metriks'
 gem 'metriks-librato_metrics'
@@ -32,9 +33,5 @@ gem 'sidekiq-unique-jobs', '~> 4'
 gem 'simplecov', require: false
 gem 'sinatra', '~> 1.4'
 gem 'travis-config', '~> 0.1.0'
+gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git', group: :test
 gem 'travis-support', git: 'https://github.com/travis-ci/travis-support.git'
-gem 'jwt'
-
-group :test do
-  gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git'
-end
