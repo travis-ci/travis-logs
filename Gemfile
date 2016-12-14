@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.3.3', engine: 'jruby', engine_version: '9.1.6.0' if ENV.key?('DYNO')
+ruby '2.3.1', engine: 'jruby', engine_version: '9.1.6.0' if ENV.key?('DYNO')
 
 gem 'activesupport', '~> 3.2'
 gem 'aws-sdk-v1'
