@@ -2,7 +2,7 @@ language: ruby
 rvm:
 - jruby-9.1.6.0
 - 2.3.3
-jdk: openjdk7
+jdk: openjdk8
 sudo: false
 dist: trusty
 env:
