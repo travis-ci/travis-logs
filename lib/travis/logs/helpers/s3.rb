@@ -1,23 +1,21 @@
-require 'aws/s3'
+require 'aws-sdk'
 
 module Travis
   module Logs
     module Helpers
       class S3
-        class << self
-          def setup
-            AWS.config(Travis::Logs.config.s3.to_hash.slice(:access_key_id, :secret_access_key))
-          end
-        end
-
-        attr_reader :s3, :url
+        attr_reader :s3
 
         def initialize
-          @s3 = AWS::S3.new
+          @s3 = Aws::S3::Resource.new(
+            access_key_id: Travis::Logs.config.s3.access_key_id,
+            secret_access_key: Travis::Logs.config.s3.secret_access_key,
+            region: 'us-east-1'
+          )
         end
 
         def store(data, url)
-          object(url).write(data, content_type: 'text/plain', acl: Travis::Logs.config.s3.acl)
+          object(url).put(body: data, content_type: 'text/plain', acl: Travis::Logs.config.s3.acl)
         end
 
         def content_length(url)
@@ -27,11 +25,11 @@ module Travis
         private
 
         def object(url)
-          bucket(url).objects[URI.parse(url).path[1..-1]]
+          bucket(url).object(URI.parse(url).path[1..-1])
         end
 
         def bucket(url)
-          s3.buckets[URI.parse(url).host]
+          s3.bucket(URI.parse(url).host)
         end
       end
     end

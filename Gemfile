@@ -3,10 +3,11 @@ source 'https://rubygems.org'
 ruby '2.3.1', engine: 'jruby', engine_version: '9.1.5.0' if ENV.key?('DYNO')
 
 gem 'activesupport', '~> 3.2'
-gem 'aws-sdk-v1'
+gem 'aws-sdk'
 gem 'bunny', platform: :mri
 gem 'coder', git: 'https://github.com/rkh/coder.git'
 gem 'connection_pool'
+gem 'excon'
 gem 'faraday'
 gem 'jdbc-postgres', platform: :jruby
 gem 'jruby-openssl', platform: :jruby
