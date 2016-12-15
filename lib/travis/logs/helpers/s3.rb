@@ -1,17 +1,24 @@
+require 'uri'
 require 'aws-sdk'
 
 module Travis
   module Logs
     module Helpers
       class S3
+        def self.setup
+          Aws.config.update(
+            region: 'us-east-1',
+            credentials: Aws::Credentials.new(
+              Travis::Logs.config.s3.access_key_id,
+              Travis::Logs.config.s3.secret_access_key
+            )
+          )
+        end
+
         attr_reader :s3
 
         def initialize
-          @s3 = Aws::S3::Resource.new(
-            access_key_id: Travis::Logs.config.s3.access_key_id,
-            secret_access_key: Travis::Logs.config.s3.secret_access_key,
-            region: 'us-east-1'
-          )
+          @s3 = Aws::S3::Resource.new
         end
 
         def store(data, url)
@@ -29,11 +36,11 @@ module Travis
         private
 
         def object(url)
-          bucket(url).object(URI.parse(url).path[1..-1])
+          bucket(url).object(URI(url).path[1..-1])
         end
 
         def bucket(url)
-          s3.bucket(URI.parse(url).host)
+          s3.bucket(URI(url).host)
         end
       end
     end
