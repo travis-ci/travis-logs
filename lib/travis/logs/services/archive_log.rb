@@ -85,6 +85,10 @@ module Travis
               actual = archived_content_length
               expected = content.bytesize
               unless actual == expected
+                Travis.logger.error(
+                  "action=archive id=#{log_id} result=verification-failed " \
+                  "expected=#{expected} actual=#{actual}"
+                )
                 raise VerificationFailed.new(log_id, target_url, expected, actual)
               end
             end
@@ -157,6 +161,10 @@ module Travis
             sleep count * 1
             retry
           else
+            Travis.logger.error(
+              "action=archive retrying=#{header} exceeded=#{times} " \
+              "error=#{e.backtrace.first} type=#{e.class.name}"
+            )
             raise
           end
         end
