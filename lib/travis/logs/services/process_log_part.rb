@@ -5,7 +5,7 @@ require 'pusher'
 require 'coder'
 
 # pusher requires this in a method, which sometimes
-# causes and uninitialized constant error
+# causes an uninitialized constant error
 require 'net/https'
 
 module Travis
