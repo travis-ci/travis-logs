@@ -100,7 +100,7 @@ module Travis::Logs::Services
 
         service.run
 
-        pusher_client.should have_received(:push).with(any_args)
+        expect(pusher_client).to have_received(:push).with(any_args)
       end
 
       it 'ignores a part if channel is not occupied' do
@@ -110,7 +110,7 @@ module Travis::Logs::Services
 
         service.run
 
-        pusher_client.should_not have_received(:push)
+        expect(pusher_client).to_not have_received(:push)
       end
 
       it 'sends a part if channel is occupied' do
@@ -120,7 +120,7 @@ module Travis::Logs::Services
 
         service.run
 
-        pusher_client.should have_received(:push).with(any_args)
+        expect(pusher_client).to have_received(:push).with(any_args)
       end
     end
 
@@ -132,10 +132,10 @@ module Travis::Logs::Services
       it 'notifies pusher on a private channel' do
         service.run
 
-        pusher_client.should have_received(:push).with('id' => 2,
-                                                       'chars' => 'hello, world',
-                                                       'number' => 1,
-                                                       'final' => false)
+        expect(pusher_client).to have_received(:push).with('id' => 2,
+                                                           'chars' => 'hello, world',
+                                                           'number' => 1,
+                                                           'final' => false)
       end
     end
 
@@ -147,10 +147,10 @@ module Travis::Logs::Services
       it 'notifies pusher on a regular channel' do
         service.run
 
-        pusher_client.should have_received(:push).with('id' => 2,
-                                                       'chars' => 'hello, world',
-                                                       'number' => 1,
-                                                       'final' => false)
+        expect(pusher_client).to have_received(:push).with('id' => 2,
+                                                           'chars' => 'hello, world',
+                                                           'number' => 1,
+                                                           'final' => false)
       end
     end
   end

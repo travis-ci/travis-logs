@@ -51,10 +51,10 @@ module Travis
             password: config[:password]
           }
 
-          params.merge!(
-            ssl: true,
-            sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
-          ) unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+          unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+            params[:ssl] = true
+            params[:sslfactory] = 'org.postgresql.ssl.NonValidatingFactory'
+          end
 
           "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
@@ -80,11 +80,7 @@ module Travis
 
         def log_id_for_job_id(job_id)
           log = @db.call(:find_log_id, job_id: job_id)
-          if log
-            log[:id]
-          else
-            nil
-          end
+          log[:id] if log
         end
 
         def log_content_length_for_id(log_id)

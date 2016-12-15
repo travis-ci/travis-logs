@@ -27,55 +27,55 @@ module Travis::Logs
     describe 'GET /uptime' do
       it 'returns 204' do
         response = get '/uptime'
-        response.status.should == 204
+        expect(response.status).to eq(204)
       end
     end
 
     describe 'POST /pusher/existence' do
       it 'sets proper properties on channel' do
-        existence.occupied?('foo').should be_false
-        existence.occupied?('bar').should be_false
+        expect(existence.occupied?('foo')).to be nil
+        expect(existence.occupied?('bar')).to be nil
 
         webhook = OpenStruct.new(valid?: true, events: [
-          { 'name' => 'channel_occupied', 'channel' => 'foo' },
-          { 'name' => 'channel_vacated',  'channel' => 'bar' }
-        ])
-        pusher.should_receive(:webhook) do |request|
+                                   { 'name' => 'channel_occupied', 'channel' => 'foo' },
+                                   { 'name' => 'channel_vacated',  'channel' => 'bar' }
+                                 ])
+        expect(pusher).to receive(:webhook) do |request|
           request.path_info == '/pusher/existence'
           webhook
         end
 
         response = post '/pusher/existence'
-        response.status.should == 204
+        expect(response.status).to eq(204)
 
-        existence.occupied?('foo').should be_true
-        existence.occupied?('bar').should be_false
+        expect(existence.occupied?('foo')).to eq('true')
+        expect(existence.occupied?('bar')).to be nil
 
         webhook = OpenStruct.new(valid?: true, events: [
-          { 'name' => 'channel_vacated', 'channel' => 'foo' },
-          { 'name' => 'channel_occupied', 'channel' => 'bar' }
-        ])
-        pusher.should_receive(:webhook) do |request|
+                                   { 'name' => 'channel_vacated', 'channel' => 'foo' },
+                                   { 'name' => 'channel_occupied', 'channel' => 'bar' }
+                                 ])
+        expect(pusher).to receive(:webhook) do |request|
           request.path_info == '/pusher/existence'
           webhook
         end
 
         response = post '/pusher/existence'
-        response.status.should == 204
+        expect(response.status).to eq(204)
 
-        existence.occupied?('foo').should be_false
-        existence.occupied?('bar').should be_true
+        expect(existence.occupied?('foo')).to be nil
+        expect(existence.occupied?('bar')).to eq('true')
       end
 
       it 'responds with 401 with invalid webhook' do
         webhook = OpenStruct.new(valid?: false)
-        pusher.should_receive(:webhook) do |request|
+        expect(pusher).to receive(:webhook) do |request|
           request.path_info == '/pusher/existence'
           webhook
         end
 
         response = post '/pusher/existence'
-        response.status.should == 401
+        expect(response.status).to eq(401)
       end
     end
 
@@ -185,11 +185,11 @@ EOF
             'id' => @job_id,
             'log' => 'fafafaf',
             'number' => 1,
-            'final' => false,
+            'final' => false
           },
           database,
           pusher,
-          existence,
+          existence
         ).and_return(double(:log_part_service_instance, run: nil))
       end
 
@@ -201,12 +201,10 @@ EOF
         end
 
         it 'returns 204' do
-          response = put "/log-parts/#{@job_id}/1", JSON.dump({
-            "@type" => "log_part",
-            "final" => false,
-            "content" => Base64.encode64("fafafaf"),
-            "encoding" => "base64",
-          })
+          response = put "/log-parts/#{@job_id}/1", JSON.dump('@type' => 'log_part',
+                                                              'final' => false,
+                                                              'content' => Base64.encode64('fafafaf'),
+                                                              'encoding' => 'base64')
           expect(response.status).to be == 204
         end
       end

@@ -97,7 +97,7 @@ module Travis::Logs::Helpers
       it 'sets the archiving column' do
         database.update_archiving_status(@log_id, true)
 
-        expect(sequel[:logs].where(id: @log_id).get(:archiving)).to be_true
+        expect(sequel[:logs].where(id: @log_id).get(:archiving)).to be true
       end
     end
 
@@ -110,7 +110,7 @@ module Travis::Logs::Helpers
         database.mark_archive_verified(@log_id)
 
         verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
-        expect(verified).to be_true
+        expect(verified).to be true
       end
     end
 
@@ -140,10 +140,10 @@ module Travis::Logs::Helpers
     describe '#delete_log_parts' do
       it 'deletes all log parts with the given log ID' do
         sequel[:log_parts].multi_insert([
-          { log_id: 2, content: 'hello', number: 1, final: false },
-          { log_id: 2, content: 'world', number: 2, final: false },
-          { log_id: 3, content: 'foobar', number: 1, final: false }
-        ])
+                                          { log_id: 2, content: 'hello', number: 1, final: false },
+                                          { log_id: 2, content: 'world', number: 2, final: false },
+                                          { log_id: 3, content: 'foobar', number: 1, final: false }
+                                        ])
 
         database.delete_log_parts(2)
 
@@ -154,10 +154,10 @@ module Travis::Logs::Helpers
     describe '#aggregatable_log_parts' do
       before(:each) do
         sequel[:log_parts].multi_insert([
-          { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
-          { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
-          { log_id: 2, final: true, created_at: now - 60 * 60 }
-        ])
+                                          { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
+                                          { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
+                                          { log_id: 2, final: true, created_at: now - 60 * 60 }
+                                        ])
       end
 
       it 'includes finished logs older than the regular interval' do
@@ -195,10 +195,10 @@ module Travis::Logs::Helpers
       before(:each) do
         @log_id = sequel[:logs].insert(aggregated_at: nil)
         sequel[:log_parts].multi_insert([
-          { log_id: @log_id, content: 'world', number: 3 },
-          { log_id: @log_id, content: 'hello ', number: 1 },
-          { log_id: @log_id, content: '!', number: 4 }
-        ])
+                                          { log_id: @log_id, content: 'world', number: 3 },
+                                          { log_id: @log_id, content: 'hello ', number: 1 },
+                                          { log_id: @log_id, content: '!', number: 4 }
+                                        ])
       end
 
       it 'coalesces the log_parts ordered by number' do
@@ -250,7 +250,7 @@ module Travis::Logs::Helpers
         database.mark_not_archived(@log_id)
 
         verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
-        expect(verified).to be_false
+        expect(verified).to be false
       end
     end
 

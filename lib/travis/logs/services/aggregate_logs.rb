@@ -8,7 +8,7 @@ module Travis
       class AggregateLogs
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.aggregate_logs'
+        METRIKS_PREFIX = 'logs.aggregate_logs'.freeze
 
         def self.metriks_prefix
           METRIKS_PREFIX

@@ -34,7 +34,7 @@ describe 'receive_logs' do
     expect(log[:job_id]).to eq(123)
     expect(log_part[:content]).to eq('hello, world')
     expect(log_part[:number]).to eq(1)
-    expect(log_part[:final]).to be_false
+    expect(log_part[:final]).to be false
     expect(log_part[:log_id]).to eq(log[:id])
   end
 

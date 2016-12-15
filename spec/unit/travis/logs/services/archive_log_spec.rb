@@ -36,8 +36,7 @@ class FakeWarningLogger
     @warnings << msg
   end
 
-  def debug(*)
-  end
+  def debug(*); end
 end
 
 describe Travis::Logs::Services::ArchiveLog do
@@ -127,19 +126,19 @@ describe Travis::Logs::Services::ArchiveLog do
     it 'reports matching amazement' do
       expect(service).to receive(:mark).with('amazement.9000')
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=amazement\b/ }).to be_true
+      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=amazement\b/ }).to be true
     end
 
     it 'reports matching greeting' do
       expect(service).to_not receive(:mark).with(/greeting/)
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=ohhai\b/ }).to be_true
+      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=ohhai\b/ }).to be true
     end
 
     it 'does not report matching kaboom' do
       expect(service).to_not receive(:mark).with(/kaboom/)
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=kaboom-code/ }).to_not be_true
+      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=kaboom-code/ }).to_not be true
     end
   end
 end

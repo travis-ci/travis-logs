@@ -14,7 +14,7 @@ module Travis
       class ProcessLogPart
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.process_log_part'
+        METRIKS_PREFIX = 'logs.process_log_part'.freeze
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -81,7 +81,7 @@ module Travis
         def log_id
           @log_id ||= find_log_id || create_log
         end
-        alias_method :find_or_create_log, :log_id
+        alias find_or_create_log log_id
 
         def find_log_id
           database.log_id_for_job_id(payload['id'])
