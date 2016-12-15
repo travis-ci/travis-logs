@@ -69,7 +69,7 @@ describe Travis::Logs::Services::ArchiveLog do
     it 'raises an error' do
       storage_service.return_incorrect_content_length!
 
-      expect { service.run }.to raise_error
+      expect { service.run }.to raise_error(Travis::Logs::Services::ArchiveLog::VerificationFailed)
     end
   end
 
