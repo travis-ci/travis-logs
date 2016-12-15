@@ -37,7 +37,8 @@ module Travis
 
         def receive(message, payload)
           smart_retry do
-            if payload = decode(payload)
+            payload = decode(payload)
+            if payload
               Travis.uuid = payload.delete('uuid')
               handler.run(payload)
             end
