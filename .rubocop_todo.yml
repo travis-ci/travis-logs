@@ -17,11 +17,6 @@ Lint/RescueException:
     - 'lib/travis/logs/aggregate.rb'
     - 'lib/travis/logs/receive/queue.rb'
 
-# Offense count: 1
-Lint/ShadowingOuterLocalVariable:
-  Exclude:
-    - 'lib/travis/logs/services/purge_log.rb'
-
 # Offense count: 2
 Lint/UselessAssignment:
   Exclude:
