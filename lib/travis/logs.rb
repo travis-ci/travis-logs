@@ -1,5 +1,9 @@
 require 'travis/logs/config'
 
+if RUBY_PLATFORM =~ /^java/
+  require 'jrjackson'
+end
+
 module Travis
   def self.config
     Logs.config

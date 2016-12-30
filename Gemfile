@@ -10,6 +10,7 @@ gem 'connection_pool'
 gem 'excon'
 gem 'faraday'
 gem 'jdbc-postgres', platform: :jruby
+gem 'jrjackson', platform: :jruby
 gem 'jruby-openssl', platform: :jruby
 gem 'json'
 gem 'jwt'
