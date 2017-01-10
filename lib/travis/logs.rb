@@ -2,6 +2,8 @@ require 'travis/logs/config'
 
 if RUBY_PLATFORM =~ /^java/
   require 'jrjackson'
+else
+  require 'oj'
 end
 
 module Travis
