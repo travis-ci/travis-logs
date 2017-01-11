@@ -13,7 +13,7 @@ module Travis
       end
       
       define amqp:          { username: 'guest', password: 'guest', host: 'localhost', prefetch: 1 },
-             logs_database: { adapter: 'postgresql', database: "travis_logs_#{env}", ssl: ssl?, encoding: 'unicode', min_messages: 'warning' },
+             logs_database: { adapter: 'postgresql', database: "travis_logs_#{Travis.env}", ssl: ssl?, encoding: 'unicode', min_messages: 'warning' },
              s3:            { hostname: 'archive.travis-ci.org', access_key_id: '', secret_access_key: '', acl: :public_read },
              pusher:        { app_id: 'app-id', key: 'key', secret: 'secret', secure: false },
              sidekiq:       { namespace: 'sidekiq', pool_size: 22 },
@@ -28,7 +28,7 @@ module Travis
 
       def env
         Travis.env
-      end
+      end 
     end
   end
 end
