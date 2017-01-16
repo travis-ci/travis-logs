@@ -18,7 +18,7 @@ describe Travis::RedisPool do
   it 'fails when a non-supported operation is called' do
     expect do
       redis.setssss
-    end.to raise_error
+    end.to raise_error(NoMethodError)
   end
 
   it 'adds a wait time for the pool checkout' do
