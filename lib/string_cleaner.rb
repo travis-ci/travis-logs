@@ -20,7 +20,7 @@ class StringCleaner
     return input.each { |b| self << b } if input.respond_to? :each
 
     case input
-    when 001..127 then add(input)
+    when 0o01..127 then add(input)
     when 128..191 then fill_buffer(input)
     when 192..223 then start_buffer(input, 2)
     when 224..239 then start_buffer(input, 3)

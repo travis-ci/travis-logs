@@ -51,10 +51,10 @@ module Travis
             password: config[:password]
           }
 
-          params.merge!(
-            ssl: true,
-            sslfactory: 'org.postgresql.ssl.NonValidatingFactory'
-          ) unless %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+          if config[:ssl]
+            params[:ssl] = true
+            params[:sslfactory] = 'org.postgresql.ssl.NonValidatingFactory'
+          end
 
           "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
         end
@@ -78,8 +78,9 @@ module Travis
           @db.call(:find_log, log_id: log_id).first
         end
 
-        def log_for_job_id(job_id)
-          @db.call(:find_log_id, job_id: job_id).first
+        def log_id_for_job_id(job_id)
+          log = @db.call(:find_log_id, job_id: job_id)
+          log[:id] if log
         end
 
         def log_content_length_for_id(log_id)
@@ -118,7 +119,8 @@ module Travis
 
         def set_log_content(log_id, content)
           delete_log_parts(log_id)
-          @db[:logs].where(id: log_id).update(content: content, aggregated_at: Time.now.utc, archived_at: nil, archive_verified: nil, updated_at: Time.now.utc)
+          aggregated_at = Time.now.utc unless content.nil?
+          @db[:logs].where(id: log_id).update(content: content, aggregated_at: aggregated_at, archived_at: nil, archive_verified: nil, updated_at: Time.now.utc)
         end
 
         AGGREGATEABLE_SELECT_SQL = <<-SQL.split.join(' ')
@@ -159,7 +161,7 @@ module Travis
 
         def prepare_statements
           @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
-          @db[:logs].select(:id).where(job_id: :$job_id).prepare(:select, :find_log_id)
+          @db[:logs].select(:id).where(job_id: :$job_id).prepare(:first, :find_log_id)
           @db[:logs].prepare(:insert, :create_log,             job_id: :$job_id,
                                                                created_at: :$created_at,
                                                                updated_at: :$updated_at)

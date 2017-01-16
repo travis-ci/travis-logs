@@ -1,4 +1,5 @@
 require 'pusher'
+require 'multi_json'
 
 module Travis
   module Logs
@@ -22,6 +23,10 @@ module Travis
           channel
         end
 
+        def webhook(request)
+          @pusher_client.webhook(request)
+        end
+
         private
 
         def pusher_channel(payload)
@@ -29,12 +34,12 @@ module Travis
         end
 
         def pusher_payload(payload)
-          {
+          MultiJson.dump({
             'id' => payload['id'],
             '_log' => payload['chars'],
             'number' => payload['number'],
             'final' => payload['final']
-          }
+          })
         end
 
         def default_client

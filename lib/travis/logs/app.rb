@@ -3,10 +3,13 @@ require 'raven'
 require 'sinatra/base'
 require 'logger'
 require 'pusher'
+require 'jwt'
 
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/pusher'
+require 'travis/logs/services/process_log_part'
 require 'rack/ssl'
 
 module Travis
@@ -19,7 +22,7 @@ module Travis
     end
 
     class App < Sinatra::Base
-      attr_reader :existence, :pusher, :database
+      attr_reader :existence, :pusher, :database, :log_part_service
 
       configure(:production, :staging) do
         use Rack::SSL
@@ -29,11 +32,15 @@ module Travis
         use SentryMiddleware if ENV['SENTRY_DSN']
       end
 
-      def initialize(existence = nil, pusher = nil, database = nil)
+      def initialize(existence = nil, pusher = nil, database = nil, log_part_service = nil)
         super()
         @existence = existence || Travis::Logs::Existence.new
-        @pusher    = pusher || ::Pusher::Client.new(Travis::Logs.config.pusher.to_h)
+        @pusher    = pusher || Travis::Logs::Helpers::Pusher.new
         @database  = database || Travis::Logs::Helpers::Database.connect
+        @log_part_service = log_part_service || Travis::Logs::Services::ProcessLogPart
+        unless ENV['JWT_RSA_PUBLIC_KEY'].to_s.strip.empty?
+          @rsa_public_key = OpenSSL::PKey::RSA.new(ENV['JWT_RSA_PUBLIC_KEY'])
+        end
       end
 
       post '/pusher/existence' do
@@ -65,10 +72,55 @@ module Travis
 
         job_id = Integer(params[:job_id])
 
-        log = database.log_for_job_id(job_id) || database.create_log(job_id)
+        log_id = database.log_id_for_job_id(job_id) || database.create_log(job_id)
 
         request.body.rewind
-        database.set_log_content(log[:id], request.body.read)
+        content = request.body.read
+        content = nil if content.empty?
+        database.set_log_content(log_id, content)
+
+        status 204
+      end
+
+      put '/log-parts/:job_id/:log_part_id' do
+        halt 500, 'key is not set' if @rsa_public_key.nil?
+
+        Travis.uuid = request.env['HTTP_X_REQUEST_ID']
+
+        auth_header = request.env['HTTP_AUTHORIZATION']
+        if auth_header.nil? || !request.env['HTTP_AUTHORIZATION'].start_with?('Bearer ')
+          halt 403
+        end
+
+        begin
+          JWT.decode(auth_header[7..-1], @rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
+        rescue JWT::DecodeError
+          halt 403
+        end
+
+        data = JSON.parse(request.body.read)
+        if data['@type'] != 'log_part'
+          halt 400, JSON.dump('error' => '@type should be log_part')
+        end
+
+        content = case data['encoding']
+                  when 'base64'
+                    Base64.decode64(data['content'])
+                  else
+                    halt 400, JSON.dump('error' => 'invalid encoding, only base64 supported')
+        end
+
+        @log_part_service.new(
+          {
+            'id' => Integer(params[:job_id]),
+            'log' => content,
+            'number' => Integer(params[:log_part_id]),
+            'final' => data['final']
+          },
+          database,
+          pusher,
+          existence
+        ).run
 
         status 204
       end

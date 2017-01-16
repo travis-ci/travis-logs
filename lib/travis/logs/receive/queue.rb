@@ -8,7 +8,7 @@ module Travis
       class Queue
         include Logging
 
-        METRIKS_PREFIX = 'logs.queue'
+        METRIKS_PREFIX = 'logs.queue'.freeze
 
         def self.subscribe(name, handler)
           new(name, handler).subscribe
