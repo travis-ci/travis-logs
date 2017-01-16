@@ -149,7 +149,7 @@ module Travis
           yield
         rescue => e
           count ||= 0
-          if times > (count += 1) && RACK_ENV != 'test'
+          if times > (count += 1) && ENV['RACK_ENV'] != 'test'
             Travis.logger.debug(
               "action=archive retrying=#{header} " \
               "error=#{JSON.dump(e.backtrace)} type=#{e.class.name}"
