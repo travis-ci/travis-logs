@@ -10,12 +10,14 @@ gem 'connection_pool'
 gem 'excon'
 gem 'faraday'
 gem 'jdbc-postgres', platform: :jruby
+gem 'jrjackson', platform: :jruby
 gem 'jruby-openssl', platform: :jruby
 gem 'json'
 gem 'jwt'
 gem 'march_hare', '~> 2', platform: :jruby
 gem 'metriks'
 gem 'metriks-librato_metrics'
+gem 'oj', platform: :mri
 gem 'pg', platform: :mri
 gem 'pry'
 gem 'puma'
