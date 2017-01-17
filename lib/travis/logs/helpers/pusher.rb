@@ -18,7 +18,7 @@ module Travis
 
         def pusher_channel_name(payload)
           channel = ''
-          channel << 'private-' if Logs.config.pusher.secure
+          channel << 'private-' if Travis::Logs.config.pusher.secure
           channel << "job-#{payload['id']}"
           channel
         end
