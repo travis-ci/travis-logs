@@ -23,8 +23,11 @@ module Travis
           uri = uri_from_config(config) unless jruby?
 
           after_connect = proc {|c|
-            c.execute("SET application_name TO 'logs'")
-            prepare_statements
+            if c.responds_to?(:execute)
+              c.execute("SET application_name TO 'logs'")
+            elsif c.responds_to?(:exec)
+              c.exec("SET application_name TO 'logs'")
+            end
           }
 
           Sequel.default_timezone = :utc
@@ -74,6 +77,11 @@ module Travis
 
         def connect
           @db.test_connection
+
+          # TODO: run prepare_statements for every connection,
+          # not just the first connection in the pool
+          # see also: Sequel.connect, after_connect
+          prepare_statements
         end
 
         def log_for_id(log_id)
