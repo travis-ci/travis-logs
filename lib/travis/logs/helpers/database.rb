@@ -23,9 +23,9 @@ module Travis
           uri = uri_from_config(config) unless jruby?
 
           after_connect = proc {|c|
-            if c.responds_to?(:execute)
+            if c.respond_to?(:execute)
               c.execute("SET application_name TO 'logs'")
-            elsif c.responds_to?(:exec)
+            elsif c.respond_to?(:exec)
               c.exec("SET application_name TO 'logs'")
             end
           }
