@@ -19,8 +19,10 @@ describe 'receive_logs' do
   let(:queue) { FakeAmqpQueue.new }
 
   it 'stores the log part in the database' do
+    pusher_client = Travis.config.pusher_client
+    Travis.config.pusher_client = double('pusher_client', :[] => double('channel', trigger: nil))
+
     allow(Travis::Amqp::Consumer).to receive(:jobs) { queue }
-    allow(Travis.config).to receive(:pusher_client) { double('pusher_client', :[] => double('channel', trigger: nil)) }
     db = Travis::Logs::Helpers::Database.create_sequel
     db[:logs].delete
     db[:log_parts].delete
@@ -36,6 +38,8 @@ describe 'receive_logs' do
     expect(log_part[:number]).to eq(1)
     expect(log_part[:final]).to be false
     expect(log_part[:log_id]).to eq(log[:id])
+
+    Travis.config.pusher_client = pusher_client
   end
 
   it 'uses the default prefetch' do
@@ -44,8 +48,9 @@ describe 'receive_logs' do
   end
 
   it 'uses a custom prefetch given in the config' do
-    allow(Travis.config.amqp).to receive(:prefetch) { 2 }
+    Travis.config.amqp[:prefetch] = 2
     expect(Travis::Amqp::Consumer).to receive(:jobs).with('logs', channel: { prefetch: 2 }) { queue }
     Travis::Logs::Receive::Queue.subscribe('logs', Travis::Logs::Services::ProcessLogPart)
+    Travis.config.amqp[:prefetch] = 1
   end
 end
