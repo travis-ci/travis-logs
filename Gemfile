@@ -29,7 +29,7 @@ gem 'rake'
 gem 'redis-namespace'
 gem 'rspec', group: :test
 gem 'rubocop', require: false
-gem 'sentry-raven', git: 'https://github.com/getsentry/raven-ruby.git'
+gem 'sentry-raven'
 gem 'sequel'
 gem 'sidekiq'
 gem 'sidekiq-unique-jobs', '~> 4'

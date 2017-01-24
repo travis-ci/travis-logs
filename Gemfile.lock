@@ -1,11 +1,4 @@
 GIT
-  remote: https://github.com/getsentry/raven-ruby.git
-  revision: d75133cf8f0dfad924bb52f567141ca6bcd9edb8
-  specs:
-    sentry-raven (2.2.0)
-      faraday (>= 0.7.6, < 1.0)
-
-GIT
   remote: https://github.com/rkh/coder.git
   revision: 44b0cf89b98caecc654dd1a724a448e17ef7aa6c
   specs:
@@ -52,7 +45,7 @@ GEM
     diff-lcs (1.2.5)
     docile (1.1.5)
     excon (0.54.0)
-    faraday (0.10.0)
+    faraday (0.11.0)
       multipart-post (>= 1.2, < 3)
     ffi (1.9.14-java)
     hashr (0.0.22)
@@ -135,6 +128,8 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.8.1)
+    sentry-raven (2.3.0)
+      faraday (>= 0.7.6, < 1.0)
     sequel (4.41.0)
     sidekiq (4.2.7)
       concurrent-ruby (~> 1.0)
@@ -194,7 +189,7 @@ DEPENDENCIES
   redis-namespace
   rspec
   rubocop
-  sentry-raven!
+  sentry-raven
   sequel
   sidekiq
   sidekiq-unique-jobs (~> 4)
