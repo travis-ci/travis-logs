@@ -12,6 +12,13 @@ require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/process_log_part'
 require 'rack/ssl'
 
+if Travis.config.sentry && Travis.config.sentry.dsn
+  Raven.configure do |config|
+    config.dsn = Travis.config.sentry.dsn
+    config.logger = Travis.logger
+  end
+end
+
 module Travis
   module Logs
     class SentryMiddleware < Sinatra::Base
@@ -29,7 +36,7 @@ module Travis
       end
 
       configure do
-        use SentryMiddleware if ENV['SENTRY_DSN']
+        use Raven::Rack if Travis.config.sentry && Travis.config.sentry.dsn
       end
 
       def initialize(existence = nil, pusher = nil, database = nil, log_part_service = nil)
