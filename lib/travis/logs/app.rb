@@ -26,7 +26,10 @@ module Travis
 
       configure(:production, :staging) do
         use Rack::SSL
-        use Raven::Rack if Travis.config.sentry && Travis.config.sentry.dsn
+      end
+
+      configure do
+        use Raven::Rack 
       end
 
       def initialize(existence = nil, pusher = nil, database = nil, log_part_service = nil)
@@ -122,10 +125,5 @@ module Travis
         status 204
       end
     end
-
-    get '/boomtown' do
-      raise "Boomtown"
-    end
-
   end
 end
