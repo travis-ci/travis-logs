@@ -26,9 +26,6 @@ module Travis
 
       configure(:production, :staging) do
         use Rack::SSL
-      end
-
-      configure do
         use Raven::Rack if Travis.config.sentry && Travis.config.sentry.dsn
       end
 
