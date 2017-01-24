@@ -122,5 +122,10 @@ module Travis
         status 204
       end
     end
+
+    get '/boomtown' do
+      raise "Boomtown"
+    end
+
   end
 end
