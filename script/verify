@@ -16,7 +16,7 @@ end
 class Archiver; include Sidekiq::Worker; end
 
 def http
-  Faraday.new(ssl: Travis.config.ssl.compact) do |f|
+  Faraday.new(ssl: Travis.config.ssl.to_h.compact) do |f|
     f.request :url_encoded
     f.adapter :net_http
   end

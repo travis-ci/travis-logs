@@ -174,7 +174,7 @@ module Travis
         end
 
         def investigators
-          @investigators ||= Travis.config.investigation.investigators.map do |name, h|
+          @investigators ||= Travis.config.investigation.investigators.to_h.map do |name, h|
             ::Travis::Logs::Investigator.new(
               name,
               Regexp.new(h[:matcher]),

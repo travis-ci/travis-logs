@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/travis-ci/travis-amqp.git
+  revision: 3966b3651adfd1c544f53d49d5986ac16cd9c4bc
+  specs:
+    travis-amqp (0.0.1)
+
+GIT
   remote: https://github.com/getsentry/raven-ruby.git
   revision: d75133cf8f0dfad924bb52f567141ca6bcd9edb8
   specs:
@@ -55,7 +61,7 @@ GEM
     faraday (0.10.0)
       multipart-post (>= 1.2, < 3)
     ffi (1.9.14-java)
-    hashr (0.0.22)
+    hashr (2.0.0)
     hitimes (1.2.4)
     hitimes (1.2.4-java)
     httpclient (2.8.3)
@@ -158,8 +164,8 @@ GEM
       ffi
     thor (0.19.4)
     tilt (2.0.5)
-    travis-config (0.1.4)
-      hashr (~> 0.0)
+    travis-config (1.0.12)
+      hashr (~> 2.0.0)
     unicode-display_width (1.1.2)
 
 PLATFORMS
@@ -200,7 +206,8 @@ DEPENDENCIES
   sidekiq-unique-jobs (~> 4)
   simplecov
   sinatra (~> 1.4)
-  travis-config (~> 0.1.0)
+  travis-amqp!
+  travis-config (~> 1.0.12)
   travis-migrations!
   travis-support!
 

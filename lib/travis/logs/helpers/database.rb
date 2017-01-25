@@ -18,7 +18,7 @@ module Travis
         # This method should only be called for "maintenance" tasks (such as
         # creating the tables or debugging).
         def self.create_sequel
-          config = Travis::Logs.config.logs_database
+          config = Travis::Logs.config.logs_database.to_h
           uri = jdbc_uri_from_config(config) if jruby?
           uri = uri_from_config(config) unless jruby?
 
