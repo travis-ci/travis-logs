@@ -8,11 +8,11 @@ module Travis
 
       class << self
         def redis
-          @redis ||= RedisPool.new(redis_config.to_h)
+          @redis ||= RedisPool.new(redis_config)
         end
 
         def redis_config
-          Logs.config[:logs_redis] || Logs.config[:redis] || {}
+          (Logs.config.logs_redis || Logs.config.redis || {}).to_h
         end
       end
 
