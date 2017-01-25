@@ -1,6 +1,6 @@
 require 'travis/logs'
 require 'travis/support'
-require 'travis/support/amqp'
+require 'travis/amqp'
 require 'travis/support/exceptions/reporter'
 require 'travis/support/metrics'
 require 'travis/logs/receive/queue'
