@@ -129,6 +129,11 @@ module Travis::Logs::Services
         Travis::Logs.config.pusher.secure = true
       end
 
+      # Some tests assume this not to be true so be sure to tear down to avoid flagging tests. 
+      after(:each) do 
+        Travis::Logs.config.pusher.secure = false 
+      end
+      
       it 'notifies pusher on a private channel' do
         service.run
 
@@ -137,6 +142,7 @@ module Travis::Logs::Services
                                                            'number' => 1,
                                                            'final' => false)
       end
+
     end
 
     context 'when pusher.secure is false' do
