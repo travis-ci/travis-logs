@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/travis-ci/travis-amqp.git
+  revision: 3966b3651adfd1c544f53d49d5986ac16cd9c4bc
+  specs:
+    travis-amqp (0.0.1)
+
+GIT
   remote: https://github.com/getsentry/raven-ruby.git
   revision: d75133cf8f0dfad924bb52f567141ca6bcd9edb8
   specs:
@@ -200,7 +206,8 @@ DEPENDENCIES
   sidekiq-unique-jobs (~> 4)
   simplecov
   sinatra (~> 1.4)
-  travis-config (~> 1.0.0)
+  travis-amqp!
+  travis-config (~> 1.0.12)
   travis-migrations!
   travis-support!
 
