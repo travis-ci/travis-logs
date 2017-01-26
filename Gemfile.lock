@@ -164,7 +164,7 @@ GEM
       ffi
     thor (0.19.4)
     tilt (2.0.5)
-    travis-config (1.0.12)
+    travis-config (1.0.13)
       hashr (~> 2.0.0)
     unicode-display_width (1.1.2)
 
