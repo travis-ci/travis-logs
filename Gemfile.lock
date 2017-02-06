@@ -127,6 +127,8 @@ GEM
     redis (3.3.2)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
+    redlock (0.2.0)
+      redis (~> 3, >= 3.0.0)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
@@ -204,6 +206,7 @@ DEPENDENCIES
   rails_12factor
   rake
   redis-namespace
+  redlock
   rspec
   rubocop
   sentry-raven!
