@@ -28,10 +28,12 @@ module Travis
 
       def aggregate_logs
         exclusive do
-          Travis::Logs::Services::AggregateLogs.run
+          begin 
+            Travis::Logs::Services::AggregateLogs.run
+          rescue Exception => e
+            Travis::Exceptions.handle(e)
+          end
         end
-      rescue Exception => e
-        Travis::Exceptions.handle(e)
       end
 
       private
