@@ -138,7 +138,6 @@ module Travis
             FROM log_parts
            WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
               OR  created_at <= NOW() - interval '? seconds'
-        ORDER BY created_at ASC
            LIMIT ?
         SQL
 
