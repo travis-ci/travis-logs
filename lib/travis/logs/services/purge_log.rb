@@ -9,7 +9,7 @@ module Travis
       class PurgeLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.purge'
+        METRIKS_PREFIX = 'logs.purge'.freeze
 
         def self.metriks_prefix
           METRIKS_PREFIX

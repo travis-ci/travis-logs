@@ -22,8 +22,8 @@ class FakeDatabase
     log_part_id
   end
 
-  def log_for_job_id(job_id)
-    @logs.find { |log| log[:job_id] == job_id }
+  def log_id_for_job_id(job_id)
+    @logs.select { |log| log[:job_id] == job_id }.map { |log| log[:id] }.first
   end
 end
 
@@ -46,7 +46,7 @@ describe Travis::Logs::Services::ProcessLogPart do
     it 'creates a log' do
       service.run
 
-      expect(database.log_for_job_id(2)).not_to be_nil
+      expect(database.log_id_for_job_id(2)).not_to be_nil
     end
 
     it 'marks the log.create metric' do
@@ -96,30 +96,27 @@ describe Travis::Logs::Services::ProcessLogPart do
       expect(service).to receive(:channel_occupied?) { false }
       expect(service).to receive(:mark).with(any_args)
       expect(service).to receive(:mark).with('pusher.ignore')
+      expect(pusher_client).to receive(:push).with(any_args)
 
       service.run
-
-      pusher_client.should have_received(:push).with(any_args)
     end
 
     it 'ignores a part if channel is not occupied' do
       expect(service).to receive(:channel_occupied?) { false }
       expect(service).to receive(:mark).with(any_args)
       expect(service).to receive(:mark).with('pusher.ignore')
+      expect(pusher_client).to_not receive(:push)
 
       service.run
-
-      pusher_client.should_not have_received(:push)
     end
 
     it 'sends a part if channel is occupied' do
       expect(service).to receive(:channel_occupied?) { true }
       expect(service).to receive(:mark).with(any_args)
       expect(service).to receive(:mark).with('pusher.send')
+      expect(pusher_client).to receive(:push).with(any_args)
 
       service.run
-
-      pusher_client.should have_received(:push).with(any_args)
     end
   end
 
@@ -129,12 +126,11 @@ describe Travis::Logs::Services::ProcessLogPart do
     end
 
     it 'notifies pusher on a private channel' do
+      expect(pusher_client).to receive(:push)
+        .with(
+          'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false
+        )
       service.run
-
-      pusher_client.should have_received(:push).with('id' => 2,
-                                                     'chars' => 'hello, world',
-                                                     'number' => 1,
-                                                     'final' => false)
     end
   end
 
@@ -144,12 +140,11 @@ describe Travis::Logs::Services::ProcessLogPart do
     end
 
     it 'notifies pusher on a regular channel' do
+      expect(pusher_client).to receive(:push)
+        .with(
+          'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false
+        )
       service.run
-
-      pusher_client.should have_received(:push).with('id' => 2,
-                                                     'chars' => 'hello, world',
-                                                     'number' => 1,
-                                                     'final' => false)
     end
   end
 end

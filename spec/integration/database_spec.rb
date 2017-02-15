@@ -11,6 +11,7 @@ describe Travis::Logs::Helpers::Database do
     sequel[:logs].delete
     sequel[:log_parts].delete
     sequel << "SET TIME ZONE 'UTC'"
+    database.instance_variable_set(:@db, sequel)
     database.connect
   end
 
@@ -34,22 +35,18 @@ describe Travis::Logs::Helpers::Database do
     end
   end
 
-  describe '#log_for_job_id' do
+  describe '#log_id_for_job_id' do
     context 'when the log exists' do
       let(:log) { { content: 'hello, world', job_id: 2 } }
 
-      before(:each) do
-        @log_id = sequel[:logs].insert(log)
-      end
-
-      it 'returns the id of the log in a Hash' do
-        expect(database.log_for_job_id(2)).to eq(id: @log_id)
+      it 'returns the id of the log' do
+        expect(database.log_id_for_job_id(2)).to eq(@log_id)
       end
     end
 
     context 'when the log does not exist' do
       it 'returns nil' do
-        expect(database.log_for_job_id(1)).to be_nil
+        expect(database.log_id_for_job_id(1)).to be_nil
       end
     end
   end
@@ -96,7 +93,7 @@ describe Travis::Logs::Helpers::Database do
     it 'sets the archiving column' do
       database.update_archiving_status(@log_id, true)
 
-      expect(sequel[:logs].where(id: @log_id).get(:archiving)).to be_true
+      expect(sequel[:logs].where(id: @log_id).get(:archiving)).to eq(true)
     end
   end
 
@@ -109,7 +106,7 @@ describe Travis::Logs::Helpers::Database do
       database.mark_archive_verified(@log_id)
 
       verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
-      expect(verified).to be_true
+      expect(verified).to eq(true)
     end
   end
 
@@ -249,7 +246,7 @@ describe Travis::Logs::Helpers::Database do
       database.mark_not_archived(@log_id)
 
       verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
-      expect(verified).to be_false
+      expect(verified).to eq(false)
     end
   end
 

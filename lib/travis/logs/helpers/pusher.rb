@@ -1,4 +1,5 @@
 require 'pusher'
+require 'multi_json'
 
 module Travis
   module Logs
@@ -17,9 +18,13 @@ module Travis
 
         def pusher_channel_name(payload)
           channel = ''
-          channel << 'private-' if Logs.config.pusher.secure
+          channel << 'private-' if Travis::Logs.config.pusher.secure
           channel << "job-#{payload['id']}"
           channel
+        end
+
+        def webhook(request)
+          @pusher_client.webhook(request)
         end
 
         private
@@ -29,16 +34,14 @@ module Travis
         end
 
         def pusher_payload(payload)
-          {
-            'id' => payload['id'],
-            '_log' => payload['chars'],
-            'number' => payload['number'],
-            'final' => payload['final']
-          }
+          MultiJson.dump('id' => payload['id'],
+                         '_log' => payload['chars'],
+                         'number' => payload['number'],
+                         'final' => payload['final'])
         end
 
         def default_client
-          ::Pusher::Client.new(Travis::Logs.config.pusher)
+          ::Pusher::Client.new(Travis::Logs.config.pusher.to_h)
         end
       end
     end

@@ -11,7 +11,7 @@ module Travis
       class ArchiveLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.archive'
+        METRIKS_PREFIX = 'logs.archive'.freeze
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -55,7 +55,7 @@ module Travis
             log
           end
         end
-        alias_method :fetch, :log
+        alias fetch log
 
         def mark_as_archiving(archiving = true)
           database.update_archiving_status(log_id, archiving)
@@ -85,7 +85,11 @@ module Travis
               actual = archived_content_length
               expected = content.bytesize
               unless actual == expected
-                fail VerificationFailed.new(log_id, target_url, expected, actual)
+                Travis.logger.error(
+                  "action=archive id=#{log_id} result=verification-failed " \
+                  "expected=#{expected} actual=#{actual}"
+                )
+                raise VerificationFailed.new(log_id, target_url, expected, actual)
               end
             end
           end
@@ -145,11 +149,22 @@ module Travis
           yield
         rescue => e
           count ||= 0
-          if times > (count += 1)
-            Travis.logger.warn "[#{header}] retry #{count} because: #{e.message}"
+          if times > (count += 1) && ENV['RACK_ENV'] != 'test'
+            Travis.logger.debug(
+              "action=archive retrying=#{header} " \
+              "error=#{JSON.dump(e.backtrace)} type=#{e.class.name}"
+            )
+            Travis.logger.warn(
+              "action=archive retrying=#{header} " \
+              "reason=#{e.message} id=#{log_id} job_id=#{job_id}"
+            )
             sleep count * 1
             retry
           else
+            Travis.logger.error(
+              "action=archive retrying=#{header} exceeded=#{times} " \
+              "error=#{e.backtrace.first} type=#{e.class.name}"
+            )
             raise
           end
         end
@@ -159,16 +174,14 @@ module Travis
         end
 
         def investigators
-          @investigators ||= Travis.config.investigation.investigators.map do |name, h|
-            Travis::Logs::Investigator.new(
+          @investigators ||= Travis.config.investigation.investigators.to_h.map do |name, h|
+            ::Travis::Logs::Investigator.new(
               name,
               Regexp.new(h[:matcher]),
               h[:marking_tmpl],
               h[:label_tmpl]
             )
-          end.sort do |a, b|
-            a.name <=> b.name
-          end
+          end.sort_by(&:name)
         end
       end
     end

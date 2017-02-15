@@ -1,6 +1,6 @@
 require 'travis/logs'
 require 'travis/support'
-require 'travis/support/amqp'
+require 'travis/amqp'
 require 'travis/support/exceptions/reporter'
 require 'travis/support/metrics'
 require 'travis/logs/receive/queue'
@@ -13,7 +13,7 @@ module Travis
     class Receive
       def setup
         Travis.logger.info('** Starting Log Parts Processor **')
-        Travis::Amqp.config = amqp_config
+        Travis::Amqp.setup(amqp_config)
         Travis::Exceptions::Reporter.start
         Travis::Metrics.setup
 
@@ -32,7 +32,7 @@ module Travis
       end
 
       def amqp_config
-        Travis::Logs.config.amqp.merge(
+        Travis::Logs.config.amqp.to_h.merge(
           thread_pool_size: (Travis::Logs.config.logs.threads * 2 + 3)
         )
       end

@@ -1,29 +1,33 @@
 require 'travis/logs'
 require 'travis/logs/existence'
 
-describe Travis::Logs::Existence do
-  let(:existence) { described_class.new }
+module Travis::Logs
+  describe Existence do
+    let(:existence) { described_class.new }
 
-  describe '#occupied!' do
-    it 'sets channel to occupied state' do
-      existence.occupied!('foo')
-      existence.occupied?('foo').should be_true
+    describe '#occupied!' do
+      it 'sets channel to occupied state' do
+        existence.occupied!('foo')
+        expect(existence.occupied?('foo')).to eq('true')
 
-      described_class.new.occupied?('foo').should be_true
-    end
-  end
-
-  describe '#vacant!' do
-    before do
-      existence.occupied!('foo')
-      existence.occupied?('foo').should be_true
+        # check new instance
+        expect(described_class.new.occupied?('foo')).to eq('true')
+      end
     end
 
-    it 'sets channel to vacant state' do
-      existence.vacant!('foo')
-      existence.occupied?('foo').should be_false
+    describe '#vacant!' do
+      before do
+        existence.occupied!('foo')
+        expect(existence.occupied?('foo')).to eq('true')
+      end
 
-      described_class.new.occupied?('foo').should be_false
+      it 'sets channel to vacant state' do
+        existence.vacant!('foo')
+        expect(existence.occupied?('foo')).to be nil
+
+        # check new instance
+        expect(described_class.new.occupied?('foo')).to be nil
+      end
     end
   end
 end
