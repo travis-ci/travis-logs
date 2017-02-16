@@ -34,6 +34,8 @@ module Travis
         end
 
         def run
+          Travis.logger.info('fetching aggregatable ids')
+
           ids = aggregatable_ids
           if ids.empty?
             Travis.logger.info('no aggregatable ids')
