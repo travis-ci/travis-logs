@@ -133,7 +133,7 @@ module Travis
           @db[:logs].where(id: log_id).update(content: content, aggregated_at: aggregated_at, archived_at: nil, archive_verified: nil, updated_at: Time.now.utc)
         end
 
-        AGGREGATEABLE_SELECT_SQL = <<-SQL.split.join(' ')
+        AGGREGATABLE_SELECT_SQL = <<-SQL.split.join(' ')
           SELECT log_id
             FROM log_parts
            WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
@@ -142,7 +142,7 @@ module Travis
         SQL
 
         def aggregatable_log_parts(regular_interval, force_interval, limit)
-          @db[AGGREGATEABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
+          @db[AGGREGATABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
         end
 
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ')

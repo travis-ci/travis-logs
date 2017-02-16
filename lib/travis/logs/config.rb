@@ -35,7 +35,7 @@ module Travis
         def intervals_vacuum
           Integer(
             ENV['TRAVIS_LOGS_INTERVALS_VACUUM'] ||
-            ENV['INTERVALS_VACUUM'] || 5
+            ENV['INTERVALS_VACUUM'] || 1
           )
         end
       end
