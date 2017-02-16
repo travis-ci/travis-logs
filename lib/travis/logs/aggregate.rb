@@ -19,14 +19,22 @@ module Travis
       def run
         loop do
           aggregate_logs
-          sleep Travis.config.logs.intervals.vacuum
+          sleep sleep_interval
         end
       end
 
       def aggregate_logs
-        Travis::Logs::Services::AggregateLogs.run
+        aggregator.run
       rescue Exception => e
         Travis::Exceptions.handle(e)
+      end
+
+      private def aggregator
+        @aggregator ||= Travis::Logs::Services::AggregateLogs.new
+      end
+
+      private def sleep_interval
+        Travis.config.logs.intervals.vacuum
       end
     end
   end

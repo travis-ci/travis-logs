@@ -14,7 +14,8 @@ module Travis
         end
 
         def aggregate_async?
-          ENV.key?('AGGREGATE_ASYNC')
+          ENV.key?('TRAVIS_LOGS_AGGREGATE_ASYNC') ||
+            ENV.key?('AGGREGATE_ASYNC')
         end
 
         def aggregate_pool_min_threads
@@ -28,6 +29,13 @@ module Travis
           Integer(
             ENV['TRAVIS_LOGS_AGGREGATE_POOL_MAX_THREADS'] ||
             ENV['AGGREGATE_POOL_MAX_THREADS'] || 20
+          )
+        end
+
+        def intervals_vacuum
+          Integer(
+            ENV['TRAVIS_LOGS_INTERVALS_VACUUM'] ||
+            ENV['INTERVALS_VACUUM'] || 5
           )
         end
       end
@@ -49,7 +57,7 @@ module Travis
             max_queue: 0
           },
           intervals: {
-            vacuum: 10,
+            vacuum: intervals_vacuum,
             regular: 180,
             force: 3 * 60 * 60,
             purge: 6
