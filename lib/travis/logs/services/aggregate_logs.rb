@@ -59,7 +59,7 @@ module Travis
           Travis.logger.debug(
             'aggregating with pool config',
             pool_config.merge(
-              action: 'aggregate', async: false,
+              action: 'aggregate', async: false
             )
           )
           Travis.logger.info(
