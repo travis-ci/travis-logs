@@ -93,7 +93,7 @@ describe Travis::Logs::Helpers::Database do
     it 'sets the archiving column' do
       database.update_archiving_status(@log_id, true)
 
-      expect(sequel[:logs].where(id: @log_id).get(:archiving)).to eq(true)
+      expect(sequel[:logs].where(id: @log_id).get(:archiving)).to be true
     end
   end
 
@@ -106,7 +106,7 @@ describe Travis::Logs::Helpers::Database do
       database.mark_archive_verified(@log_id)
 
       verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
-      expect(verified).to eq(true)
+      expect(verified).to be true
     end
   end
 
@@ -246,7 +246,7 @@ describe Travis::Logs::Helpers::Database do
       database.mark_not_archived(@log_id)
 
       verified = sequel[:logs].where(id: @log_id).get(:archive_verified)
-      expect(verified).to eq(false)
+      expect(verified).to be false
     end
   end
 
