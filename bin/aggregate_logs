@@ -6,6 +6,7 @@ require 'bundler/setup'
 require 'travis/logs/aggregate'
 
 $stdout.sync = true
+$stderr.sync = true
 
 app = Travis::Logs::Aggregate.new
 app.setup
