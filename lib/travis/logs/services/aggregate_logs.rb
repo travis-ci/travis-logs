@@ -44,7 +44,7 @@ module Travis
             Travis.logger.info(
               'aggregating',
               action: 'aggregate', async: true,
-              'sample#aggregatable-logs' => ids.length
+              :'sample#aggregatable-logs' => ids.length
             )
 
             ids.each do |log_id|
