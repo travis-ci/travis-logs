@@ -32,8 +32,8 @@ class FakeWarningLogger
     @warnings = []
   end
 
-  def warn(msg)
-    @warnings << msg
+  def warn(msg, args)
+    @warnings << [msg, args]
   end
 
   def debug(*); end
@@ -134,19 +134,19 @@ describe Travis::Logs::Services::ArchiveLog do
     it 'reports matching amazement' do
       expect(service).to receive(:mark).with('amazement.9000')
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=amazement\b/ }).to be true
+      expect(Travis.logger.warnings.any? { |e| e.last[:result] == 'amazement' }).to be true
     end
 
     it 'reports matching greeting' do
       expect(service).to_not receive(:mark).with(/greeting/)
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=ohhai\b/ }).to be true
+      expect(Travis.logger.warnings.any? { |e| e.last[:result] == 'ohhai' }).to be true
     end
 
     it 'does not report matching kaboom' do
       expect(service).to_not receive(:mark).with(/kaboom/)
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=kaboom-code/ }).to_not be true
+      expect(Travis.logger.warnings.any? { |e| e.last[:result] == 'kaboom-code' }).to_not be true
     end
   end
 end

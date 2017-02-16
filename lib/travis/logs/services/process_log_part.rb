@@ -47,15 +47,24 @@ module Travis
 
         def create_part
           valid_log_id?
-          database.create_log_part(log_id: log_id, content: chars, number: number, final: final?)
+          database.create_log_part(
+            log_id: log_id, content: chars, number: number, final: final?
+          )
         rescue Sequel::Error => e
-          Travis.logger.warn "[warn] could not save log_park in create_part job_id: #{payload['id']}: #{e.message}"
-          Travis.logger.warn e.backtrace
+          Travis.logger.warn(
+            'Could not save log_park in create_part',
+            job_id: payload['id'], warning: e.message
+          )
+          Travis.logger.warn(e.backtrace.join("\n"))
         end
 
         def valid_log_id?
           if log_id == 0
-            Travis.logger.warn "action=process job_id=#{payload['id']} result=invalid_id log_id=#{log_id.inspect}"
+            Travis.logger.warn(
+              'invalid log id',
+              action: 'process', job_id: payload['id'],
+              result: 'invalid_id', log_id: log_id
+            )
             mark('log.id_invalid')
           end
         end
@@ -75,7 +84,10 @@ module Travis
             pusher_client.push(pusher_payload)
           end
         rescue => e
-          Travis.logger.error("Error notifying of log update: #{e.message} (from #{e.backtrace.first})")
+          Travis.logger.error(
+            'Error notifying of log update',
+            err: e.message, from: e.backtrace.first
+          )
         end
 
         def log_id
@@ -88,9 +100,13 @@ module Travis
         end
 
         def create_log
-          Travis.logger.warn "action=process job_id=#{payload['id']} message=log_created"
           mark('log.create')
-          database.create_log(payload['id'])
+          created = database.create_log(payload['id'])
+          Travis.logger.warn(
+            'created log',
+            action: 'process', job_id: payload['id'], message: 'log_created'
+          )
+          created
         end
 
         def chars

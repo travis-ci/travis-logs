@@ -6,6 +6,7 @@ gem 'activesupport', '~> 3.2'
 gem 'aws-sdk'
 gem 'bunny', platform: :mri
 gem 'coder', git: 'https://github.com/rkh/coder.git'
+gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'excon'
 gem 'faraday'

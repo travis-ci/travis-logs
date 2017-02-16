@@ -11,8 +11,9 @@ module Travis
           pool_size = Logs.config.sidekiq.pool_size
 
           Travis.logger.info(
-            "Setting up Sidekiq (pool size: #{pool_size}) and Redis " \
-            "(connecting to host #{URI(url).host})"
+            'Setting up Sidekiq and Redis',
+            pool_size: pool_size,
+            host: URI(url).host
           )
           ::Sidekiq.redis = ::Sidekiq::RedisConnection.create(
             url: url,

@@ -43,23 +43,20 @@ describe Travis::Logs::Services::AggregateLogs do
   it 'aggregates every aggregatable log' do
     service.run
 
-    expect(database).to have_received(:aggregate).with(1)
-    expect(database).to have_received(:aggregate).with(2)
+    expect(database).to have_received(:aggregate).twice
   end
 
   it 'vacuums every aggregatable log' do
     service.run
 
-    expect(database).to have_received(:delete_log_parts).with(1)
-    expect(database).to have_received(:delete_log_parts).with(2)
+    expect(database).to have_received(:delete_log_parts).twice
   end
 
-  context 'when a the log exists' do
+  context 'when the log exists' do
     it 'queues the log for archiving' do
       service.run
 
-      expect(archiver).to have_received(:perform_async).with(1)
-      expect(archiver).to have_received(:perform_async).with(2)
+      expect(archiver).to have_received(:perform_async).twice
     end
   end
 
@@ -74,8 +71,7 @@ describe Travis::Logs::Services::AggregateLogs do
       rescue
       end
 
-      expect(database).not_to have_received(:delete_log_parts).with(1)
-      expect(database).not_to have_received(:delete_log_parts).with(2)
+      expect(database).not_to have_received(:delete_log_parts)
     end
   end
 
@@ -90,8 +86,7 @@ describe Travis::Logs::Services::AggregateLogs do
       rescue
       end
 
-      expect(database).not_to have_received(:delete_log_parts).with(1)
-      expect(database).not_to have_received(:delete_log_parts).with(2)
+      expect(database).not_to have_received(:delete_log_parts)
     end
   end
 end

@@ -136,10 +136,10 @@ describe Travis::Logs::Helpers::Database do
   describe '#delete_log_parts' do
     it 'deletes all log parts with the given log ID' do
       sequel[:log_parts].multi_insert([
-        { log_id: 2, content: 'hello', number: 1, final: false },
-        { log_id: 2, content: 'world', number: 2, final: false },
-        { log_id: 3, content: 'foobar', number: 1, final: false }
-      ])
+                                        { log_id: 2, content: 'hello', number: 1, final: false },
+                                        { log_id: 2, content: 'world', number: 2, final: false },
+                                        { log_id: 3, content: 'foobar', number: 1, final: false }
+                                      ])
 
       database.delete_log_parts(2)
 
@@ -150,10 +150,10 @@ describe Travis::Logs::Helpers::Database do
   describe '#aggregatable_log_parts' do
     before(:each) do
       sequel[:log_parts].multi_insert([
-        { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
-        { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
-        { log_id: 2, final: true, created_at: now - 60 * 60 }
-      ])
+                                        { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
+                                        { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
+                                        { log_id: 2, final: true, created_at: now - 60 * 60 }
+                                      ])
     end
 
     it 'includes finished logs older than the regular interval' do
@@ -191,10 +191,10 @@ describe Travis::Logs::Helpers::Database do
     before(:each) do
       @log_id = sequel[:logs].insert(aggregated_at: nil)
       sequel[:log_parts].multi_insert([
-        { log_id: @log_id, content: 'world', number: 3 },
-        { log_id: @log_id, content: 'hello ', number: 1 },
-        { log_id: @log_id, content: '!', number: 4 }
-      ])
+                                        { log_id: @log_id, content: 'world', number: 3 },
+                                        { log_id: @log_id, content: 'hello ', number: 1 },
+                                        { log_id: @log_id, content: '!', number: 4 }
+                                      ])
     end
 
     it 'coalesces the log_parts ordered by number' do

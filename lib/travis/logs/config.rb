@@ -16,19 +16,50 @@ module Travis
         ENV.key?('AGGREGATE_ASYNC')
       end
 
-      define amqp:          { username: 'guest', password: 'guest', host: 'localhost', prefetch: 1 },
-             logs_database: { adapter: 'postgresql', database: "travis_logs_#{Travis.env}", ssl: ssl?, encoding: 'unicode', min_messages: 'warning' },
-             s3:            { hostname: 'archive.travis-ci.org', access_key_id: '', secret_access_key: '', acl: :public_read },
-             pusher:        { app_id: 'app-id', key: 'key', secret: 'secret', secure: false },
-             sidekiq:       { namespace: 'sidekiq', pool_size: 22 },
-             logs:          { aggregate_async: aggregate_async?, archive: true, purge: false, threads: 10, per_aggregate_limit: 500, intervals: { vacuum: 10, regular: 180, force: 3 * 60 * 60, purge: 6 } },
-             redis:         { url: 'redis://localhost:6379' },
-             metrics:       { reporter: 'librato' },
-             ssl:           {},
-             sentry:        {},
-             investigation: { enabled: false, investigators: {} }
+      define(
+        logs: {
+          aggregate_async: aggregate_async?,
+          archive: true,
+          purge: false,
+          threads: 10,
+          per_aggregate_limit: 500,
+          aggregate_pool: {
+            min_threads: 20,
+            max_threads: 20,
+            max_queue: 0
+          },
+          intervals: {
+            vacuum: 10,
+            regular: 180,
+            force: 3 * 60 * 60,
+            purge: 6
+          }
+        },
+        log_level: :info,
+        logger: { format_type: 'l2met', thread_id: true },
+        amqp: {
+          username: 'guest', password: 'guest', host: 'localhost', prefetch: 1
+        },
+        logs_database: {
+          adapter: 'postgresql', database: "travis_logs_#{Travis.env}",
+          ssl: ssl?, encoding: 'unicode', min_messages: 'warning'
+        },
+        s3: {
+          hostname: 'archive.travis-ci.org', access_key_id: '',
+          secret_access_key: '', acl: :public_read
+        },
+        pusher: {
+          app_id: 'app-id', key: 'key', secret: 'secret', secure: false
+        },
+        sidekiq: { namespace: 'sidekiq', pool_size: 22 },
+        redis: { url: 'redis://localhost:6379' },
+        metrics: { reporter: 'librato' },
+        ssl: {},
+        sentry: {},
+        investigation: { enabled: false, investigators: {} }
+      )
 
-      default _access: [:key]
+      default(_access: [:key])
 
       def env
         Travis.env
