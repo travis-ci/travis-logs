@@ -23,7 +23,7 @@ module Travis
           end
         end
 
-        attr_reader :log_id
+        attr_reader :log_id, :database, :storage_service
 
         def initialize(log_id, storage_service = Helpers::S3.new, database = Travis::Logs.database_connection)
           @log_id = log_id
@@ -32,9 +32,9 @@ module Travis
         end
 
         def run
-          return unless fetch
-          mark_as_archiving
-          return if content_blank?
+          warn_of_missing_log && return unless log
+          warn_of_blank_content && return if content.blank?
+          update_archiving_status(true)
           store
           verify
           confirm
@@ -42,33 +42,25 @@ module Travis
           queue_purge
           investigate if investigation_enabled?
         ensure
-          mark_as_archiving(false)
+          update_archiving_status(false)
         end
 
         def log
-          @log ||= begin
-            log = database.log_for_id(log_id)
-            unless log
-              Travis.logger.warn "action=archive id=#{log_id} result=not_found"
-              mark('log.not_found')
-            end
-            log
-          end
-        end
-        alias fetch log
-
-        def mark_as_archiving(archiving = true)
-          database.update_archiving_status(log_id, archiving)
+          @log ||= database.log_for_id(log_id)
         end
 
-        def content_blank?
-          if content.blank?
-            Travis.logger.warn "action=archive id=#{log_id} result=empty"
-            mark('log.empty')
-            true
-          else
-            false
-          end
+        def warn_of_missing_log
+          Travis.logger.warn "action=archive id=#{log_id} result=not_found"
+          mark('log.not_found')
+        end
+
+        def warn_of_blank_content
+          Travis.logger.warn "action=archive id=#{log_id} result=empty"
+          mark('log.empty')
+        end
+
+        def update_archiving_status(status)
+          database.update_archiving_status(log_id, status)
         end
 
         def store
@@ -84,7 +76,7 @@ module Travis
             measure('verify') do
               actual = archived_content_length
               expected = content.bytesize
-              unless actual == expected
+              if actual != expected
                 Travis.logger.error(
                   "action=archive id=#{log_id} result=verification-failed " \
                   "expected=#{expected} actual=#{actual}"
@@ -124,8 +116,6 @@ module Travis
         end
 
         private
-
-        attr_reader :storage_service, :database
 
         def archived_content_length
           storage_service.content_length(target_url)
