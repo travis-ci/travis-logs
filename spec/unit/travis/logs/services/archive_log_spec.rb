@@ -79,10 +79,8 @@ describe Travis::Logs::Services::ArchiveLog do
     end
 
     after do
-      Travis.config.investigation = Hashr.new({
-        enabled: false,
-        investigators: {},
-      })
+      Travis.config.investigation = Hashr.new(enabled: false,
+                                              investigators: {})
     end
 
     it 'does not investigate the log content' do
@@ -124,10 +122,8 @@ describe Travis::Logs::Services::ArchiveLog do
     end
 
     after do
-      Travis.config.investigation = Hashr.new({
-        enabled: false,
-        investigators: {},
-      })
+      Travis.config.investigation = Hashr.new(enabled: false,
+                                              investigators: {})
     end
 
     it 'investigates the log content' do

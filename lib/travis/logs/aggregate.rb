@@ -13,7 +13,7 @@ module Travis
         Travis.logger.info('** Starting Logs Aggregation **')
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
-        Logs.database_connection = Travis::Logs::Helpers::Database.connect
+        Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
       end
 
       def run

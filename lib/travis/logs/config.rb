@@ -5,7 +5,7 @@ module Travis
   module Logs
     class Config < Travis::Config
       def self.ssl?
-        env == 'production' and not disable_ssl?
+        (env == 'production') && !disable_ssl?
       end
 
       def self.disable_ssl?

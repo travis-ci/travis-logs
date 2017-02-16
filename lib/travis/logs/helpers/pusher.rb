@@ -34,12 +34,10 @@ module Travis
         end
 
         def pusher_payload(payload)
-          MultiJson.dump({
-            'id' => payload['id'],
-            '_log' => payload['chars'],
-            'number' => payload['number'],
-            'final' => payload['final']
-          })
+          MultiJson.dump('id' => payload['id'],
+                         '_log' => payload['chars'],
+                         'number' => payload['number'],
+                         'final' => payload['final'])
         end
 
         def default_client

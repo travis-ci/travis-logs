@@ -1,10 +1,4 @@
 GIT
-  remote: git://github.com/travis-ci/travis-amqp.git
-  revision: 3966b3651adfd1c544f53d49d5986ac16cd9c4bc
-  specs:
-    travis-amqp (0.0.1)
-
-GIT
   remote: https://github.com/getsentry/raven-ruby.git
   revision: d75133cf8f0dfad924bb52f567141ca6bcd9edb8
   specs:
@@ -16,6 +10,12 @@ GIT
   revision: 44b0cf89b98caecc654dd1a724a448e17ef7aa6c
   specs:
     coder (0.4.0)
+
+GIT
+  remote: https://github.com/travis-ci/travis-amqp.git
+  revision: 3966b3651adfd1c544f53d49d5986ac16cd9c4bc
+  specs:
+    travis-amqp (0.0.1)
 
 GIT
   remote: https://github.com/travis-ci/travis-migrations.git

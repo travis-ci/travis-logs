@@ -22,13 +22,13 @@ module Travis
           uri = jdbc_uri_from_config(config) if jruby?
           uri = uri_from_config(config) unless jruby?
 
-          after_connect = proc {|c|
+          after_connect = proc do |c|
             if c.respond_to?(:execute)
               c.execute("SET application_name TO 'logs'")
             elsif c.respond_to?(:exec)
               c.exec("SET application_name TO 'logs'")
             end
-          }
+          end
 
           Sequel.default_timezone = :utc
           Sequel.connect(uri, max_connections: config[:pool], after_connect: after_connect)
