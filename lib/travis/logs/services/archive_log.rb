@@ -149,7 +149,7 @@ module Travis
           yield
         rescue => e
           count ||= 0
-          if times > (count += 1)
+          if times > (count += 1) && ENV['RACK_ENV'] != 'test'
             Travis.logger.debug(
               "action=archive retrying=#{header} " \
               "error=#{JSON.dump(e.backtrace)} type=#{e.class.name}"
@@ -174,7 +174,7 @@ module Travis
         end
 
         def investigators
-          @investigators ||= Travis.config.investigation.investigators.map do |name, h|
+          @investigators ||= Travis.config.investigation.investigators.to_h.map do |name, h|
             ::Travis::Logs::Investigator.new(
               name,
               Regexp.new(h[:matcher]),

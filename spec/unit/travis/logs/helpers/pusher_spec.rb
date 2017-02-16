@@ -7,14 +7,14 @@ module Travis::Logs::Helpers
     let(:pusher_channel) { double('pusher-channel') }
     let(:pusher_helper) { described_class.new(pusher_client) }
 
-    let(:payload) {
+    let(:payload) do
       {
         'id' => '1919',
         'chars' => 'strike! ✊',
         'number' => '204',
         'final' => false
       }
-    }
+    end
 
     before(:each) do
       allow(pusher_client).to receive(:[]) { pusher_channel }

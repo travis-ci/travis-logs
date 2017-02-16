@@ -4,8 +4,8 @@ require 'travis/logs/existence'
 require 'pusher'
 require 'coder'
 
-# pusher requires this in a method, which sometimes
-# causes an uninitialized constant error
+# pusher requires this in a method, which sometimes causes an uninitialized
+# constant error
 require 'net/https'
 
 module Travis

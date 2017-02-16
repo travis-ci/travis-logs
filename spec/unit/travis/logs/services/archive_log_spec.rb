@@ -75,8 +75,12 @@ describe Travis::Logs::Services::ArchiveLog do
 
   context 'without investigation enabled' do
     before do
-      allow(Travis.config.investigation).to receive(:enabled?)
-        .and_return(false)
+      Travis.config.investigation[:enabled] = false
+    end
+
+    after do
+      Travis.config.investigation = Hashr.new(enabled: false,
+                                              investigators: {})
     end
 
     it 'does not investigate the log content' do
@@ -111,11 +115,15 @@ describe Travis::Logs::Services::ArchiveLog do
     let(:logger) { FakeWarningLogger.new }
 
     before do
-      allow(Travis.config.investigation).to receive(:enabled?)
-        .and_return(true)
-      allow(Travis.config.investigation).to receive(:investigators)
-        .and_return(investigators)
+      Travis.config.investigation[:enabled] = true
+      Travis.config.investigation[:investigators] = investigators
+
       allow(Travis).to receive(:logger).and_return(logger)
+    end
+
+    after do
+      Travis.config.investigation = Hashr.new(enabled: false,
+                                              investigators: {})
     end
 
     it 'investigates the log content' do

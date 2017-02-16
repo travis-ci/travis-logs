@@ -35,6 +35,7 @@ gem 'sidekiq'
 gem 'sidekiq-unique-jobs', '~> 4'
 gem 'simplecov', require: false
 gem 'sinatra', '~> 1.4'
-gem 'travis-config', '~> 0.1.0'
+gem 'travis-amqp', git: 'https://github.com/travis-ci/travis-amqp.git'
+gem 'travis-config', '~> 1.0.12'
 gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git', group: :test
 gem 'travis-support', git: 'https://github.com/travis-ci/travis-support.git'

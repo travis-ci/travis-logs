@@ -1,9 +1,11 @@
-#! /usr/bin/env ruby
+#!/usr/bin/env ruby
 
 $LOAD_PATH << 'lib'
 
 require 'bundler/setup'
 require 'travis/logs/aggregate'
+
+$stdout.sync = true
 
 app = Travis::Logs::Aggregate.new
 app.setup

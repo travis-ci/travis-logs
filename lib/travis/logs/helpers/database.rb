@@ -18,12 +18,20 @@ module Travis
         # This method should only be called for "maintenance" tasks (such as
         # creating the tables or debugging).
         def self.create_sequel
-          config = Travis::Logs.config.logs_database
+          config = Travis::Logs.config.logs_database.to_h
           uri = jdbc_uri_from_config(config) if jruby?
           uri = uri_from_config(config) unless jruby?
-          Sequel.connect(uri, max_connections: config[:pool]).tap do |db|
-            db.timezone = :utc
+
+          after_connect = proc do |c|
+            if c.respond_to?(:execute)
+              c.execute("SET application_name TO 'logs'")
+            elsif c.respond_to?(:exec)
+              c.exec("SET application_name TO 'logs'")
+            end
           end
+
+          Sequel.default_timezone = :utc
+          Sequel.connect(uri, max_connections: config[:pool], after_connect: after_connect)
         end
 
         def self.uri_from_config(config)
@@ -69,8 +77,10 @@ module Travis
 
         def connect
           @db.test_connection
-          @db << "SET application_name = 'logs'"
-          @db << "SET TIME ZONE 'UTC'"
+
+          # TODO: run prepare_statements for every connection,
+          # not just the first connection in the pool
+          # see also: Sequel.connect, after_connect
           prepare_statements
         end
 
@@ -128,7 +138,6 @@ module Travis
             FROM log_parts
            WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
               OR  created_at <= NOW() - interval '? seconds'
-        ORDER BY created_at ASC
            LIMIT ?
         SQL
 
