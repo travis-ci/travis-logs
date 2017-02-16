@@ -34,13 +34,17 @@ module Travis
         end
 
         def run
-          ids = aggregateable_ids
+          ids = aggregatable_ids
+          if ids.empty?
+            Travis.logger.info('no aggregatable ids')
+            return
+          end
 
           if aggregate_async?
             Travis.logger.info(
               'aggregating',
               action: 'aggregate', async: true,
-              'sample#aggregateable-logs' => ids.length
+              'sample#aggregatable-logs' => ids.length
             )
 
             ids.each do |log_id|
@@ -51,19 +55,26 @@ module Travis
           end
 
           Travis.logger.debug(
-            'aggregating',
-            action: 'aggregate', async: false,
-            pool_config: pool_config.inspect
+            'aggregating with pool config',
+            pool_config.merge(
+              action: 'aggregate', async: false,
+            )
           )
           Travis.logger.info(
-            'aggregating',
+            'starting aggregation batch',
             action: 'aggregate', async: false,
-            'sample#aggregateable-logs' => ids.length
+            'sample#aggregatable-logs' => ids.length
           )
+
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
           ids.each { |i| pool.post { aggregate_log(i) } }
           pool.shutdown
           pool.wait_for_termination
+
+          Travis.logger.info(
+            'finished aggregation batch',
+            action: 'aggregate', async: false
+          )
         end
 
         def aggregate_log(log_id)
@@ -125,7 +136,7 @@ module Travis
           end
         end
 
-        private def aggregateable_ids
+        private def aggregatable_ids
           database.aggregatable_log_parts(
             intervals[:regular], intervals[:force], per_aggregate_limit
           ).uniq
