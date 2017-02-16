@@ -4,16 +4,36 @@ require 'travis/support'
 module Travis
   module Logs
     class Config < Travis::Config
-      def self.ssl?
-        (env == 'production') && !disable_ssl?
+      class << self
+        def ssl?
+          (env == 'production') && !disable_ssl?
+        end
+
+        def disable_ssl?
+          %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+        end
+
+        def aggregate_async?
+          ENV.key?('AGGREGATE_ASYNC')
+        end
+
+        def aggregate_pool_min_threads
+          Integer(
+            ENV['TRAVIS_LOGS_AGGREGATE_POOL_MIN_THREADS'] ||
+            ENV['AGGREGATE_POOL_MIN_THREADS'] || 20
+          )
+        end
+
+        def aggregate_pool_max_threads
+          Integer(
+            ENV['TRAVIS_LOGS_AGGREGATE_POOL_MAX_THREADS'] ||
+            ENV['AGGREGATE_POOL_MAX_THREADS'] || 20
+          )
+        end
       end
 
-      def self.disable_ssl?
-        %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
-      end
-
-      def self.aggregate_async?
-        ENV.key?('AGGREGATE_ASYNC')
+      def env
+        Travis.env
       end
 
       define(
@@ -24,8 +44,8 @@ module Travis
           threads: 10,
           per_aggregate_limit: 500,
           aggregate_pool: {
-            min_threads: 20,
-            max_threads: 20,
+            min_threads: aggregate_pool_min_threads,
+            max_threads: aggregate_pool_max_threads,
             max_queue: 0
           },
           intervals: {
@@ -60,10 +80,6 @@ module Travis
       )
 
       default(_access: [:key])
-
-      def env
-        Travis.env
-      end
     end
   end
 end
