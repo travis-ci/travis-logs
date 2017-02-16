@@ -38,6 +38,13 @@ module Travis
             ENV['INTERVALS_VACUUM'] || 1
           )
         end
+
+        def per_aggregate_limit
+          Integer(
+            ENV['TRAVIS_LOGS_PER_AGGREGATE_LIMIT'] ||
+            ENV['PER_AGGREGATE_LIMIT'] || 500
+          )
+        end
       end
 
       def env
@@ -50,7 +57,7 @@ module Travis
           archive: true,
           purge: false,
           threads: 10,
-          per_aggregate_limit: 500,
+          per_aggregate_limit: per_aggregate_limit,
           aggregate_pool: {
             min_threads: aggregate_pool_min_threads,
             max_threads: aggregate_pool_max_threads,
