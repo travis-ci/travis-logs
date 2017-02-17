@@ -13,8 +13,8 @@ $stdout.sync = true
 $stderr.sync = true
 
 Travis.logger.info(
-  'working back from the end'
-  end: end_id, range_size: range_size
+  'working back from the end',
+  end_id: end_id, range_size: range_size
 )
 
 app = Travis::Logs::Aggregate.new
