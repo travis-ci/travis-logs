@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 
-end_id = Integer(ARGV.fetch(0))
-range_size = Integer(ARGV.fetch(1, '1000000'))
-begin_id = end_id
+min_id = Integer(ARGV.fetch(0))
+max_id = Integer(ARGV.fetch(1))
+end_id = max_id
+begin_id = max_id
+step = Integer(ARGV.fetch(2, '1000000'))
 
 $LOAD_PATH << 'lib'
 
@@ -13,8 +15,8 @@ $stdout.sync = true
 $stderr.sync = true
 
 Travis.logger.info(
-  'working back from the end',
-  end_id: end_id, range_size: range_size
+  'working through range',
+  min_id: min_id, max_id: max_id, step: step
 )
 
 app = Travis::Logs::Aggregate.new
@@ -22,9 +24,14 @@ app.setup
 
 Travis.logger.info('starting loop')
 loop do
-  break if end_id <= 0
-  begin_id = end_id - range_size - 1
-  Travis.logger.info('aggregate_logs!', id_range: "#{begin_id}-#{end_id}")
+  break if end_id <= min_id
+  begin_id = end_id - step - 1
+
+  Travis.logger.info(
+    'aggregate_logs!',
+    begin_id: begin_id, end_id: end_id
+  )
   app.aggregate_logs!([begin_id, end_id])
+
   end_id = begin_id + 1
 end
