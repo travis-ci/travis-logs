@@ -2,6 +2,7 @@ def jruby?
   RUBY_PLATFORM =~ /^java/
 end
 
+require 'logger'
 require 'sequel'
 require 'jdbc/postgres' if jruby?
 require 'pg' unless jruby?
@@ -31,7 +32,11 @@ module Travis
           end
 
           Sequel.default_timezone = :utc
-          Sequel.connect(uri, max_connections: config[:pool], after_connect: after_connect)
+          conn = Sequel.connect(
+            uri, max_connections: config[:pool], after_connect: after_connect
+          )
+          conn.loggers << Logger.new($stdout) if config[:sql_logging]
+          conn
         end
 
         def self.uri_from_config(config)

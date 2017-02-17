@@ -13,6 +13,13 @@ module Travis
           %w(1 yes on).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
         end
 
+        def sql_logging?
+          %w(1 yes on).include?(
+            ENV['TRAVIS_LOGS_SQL_LOGGING'] ||
+            ENV['SQL_LOGGING'] || 'off'
+          )
+        end
+
         def aggregate_async?
           ENV.key?('TRAVIS_LOGS_AGGREGATE_ASYNC') ||
             ENV.key?('AGGREGATE_ASYNC')
@@ -76,8 +83,12 @@ module Travis
           username: 'guest', password: 'guest', host: 'localhost', prefetch: 1
         },
         logs_database: {
-          adapter: 'postgresql', database: "travis_logs_#{Travis.env}",
-          ssl: ssl?, encoding: 'unicode', min_messages: 'warning'
+          adapter: 'postgresql',
+          database: "travis_logs_#{Travis.env}",
+          ssl: ssl?,
+          encoding: 'unicode',
+          min_messages: 'warning',
+          sql_logging: sql_logging?
         },
         s3: {
           hostname: 'archive.travis-ci.org', access_key_id: '',
