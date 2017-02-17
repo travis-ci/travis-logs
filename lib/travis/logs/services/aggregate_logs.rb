@@ -66,6 +66,7 @@ module Travis
           Travis.logger.info(
             'starting aggregation batch',
             action: 'aggregate', async: false,
+            size: ids.length,
             :'sample#aggregatable-logs' => ids.length
           )
 
@@ -77,7 +78,8 @@ module Travis
           Travis.logger.info(
             'finished aggregation batch',
             action: 'aggregate', async: false,
-            :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i
+            :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i,
+            size: ids.length
           )
           cutoff_id
         end
