@@ -18,13 +18,13 @@ module Travis
 
       def run
         loop do
-          aggregate_logs(ENV.fetch('TRAVIS_LOGS_MIN_LOG_PART_ID', nil))
+          aggregate_logs(ENV.fetch('TRAVIS_LOGS_LOG_PART_ID_RANGE', nil))
           sleep sleep_interval
         end
       end
 
-      def aggregate_logs(min_log_part_id)
-        aggregator.run(min_log_part_id)
+      def aggregate_logs(log_part_id_range)
+        aggregator.run(log_part_id_range)
       rescue Exception => e
         Travis::Exceptions.handle(e)
       end

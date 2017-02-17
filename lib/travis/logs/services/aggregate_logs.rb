@@ -33,11 +33,11 @@ module Travis
                          end
         end
 
-        def run(min_log_part_id = nil)
+        def run(log_part_id_range = nil)
           timer = Time.now
           Travis.logger.info('fetching aggregatable ids')
 
-          ids = aggregatable_ids(min_log_part_id)
+          ids = aggregatable_ids(log_part_id_range)
           if ids.empty?
             Travis.logger.info('no aggregatable ids')
             return
@@ -142,10 +142,11 @@ module Travis
           end
         end
 
-        private def aggregatable_ids(min_log_part_id)
-          unless min_log_part_id.nil?
-            return database.aggregatable_logs_after_log_part_id(
-              min_log_part_id,
+        private def aggregatable_ids(log_part_id_range)
+          unless log_part_id_range.nil?
+            return database.aggregatable_logs_in_id_range(
+              log_part_id_range.fetch(0),
+              log_part_id_range.fetch(1),
               intervals[:regular], intervals[:force], per_aggregate_limit
             )
           end
