@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 
+end_id = Integer(ARGV.fetch(0))
+range_size = Integer(ARGV.fetch(1, '1000000'))
+begin_id = end_id
+
 $LOAD_PATH << 'lib'
 
 require 'bundler/setup'
@@ -8,20 +12,19 @@ require 'travis/logs/aggregate'
 $stdout.sync = true
 $stderr.sync = true
 
-end_id = Integer(ARGV.fetch(0))
-range_size = Integer(ARGV.fetch(1, '1000000'))
-begin_id = end_id
-$stderr.puts "---> working back from end=#{end_id} range_size=#{range_size}"
+Travis.logger.info(
+  'working back from the end'
+  end: end_id, range_size: range_size
+)
 
 app = Travis::Logs::Aggregate.new
-$stderr.puts "---> Setting up"
 app.setup
 
-$stderr.puts "---> Starting loop"
+Travis.logger.info('starting loop')
 loop do
   break if end_id <= 0
   begin_id = end_id - range_size - 1
-  $stdout.puts "---> id_range=#{begin_id}-#{end_id}"
+  Travis.logger.info('aggregate_logs!', id_range: "#{begin_id}-#{end_id}")
   app.aggregate_logs!([begin_id, end_id])
   end_id = begin_id + 1
 end
