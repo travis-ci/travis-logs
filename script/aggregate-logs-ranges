@@ -21,8 +21,7 @@ $stderr.puts "---> Starting loop"
 loop do
   break if end_id <= 0
   begin_id = end_id - range_size - 1
-  id_range = "#{begin_id}-#{end_id}"
-  $stdout.puts "---> id_range=#{id_range}"
-  app.aggregate_logs(id_range)
+  $stdout.puts "---> id_range=#{begin_id}-#{end_id}"
+  app.aggregate_logs!([begin_id, end_id])
   end_id = begin_id + 1
 end
