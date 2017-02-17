@@ -164,15 +164,15 @@ module Travis
           ].map(:cutoff_id)[0]
         end
 
-        AGGREGATABLE_SELECT_BEFORE_ID_SQL = <<-SQL.split.join(' ')
+        AGGREGATABLE_SELECT_AFTER_ID_SQL = <<-SQL.split.join(' ')
           SELECT DISTINCT log_id
             FROM log_parts
-           WHERE log_id <= ?
+           WHERE log_id > ?
            LIMIT ?
         SQL
 
-        def aggregatable_logs_before_id(id, limit)
-          @db[AGGREGATABLE_SELECT_BEFORE_ID_SQL, id, limit].map(:log_id)
+        def aggregatable_logs_after_id(id, limit)
+          @db[AGGREGATABLE_SELECT_AFTER_ID_SQL, id, limit].map(:log_id)
         end
 
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ')

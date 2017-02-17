@@ -184,14 +184,18 @@ module Travis
 
           [
             cutoff_id,
-            database.aggregatable_logs_before_id(
-              cutoff_id, per_aggregate_limit
+            database.aggregatable_logs_after_id(
+              cutoff_id - cutoff_window, per_aggregate_limit
             )
           ]
         end
 
         private def intervals
           Travis.config.logs.intervals
+        end
+
+        private def cutoff_window
+          Travis.config.logs.aggregate_cutoff_window
         end
 
         private def per_aggregate_limit

@@ -39,6 +39,13 @@ module Travis
           )
         end
 
+        def aggregate_cutoff_window
+          Integer(
+            ENV['TRAVIS_LOGS_AGGREGATE_CUTOFF_WINDOW'] ||
+            ENV['CUTOFF_WINDOW'] || 10_000_000
+          )
+        end
+
         def intervals_vacuum
           Integer(
             ENV['TRAVIS_LOGS_INTERVALS_VACUUM'] ||
@@ -61,6 +68,7 @@ module Travis
       define(
         logs: {
           aggregate_async: aggregate_async?,
+          aggregate_cutoff_window: aggregate_cutoff_window,
           archive: true,
           purge: false,
           threads: 10,
