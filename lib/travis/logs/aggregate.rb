@@ -19,6 +19,7 @@ module Travis
       def run
         loop do
           aggregate_logs
+          break if run_once?
           sleep sleep_interval
         end
       end
@@ -42,6 +43,14 @@ module Travis
         @log_part_id_range ||= ENV.fetch(
           'TRAVIS_LOGS_LOG_PART_ID_RANGE', ''
         ).split('-', 2)
+      end
+
+      private def run_once?
+        %w(yes on 1).include?(
+          ENV['TRAVIS_LOGS_AGGREGATE_ONCE'] ||
+          ENV['AGGREGATE_ONCE'] ||
+          'off'
+        )
       end
     end
   end
