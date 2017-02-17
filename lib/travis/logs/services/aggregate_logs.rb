@@ -16,8 +16,8 @@ module Travis
           METRIKS_PREFIX
         end
 
-        def self.run
-          new.run
+        def self.run(cutoff_id = nil)
+          new.run(cutoff_id)
         end
 
         def self.aggregate_log(log_id)
@@ -33,19 +33,21 @@ module Travis
                          end
         end
 
-        def run
-          Travis.logger.info('fetching aggregatable ids')
+        def run(cutoff_id = nil)
+          timer = Time.now
+          Travis.logger.info('fetching aggregatable ids', cutoff_id: cutoff_id)
 
-          ids = aggregatable_ids
+          cutoff_id, ids = aggregatable_ids(cutoff_id)
           if ids.empty?
-            Travis.logger.info('no aggregatable ids')
-            return
+            Travis.logger.info('no aggregatable ids', cutoff_id: cutoff_id)
+            return nil
           end
 
           if aggregate_async?
             Travis.logger.info(
               'aggregating',
               action: 'aggregate', async: true,
+              cutoff_id: cutoff_id,
               :'sample#aggregatable-logs' => ids.length
             )
 
@@ -53,37 +55,67 @@ module Travis
               Travis::Logs::Sidekiq::Aggregate.perform_async(log_id)
             end
 
-            return
+            return cutoff_id
           end
 
           Travis.logger.debug(
             'aggregating with pool config',
             pool_config.merge(
-              action: 'aggregate', async: false
+              action: 'aggregate', async: false, cutoff_id: cutoff_id,
             )
           )
           Travis.logger.info(
             'starting aggregation batch',
             action: 'aggregate', async: false,
+            size: ids.length, cutoff_id: cutoff_id,
             :'sample#aggregatable-logs' => ids.length
           )
 
+          empties = Concurrent::Array.new
+
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
-          ids.each { |i| pool.post { aggregate_log(i) } }
+          ids.each do |i|
+            pool.post do
+              is_empty = aggregate_log(i)
+              empties << i if is_empty
+            end
+          end
+
           pool.shutdown
           pool.wait_for_termination
 
           Travis.logger.info(
             'finished aggregation batch',
-            action: 'aggregate', async: false
+            action: 'aggregate', async: false,
+            :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i,
+            size: ids.length, cutoff_id: cutoff_id,
           )
+
+          unless empties.empty?
+            Travis.logger.info(
+              'found empties',
+              action: 'aggregate', async: false,
+              size: ids.length, cutoff_id: cutoff_id, empties: empties.length
+            )
+          end
+
+          cutoff_id
         end
 
         def aggregate_log(log_id)
+          empty = false
           measure do
             database.transaction do
               aggregate(log_id)
-              vacuum(log_id) unless log_empty?(log_id)
+              if log_empty?(log_id)
+                empty = true
+                Travis.logger.warn(
+                  'aggregating',
+                  action: 'aggregate', log_id: log_id, result: 'empty'
+                )
+              else
+                vacuum(log_id)
+              end
             end
           end
           queue_archiving(log_id)
@@ -91,6 +123,7 @@ module Travis
             'aggregating',
             action: 'aggregate', log_id: log_id, result: 'successful'
           )
+          empty
         rescue => e
           Travis::Exceptions.handle(e)
         end
@@ -107,13 +140,8 @@ module Travis
 
         private def log_empty?(log_id)
           log = database.log_for_id(log_id)
-          if log[:content].nil? || log[:content].empty?
-            Travis.logger.warn(
-              'aggregating',
-              action: 'aggregate', log_id: log_id, result: 'empty'
-            )
-            true
-          end
+          return true if log[:content].nil? || log[:content].empty?
+          false
         end
 
         private def vacuum(log_id)
@@ -138,14 +166,36 @@ module Travis
           end
         end
 
-        private def aggregatable_ids
-          database.aggregatable_log_parts(
-            intervals[:regular], intervals[:force], per_aggregate_limit
-          ).uniq
+        private def aggregatable_ids(cutoff_id)
+          if cutoff_id.nil?
+            cutoff_id = database.aggregatable_logs_cutoff_id(
+              intervals[:regular], intervals[:force]
+            )
+          end
+
+          if cutoff_id.nil?
+            return [
+              nil,
+              database.aggregatable_logs(
+                intervals[:regular], intervals[:force], per_aggregate_limit
+              ).uniq
+            ]
+          end
+
+          [
+            cutoff_id,
+            database.aggregatable_logs_after_id(
+              cutoff_id - cutoff_window, per_aggregate_limit
+            )
+          ]
         end
 
         private def intervals
           Travis.config.logs.intervals
+        end
+
+        private def cutoff_window
+          Travis.config.logs.aggregate_cutoff_window
         end
 
         private def per_aggregate_limit
