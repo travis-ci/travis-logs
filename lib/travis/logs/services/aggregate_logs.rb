@@ -86,7 +86,14 @@ module Travis
           measure do
             database.transaction do
               aggregate(log_id)
-              vacuum(log_id) unless log_empty?(log_id)
+              if log_empty?(log_id)
+                Travis.logger.warn(
+                  'aggregating',
+                  action: 'aggregate', log_id: log_id, result: 'empty'
+                )
+              else
+                vacuum(log_id)
+              end
             end
           end
           queue_archiving(log_id)
@@ -110,13 +117,8 @@ module Travis
 
         private def log_empty?(log_id)
           log = database.log_for_id(log_id)
-          if log[:content].nil? || log[:content].empty?
-            Travis.logger.warn(
-              'aggregating',
-              action: 'aggregate', log_id: log_id, result: 'empty'
-            )
-            true
-          end
+          return true if log[:content].nil? || log[:content].empty?
+          false
         end
 
         private def vacuum(log_id)
