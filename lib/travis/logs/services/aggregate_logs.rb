@@ -35,11 +35,11 @@ module Travis
 
         def run(cutoff_id = nil)
           timer = Time.now
-          Travis.logger.info('fetching aggregatable ids')
+          Travis.logger.info('fetching aggregatable ids', cutoff_id: cutoff_id)
 
           cutoff_id, ids = aggregatable_ids(cutoff_id)
           if ids.empty?
-            Travis.logger.info('no aggregatable ids')
+            Travis.logger.info('no aggregatable ids', cutoff_id: cutoff_id)
             return nil
           end
 
@@ -47,6 +47,7 @@ module Travis
             Travis.logger.info(
               'aggregating',
               action: 'aggregate', async: true,
+              cutoff_id: cutoff_id,
               :'sample#aggregatable-logs' => ids.length
             )
 
@@ -60,13 +61,13 @@ module Travis
           Travis.logger.debug(
             'aggregating with pool config',
             pool_config.merge(
-              action: 'aggregate', async: false
+              action: 'aggregate', async: false, cutoff_id: cutoff_id,
             )
           )
           Travis.logger.info(
             'starting aggregation batch',
             action: 'aggregate', async: false,
-            size: ids.length,
+            size: ids.length, cutoff_id: cutoff_id,
             :'sample#aggregatable-logs' => ids.length
           )
 
@@ -87,14 +88,14 @@ module Travis
             'finished aggregation batch',
             action: 'aggregate', async: false,
             :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i,
-            size: ids.length
+            size: ids.length, cutoff_id: cutoff_id,
           )
 
           unless empties.empty?
             Travis.logger.info(
               'found empties',
               action: 'aggregate', async: false,
-              size: ids.length, empties: empties.length
+              size: ids.length, cutoff_id: cutoff_id, empties: empties.length
             )
           end
 
