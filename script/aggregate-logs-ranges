@@ -14,8 +14,10 @@ begin_id = end_id
 $stderr.puts "---> working back from end=#{end_id} range_size=#{range_size}"
 
 app = Travis::Logs::Aggregate.new
+$stderr.puts "---> Setting up"
 app.setup
 
+$stderr.puts "---> Starting loop"
 loop do
   break if end_id <= 0
   begin_id = end_id - range_size - 1

@@ -25,9 +25,13 @@ module Travis
       end
 
       def aggregate_logs(log_part_id_range = default_log_part_id_range)
-        aggregator.run(log_part_id_range)
+        aggregator_logs!(log_part_id_range)
       rescue Exception => e
         Travis::Exceptions.handle(e)
+      end
+
+      def aggregate_logs!(log_part_id_range = default_log_part_id_range)
+        aggregator.run(log_part_id_range)
       end
 
       private def aggregator
