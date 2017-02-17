@@ -33,10 +33,11 @@ module Travis
                          end
         end
 
-        def run
+        def run(log_part_id_range = nil)
+          timer = Time.now
           Travis.logger.info('fetching aggregatable ids')
 
-          ids = aggregatable_ids
+          ids = aggregatable_ids(log_part_id_range)
           if ids.empty?
             Travis.logger.info('no aggregatable ids')
             return
@@ -65,6 +66,7 @@ module Travis
           Travis.logger.info(
             'starting aggregation batch',
             action: 'aggregate', async: false,
+            size: ids.length,
             :'sample#aggregatable-logs' => ids.length
           )
 
@@ -75,7 +77,9 @@ module Travis
 
           Travis.logger.info(
             'finished aggregation batch',
-            action: 'aggregate', async: false
+            action: 'aggregate', async: false,
+            :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i,
+            size: ids.length
           )
         end
 
@@ -138,10 +142,18 @@ module Travis
           end
         end
 
-        private def aggregatable_ids
+        private def aggregatable_ids(log_part_id_range)
+          unless log_part_id_range.nil?
+            return database.aggregatable_logs_in_id_range(
+              log_part_id_range.fetch(0),
+              log_part_id_range.fetch(1),
+              intervals[:regular], intervals[:force], per_aggregate_limit
+            )
+          end
+
           database.aggregatable_log_parts(
             intervals[:regular], intervals[:force], per_aggregate_limit
-          ).uniq
+          )
         end
 
         private def intervals
