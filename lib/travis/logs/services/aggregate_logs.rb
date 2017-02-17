@@ -34,6 +34,7 @@ module Travis
         end
 
         def run(min_log_part_id = nil)
+          timer = Time.now
           Travis.logger.info('fetching aggregatable ids')
 
           ids = aggregatable_ids(min_log_part_id)
@@ -65,6 +66,7 @@ module Travis
           Travis.logger.info(
             'starting aggregation batch',
             action: 'aggregate', async: false,
+            size: ids.length,
             :'sample#aggregatable-logs' => ids.length
           )
 
@@ -75,7 +77,9 @@ module Travis
 
           Travis.logger.info(
             'finished aggregation batch',
-            action: 'aggregate', async: false
+            action: 'aggregate', async: false,
+            :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i,
+            size: ids.length
           )
         end
 
