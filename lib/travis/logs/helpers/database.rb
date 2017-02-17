@@ -147,7 +147,30 @@ module Travis
         SQL
 
         def aggregatable_log_parts(regular_interval, force_interval, limit)
-          @db[AGGREGATABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
+          @db[
+            AGGREGATABLE_SELECT_SQL,
+            regular_interval, true, force_interval, limit
+          ].map(:log_id).sort.uniq
+        end
+
+        AGGREGATABLE_SELECT_AFTER_LOG_PART_ID_SQL = <<-SQL.split.join(' ')
+          SELECT log_id
+            FROM log_parts
+           WHERE id > ?
+             AND (
+                   (created_at <= NOW() - interval '? seconds' AND final = ?)
+                   OR created_at <= NOW() - interval '? seconds'
+                 )
+           LIMIT ?
+        SQL
+
+        def aggregatable_logs_after_log_part_id(
+          log_part_id, regular_interval, force_interval, limit
+        )
+          @db[
+            AGGREGATABLE_SELECT_AFTER_LOG_PART_ID_SQL,
+            log_part_id, regular_interval, true, force_interval, limit
+          ].map(:log_id).sort.uniq
         end
 
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ')
