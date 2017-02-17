@@ -70,8 +70,16 @@ module Travis
             :'sample#aggregatable-logs' => ids.length
           )
 
+          empties = Concurrent::Array.new
+
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
-          ids.each { |i| pool.post { aggregate_log(i) } }
+          ids.each do |i|
+            pool.post do
+              is_empty = aggregate_log(i)
+              empties << i if is_empty
+            end
+          end
+
           pool.shutdown
           pool.wait_for_termination
 
@@ -81,14 +89,25 @@ module Travis
             :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i,
             size: ids.length
           )
+
+          unless empties.empty?
+            Travis.logger.info(
+              'found empties',
+              action: 'aggregate', async: false,
+              size: ids.length, empties: empties.length
+            )
+          end
+
           cutoff_id
         end
 
         def aggregate_log(log_id)
+          empty = false
           measure do
             database.transaction do
               aggregate(log_id)
               if log_empty?(log_id)
+                empty = true
                 Travis.logger.warn(
                   'aggregating',
                   action: 'aggregate', log_id: log_id, result: 'empty'
@@ -103,6 +122,7 @@ module Travis
             'aggregating',
             action: 'aggregate', log_id: log_id, result: 'successful'
           )
+          empty
         rescue => e
           Travis::Exceptions.handle(e)
         end
