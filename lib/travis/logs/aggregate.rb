@@ -18,12 +18,12 @@ module Travis
 
       def run
         loop do
-          aggregate_logs(ENV.fetch('TRAVIS_LOGS_LOG_PART_ID_RANGE', nil))
+          aggregate_logs
           sleep sleep_interval
         end
       end
 
-      def aggregate_logs(log_part_id_range)
+      def aggregate_logs
         aggregator.run(log_part_id_range)
       rescue Exception => e
         Travis::Exceptions.handle(e)
@@ -35,6 +35,13 @@ module Travis
 
       private def sleep_interval
         Travis.config.logs.intervals.vacuum
+      end
+
+      private def log_part_id_range
+        return nil unless ENV.key?('TRAVIS_LOGS_LOG_PART_ID_RANGE')
+        @log_part_id_range ||= ENV.fetch(
+          'TRAVIS_LOGS_LOG_PART_ID_RANGE', ''
+        ).split('-', 2)
       end
     end
   end
