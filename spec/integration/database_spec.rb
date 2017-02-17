@@ -147,7 +147,7 @@ describe Travis::Logs::Helpers::Database do
     end
   end
 
-  describe '#aggregatable_log_parts' do
+  describe '#aggregatable_logs' do
     before(:each) do
       sequel[:log_parts].multi_insert([
                                         { log_id: 1, final: false, created_at: now - 60 * 60 * 24 },
@@ -157,31 +157,31 @@ describe Travis::Logs::Helpers::Database do
     end
 
     it 'includes finished logs older than the regular interval' do
-      log_ids = database.aggregatable_log_parts(60 * 30, 60 * 60 * 12, 500)
+      log_ids = database.aggregatable_logs(60 * 30, 60 * 60 * 12, 500)
 
       expect(log_ids).to include(2)
     end
 
     it 'includes unfinished logs older than the forced interval' do
-      log_ids = database.aggregatable_log_parts(60 * 30, 60 * 60 * 12, 500)
+      log_ids = database.aggregatable_logs(60 * 30, 60 * 60 * 12, 500)
 
       expect(log_ids).to include(1)
     end
 
     it "doesn't include finished logs newer than the regular interval" do
-      log_ids = database.aggregatable_log_parts(60 * 60 * 2, 60 * 60 * 12, 500)
+      log_ids = database.aggregatable_logs(60 * 60 * 2, 60 * 60 * 12, 500)
 
       expect(log_ids).not_to include(2)
     end
 
     it "doesn't include unfinished logs newer than the forced interval" do
-      log_ids = database.aggregatable_log_parts(60 * 30, 60 * 60 * 24 * 2, 500)
+      log_ids = database.aggregatable_logs(60 * 30, 60 * 60 * 24 * 2, 500)
 
       expect(log_ids).not_to include(1)
     end
 
     it 'only includes each log_id once' do
-      log_ids = database.aggregatable_log_parts(60 * 30, 60 * 60 * 12, 500)
+      log_ids = database.aggregatable_logs(60 * 30, 60 * 60 * 12, 500)
 
       expect(log_ids).to eq(log_ids.uniq)
     end

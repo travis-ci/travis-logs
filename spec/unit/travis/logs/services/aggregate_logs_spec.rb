@@ -14,7 +14,8 @@ describe Travis::Logs::Services::AggregateLogs do
   before(:each) do
     allow(archiver).to receive(:perform_async)
     allow(database).to receive(:transaction) { |&block| block.call }
-    allow(database).to receive(:aggregatable_log_parts).and_return([1, 2])
+    allow(database).to receive(:aggregatable_logs).and_return([1, 2])
+    allow(database).to receive(:aggregatable_logs_cutoff_id).and_return(nil)
     allow(database).to receive(:log_for_id) { |id| { id: id, content: 'foo' } }
     allow(database).to receive(:aggregate)
     allow(database).to receive(:delete_log_parts)

@@ -146,8 +146,33 @@ module Travis
            LIMIT ?
         SQL
 
-        def aggregatable_log_parts(regular_interval, force_interval, limit)
+        def aggregatable_logs(regular_interval, force_interval, limit)
           @db[AGGREGATABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
+        end
+
+        AGGREGATABLE_SELECT_CUTOFF_ID_SQL = <<-SQL.split.join(' ')
+          SELECT MAX(log_id) AS cutoff_id
+            FROM log_parts
+           WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
+              OR  created_at <= NOW() - interval '? seconds'
+        SQL
+
+        def aggregatable_logs_cutoff_id(regular_interval, force_interval)
+          @db[
+            AGGREGATABLE_SELECT_CUTOFF_ID_SQL,
+            regular_interval, true, force_interval
+          ].map(:cutoff_id)[0]
+        end
+
+        AGGREGATABLE_SELECT_BEFORE_ID_SQL = <<-SQL.split.join(' ')
+          SELECT DISTINCT log_id
+            FROM log_parts
+           WHERE log_id <= ?
+           LIMIT ?
+        SQL
+
+        def aggregatable_logs_before_id(id, limit)
+          @db[AGGREGATABLE_SELECT_BEFORE_ID_SQL, id, limit].map(:log_id)
         end
 
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ')

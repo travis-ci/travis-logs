@@ -17,16 +17,18 @@ module Travis
       end
 
       def run
+        cutoff_id = nil
         loop do
-          aggregate_logs
+          cutoff_id = aggregate_logs(cutoff_id)
           sleep sleep_interval
         end
       end
 
-      def aggregate_logs
-        aggregator.run
+      def aggregate_logs(cutoff_id)
+        aggregator.run(cutoff_id)
       rescue Exception => e
         Travis::Exceptions.handle(e)
+        nil
       end
 
       private def aggregator

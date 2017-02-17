@@ -73,7 +73,14 @@ describe 'aggregation' do
 
     it 'aggregates logs' do
       expect(db[:log_parts].count).to be > 0
-      2.times { Travis::Logs::Services::AggregateLogs.run }
+      cutoff_id = nil
+      n_loops = 0
+      loop do
+        cutoff_id = Travis::Logs::Services::AggregateLogs.run(cutoff_id)
+        break if cutoff_id.nil?
+        n_loops += 1
+      end
+      expect(n_loops).to_not be_zero
       expect(db[:log_parts].count).to eql(0)
     end
   end

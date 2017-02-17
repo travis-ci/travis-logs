@@ -16,8 +16,8 @@ module Travis
           METRIKS_PREFIX
         end
 
-        def self.run
-          new.run
+        def self.run(cutoff_id = nil)
+          new.run(cutoff_id)
         end
 
         def self.aggregate_log(log_id)
@@ -33,13 +33,14 @@ module Travis
                          end
         end
 
-        def run
+        def run(cutoff_id = nil)
+          timer = Time.now
           Travis.logger.info('fetching aggregatable ids')
 
-          ids = aggregatable_ids
+          cutoff_id, ids = aggregatable_ids(cutoff_id)
           if ids.empty?
             Travis.logger.info('no aggregatable ids')
-            return
+            return nil
           end
 
           if aggregate_async?
@@ -53,7 +54,7 @@ module Travis
               Travis::Logs::Sidekiq::Aggregate.perform_async(log_id)
             end
 
-            return
+            return cutoff_id
           end
 
           Travis.logger.debug(
@@ -75,8 +76,10 @@ module Travis
 
           Travis.logger.info(
             'finished aggregation batch',
-            action: 'aggregate', async: false
+            action: 'aggregate', async: false,
+            :'sample#aggregation-duration-seconds' => (Time.now - timer).to_i
           )
+          cutoff_id
         end
 
         def aggregate_log(log_id)
@@ -138,10 +141,28 @@ module Travis
           end
         end
 
-        private def aggregatable_ids
-          database.aggregatable_log_parts(
-            intervals[:regular], intervals[:force], per_aggregate_limit
-          ).uniq
+        private def aggregatable_ids(cutoff_id)
+          if cutoff_id.nil?
+            cutoff_id = database.aggregatable_logs_cutoff_id(
+              intervals[:regular], intervals[:force]
+            )
+          end
+
+          if cutoff_id.nil?
+            return [
+              nil,
+              database.aggregatable_logs(
+                intervals[:regular], intervals[:force], per_aggregate_limit
+              ).uniq
+            ]
+          end
+
+          [
+            cutoff_id,
+            database.aggregatable_logs_before_id(
+              cutoff_id, per_aggregate_limit
+            )
+          ]
         end
 
         private def intervals
