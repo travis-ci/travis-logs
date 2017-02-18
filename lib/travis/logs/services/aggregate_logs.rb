@@ -43,14 +43,11 @@ module Travis
 
           Travis.logger.debug(
             'aggregating with pool config',
-            pool_config.merge(
-              action: 'aggregate', async: false
-            )
+            pool_config.merge(action: 'aggregate')
           )
           Travis.logger.info(
             'starting aggregation batch',
-            action: 'aggregate', async: false,
-            :'sample#aggregatable-logs' => ids.length
+            action: 'aggregate' :'sample#aggregatable-logs' => ids.length
           )
 
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
@@ -58,10 +55,7 @@ module Travis
           pool.shutdown
           pool.wait_for_termination
 
-          Travis.logger.info(
-            'finished aggregation batch',
-            action: 'aggregate', async: false
-          )
+          Travis.logger.info('finished aggregation batch', action: 'aggregate')
         end
 
         def aggregate_log(log_id)
