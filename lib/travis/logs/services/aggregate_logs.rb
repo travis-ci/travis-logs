@@ -47,7 +47,7 @@ module Travis
           )
           Travis.logger.info(
             'starting aggregation batch',
-            action: 'aggregate' :'sample#aggregatable-logs' => ids.length
+            action: 'aggregate', :'sample#aggregatable-logs' => ids.length
           )
 
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
