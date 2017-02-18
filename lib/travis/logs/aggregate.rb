@@ -34,7 +34,7 @@ module Travis
             # Travis::Exceptions.handle(e)
             puts e.message, e.backtrace
           end
-          sleep 1
+          # sleep 1
         end
       end
 

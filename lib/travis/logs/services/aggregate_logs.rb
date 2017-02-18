@@ -62,11 +62,11 @@ module Travis
           cursor ||= database.min_log_part_id
 
           Travis.logger.info('fetching aggregatable ids', cursor: cursor)
-          cursor, ids = database.aggregatable_log_parts_page(cursor, per_page)
+          ids = database.aggregatable_log_parts_page(cursor, per_page)
 
           if ids.empty?
-            Travis.logger.info('no aggregatable ids')
-            return
+            # Travis.logger.info('no aggregatable ids')
+            return cursor + per_page
           end
 
           Travis.logger.debug(
@@ -84,7 +84,7 @@ module Travis
           pool.wait_for_termination
 
           Travis.logger.info('finished aggregation batch', action: 'aggregate')
-          cursor
+          cursor + per_page
         end
 
         def aggregate_log(log_id)

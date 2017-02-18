@@ -181,16 +181,10 @@ module Travis
         end
 
         def aggregatable_log_parts_page(cursor, per_page)
-          result = @db[
+          @db[
             AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
             cursor, cursor + per_page
-          ].to_a
-
-          last = result.last || {}
-          cursor = last[:id].to_i + 1
-          ids = result.map { |part| part[:log_id] }.uniq
-
-          [cursor, ids]
+          ].map(:log_id).uniq
         end
 
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ').freeze
