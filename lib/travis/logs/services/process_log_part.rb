@@ -56,7 +56,7 @@ module Travis
           aggregate_async if final?
         rescue Sequel::Error => e
           Travis.logger.warn(
-            'Could not save log_park in create_part',
+            'Could not save log_part in create_part',
             job_id: payload['id'], warning: e.message
           )
           Travis.logger.warn(e.backtrace.join("\n"))
