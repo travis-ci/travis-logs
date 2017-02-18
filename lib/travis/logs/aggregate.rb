@@ -24,12 +24,13 @@ module Travis
       end
 
       def run_sf
-        per_page = ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 5000
-        cursor = nil
+        cursor   = Integer(ENV['TRAVIS_LOGS_AGGREGATE_START']) if ENV.key?('TRAVIS_LOGS_AGGREGATE_START')
+        per_page = Integer(ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 5000)
 
         loop do
           begin
             cursor = aggregator.run_sf(cursor, per_page)
+            break if cursor.to_i > 31065177291 # first log part id on 2017-02-18
           rescue Exception => e
             # Travis::Exceptions.handle(e)
             puts e.message, e.backtrace
