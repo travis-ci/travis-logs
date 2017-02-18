@@ -50,7 +50,8 @@ module Travis
             password: config[:password]
           }
 
-          "postgres://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
+          enc_params = URI.encode_www_form(params)
+          "postgres://#{host}:#{port}/#{database}?#{enc_params}"
         end
 
         def self.jdbc_uri_from_config(config)
@@ -69,7 +70,8 @@ module Travis
             params[:sslfactory] = 'org.postgresql.ssl.NonValidatingFactory'
           end
 
-          "jdbc:postgresql://#{host}:#{port}/#{database}?#{URI.encode_www_form(params)}"
+          enc_params = URI.encode_www_form(params)
+          "jdbc:postgresql://#{host}:#{port}/#{database}?#{enc_params}"
         end
 
         def self.connect
@@ -99,7 +101,9 @@ module Travis
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs].select { [id, job_id, octet_length(content).as(content_length)] }.where(id: log_id).first
+          @db[:logs]
+            .select { [id, job_id, octet_length(content).as(content_length)] }
+            .where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
@@ -107,21 +111,30 @@ module Travis
         end
 
         def mark_archive_verified(log_id)
-          @db[:logs].where(id: log_id).update(archived_at: Time.now.utc, archive_verified: true)
+          @db[:logs]
+            .where(id: log_id)
+            .update(archived_at: Time.now.utc, archive_verified: true)
         end
 
         def mark_not_archived(log_id)
-          @db[:logs].where(id: log_id).update(archived_at: nil, archive_verified: false)
+          @db[:logs]
+            .where(id: log_id)
+            .update(archived_at: nil, archive_verified: false)
         end
 
         def purge(log_id)
-          @db[:logs].where(id: log_id).update(purged_at: Time.now.utc, content: nil)
+          @db[:logs]
+            .where(id: log_id)
+            .update(purged_at: Time.now.utc, content: nil)
         end
 
         def create_log(job_id)
-          @db.call(:create_log,             job_id: job_id,
-                                            created_at: Time.now.utc,
-                                            updated_at: Time.now.utc)
+          @db.call(
+            :create_log,
+            job_id: job_id,
+            created_at: Time.now.utc,
+            updated_at: Time.now.utc
+          )
         end
 
         def create_log_part(params)
@@ -135,10 +148,13 @@ module Travis
         def set_log_content(log_id, content)
           delete_log_parts(log_id)
           aggregated_at = Time.now.utc unless content.nil?
-          @db[:logs].where(id: log_id).update(content: content, aggregated_at: aggregated_at, archived_at: nil, archive_verified: nil, updated_at: Time.now.utc)
+          @db[:logs].where(id: log_id)
+                    .update(content: content, aggregated_at: aggregated_at,
+                            archived_at: nil, archive_verified: nil,
+                            updated_at: Time.now.utc)
         end
 
-        AGGREGATABLE_SELECT_SQL = <<-SQL.split.join(' ')
+        AGGREGATABLE_SELECT_SQL = <<-SQL.split.join(' ').freeze
           SELECT log_id
             FROM log_parts
            WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
@@ -147,19 +163,26 @@ module Travis
         SQL
 
         def aggregatable_log_parts(regular_interval, force_interval, limit)
-          @db[AGGREGATABLE_SELECT_SQL, regular_interval, true, force_interval, limit].map(:log_id).uniq
+          @db[
+            AGGREGATABLE_SELECT_SQL,
+            regular_interval, true, force_interval, limit
+          ].map(:log_id).uniq
         end
 
-        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ')
-          SELECT array_to_string(array_agg(log_parts.content ORDER BY number, id), '')
+        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ').freeze
+          SELECT array_to_string(
+                   array_agg(log_parts.content ORDER BY number, id), ''
+                 )
             FROM log_parts
            WHERE log_id = ?
         SQL
 
-        AGGREGATE_UPDATE_SQL = <<-SQL.split.join(' ')
+        AGGREGATE_UPDATE_SQL = <<-SQL.split.join(' ').freeze
           UPDATE logs
              SET aggregated_at = ?,
-                 content = (COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL}))
+                 content = (
+                   COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL})
+                 )
            WHERE logs.id = ?
         SQL
 
@@ -174,17 +197,29 @@ module Travis
         private
 
         def prepare_statements
-          @db[:logs].where(id: :$log_id).prepare(:select, :find_log)
-          @db[:logs].select(:id).where(job_id: :$job_id).prepare(:first, :find_log_id)
-          @db[:logs].prepare(:insert, :create_log,             job_id: :$job_id,
-                                                               created_at: :$created_at,
-                                                               updated_at: :$updated_at)
-          @db[:log_parts].prepare(:insert, :create_log_part,             log_id: :$log_id,
-                                                                         content: :$content,
-                                                                         number: :$number,
-                                                                         final: :$final,
-                                                                         created_at: :$created_at)
-          @db[:log_parts].where(log_id: :$log_id).prepare(:delete, :delete_log_parts)
+          @db[:logs]
+            .where(id: :$log_id)
+            .prepare(:select, :find_log)
+
+          @db[:logs]
+            .select(:id)
+            .where(job_id: :$job_id)
+            .prepare(:first, :find_log_id)
+
+          @db[:logs]
+            .prepare(:insert, :create_log,
+                     job_id: :$job_id, created_at: :$created_at,
+                     updated_at: :$updated_at)
+
+          @db[:log_parts]
+            .prepare(:insert, :create_log_part,
+                     log_id: :$log_id, content: :$content,
+                     number: :$number, final: :$final,
+                     created_at: :$created_at)
+
+          @db[:log_parts]
+            .where(log_id: :$log_id)
+            .prepare(:delete, :delete_log_parts)
         end
       end
     end

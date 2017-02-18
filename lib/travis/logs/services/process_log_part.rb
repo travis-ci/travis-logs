@@ -26,7 +26,8 @@ module Travis
 
         attr_reader :payload
 
-        def initialize(payload, database = nil, pusher_client = nil, existence = nil)
+        def initialize(payload, database = nil, pusher_client = nil,
+                       existence = nil)
           @payload = payload
           @database = database || Travis::Logs.database_connection
           @pusher_client = pusher_client || Travis::Logs::Helpers::Pusher.new
@@ -118,7 +119,7 @@ module Travis
         end
 
         def final?
-          !!payload['final']
+          !payload['final'].nil?
         end
 
         def filter(chars)
