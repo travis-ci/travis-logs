@@ -1,6 +1,7 @@
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/existence'
+require 'travis/logs/sidekiq/aggregate'
 require 'pusher'
 require 'coder'
 
@@ -42,15 +43,17 @@ module Travis
           end
         end
 
-        private
-
         attr_reader :database, :pusher_client, :existence
+        private :database
+        private :pusher_client
+        private :existence
 
-        def create_part
+        private def create_part
           valid_log_id?
           database.create_log_part(
             log_id: log_id, content: chars, number: number, final: final?
           )
+          aggregate_async if final?
         rescue Sequel::Error => e
           Travis.logger.warn(
             'Could not save log_park in create_part',
@@ -59,7 +62,7 @@ module Travis
           Travis.logger.warn(e.backtrace.join("\n"))
         end
 
-        def valid_log_id?
+        private def valid_log_id?
           if log_id == 0
             Travis.logger.warn(
               'invalid log id',
@@ -70,7 +73,7 @@ module Travis
           end
         end
 
-        def notify
+        private def notify
           if existence_check_metrics? || existence_check?
             if channel_occupied?(channel_name)
               mark('pusher.send')
@@ -91,16 +94,20 @@ module Travis
           )
         end
 
-        def log_id
+        private def aggregate_async
+          Travis::Logs::Sidekiq::Aggregate.perform_async(log_id) if final?
+        end
+
+        private def log_id
           @log_id ||= find_log_id || create_log
         end
         alias find_or_create_log log_id
 
-        def find_log_id
+        private def find_log_id
           database.log_id_for_job_id(payload['id'])
         end
 
-        def create_log
+        private def create_log
           mark('log.create')
           created = database.create_log(payload['id'])
           Travis.logger.warn(
@@ -110,24 +117,24 @@ module Travis
           created
         end
 
-        def chars
+        private def chars
           @chars ||= filter(payload['log'])
         end
 
-        def number
+        private def number
           payload['number']
         end
 
-        def final?
+        private def final?
           !payload['final'].nil?
         end
 
-        def filter(chars)
+        private def filter(chars)
           # postgres seems to have issues with null chars
           Coder.clean!(chars.to_s.delete("\0"))
         end
 
-        def pusher_payload
+        private def pusher_payload
           {
             'id' => payload['id'],
             'chars' => chars,
@@ -136,20 +143,20 @@ module Travis
           }
         end
 
-        def channel_occupied?(channel_name)
+        private def channel_occupied?(channel_name)
           existence.occupied?(channel_name)
         end
 
-        def channel_name
+        private def channel_name
           pusher_client.pusher_channel_name(payload)
         end
 
-        def existence_check_metrics?
-          Logs.config.channels_existence_metrics
+        private def existence_check_metrics?
+          Travis::Logs.config.channels_existence_metrics
         end
 
-        def existence_check?
-          Logs.config.channels_existence_check
+        private def existence_check?
+          Travis::Logs.config.channels_existence_check
         end
       end
     end

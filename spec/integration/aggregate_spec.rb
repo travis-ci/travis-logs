@@ -66,15 +66,9 @@ describe 'aggregation' do
     populate_logs(pusher_client, existence, 100)
   end
 
-  context 'with async aggregation disabled' do
-    before do
-      Travis.config.logs.aggregate_async = false
-    end
-
-    it 'aggregates logs' do
-      expect(db[:log_parts].count).to be > 0
-      2.times { Travis::Logs::Services::AggregateLogs.run }
-      expect(db[:log_parts].count).to eql(0)
-    end
+  it 'aggregates logs' do
+    expect(db[:log_parts].count).to be > 0
+    2.times { Travis::Logs::Services::AggregateLogs.run }
+    expect(db[:log_parts].count).to eql(0)
   end
 end

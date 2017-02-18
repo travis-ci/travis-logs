@@ -20,11 +20,6 @@ module Travis
           )
         end
 
-        def aggregate_async?
-          ENV.key?('TRAVIS_LOGS_AGGREGATE_ASYNC') ||
-            ENV.key?('AGGREGATE_ASYNC')
-        end
-
         def aggregate_pool_min_threads
           Integer(
             ENV['TRAVIS_LOGS_AGGREGATE_POOL_MIN_THREADS'] ||
@@ -42,7 +37,7 @@ module Travis
         def intervals_vacuum
           Integer(
             ENV['TRAVIS_LOGS_INTERVALS_VACUUM'] ||
-            ENV['INTERVALS_VACUUM'] || 1
+            ENV['INTERVALS_VACUUM'] || 60
           )
         end
 
@@ -60,7 +55,6 @@ module Travis
 
       define(
         logs: {
-          aggregate_async: aggregate_async?,
           archive: true,
           purge: false,
           threads: 10,
@@ -72,7 +66,7 @@ module Travis
           },
           intervals: {
             vacuum: intervals_vacuum,
-            regular: 180,
+            regular: 3 * 60,
             force: 3 * 60 * 60,
             purge: 6
           }

@@ -2,7 +2,6 @@ require 'concurrent'
 
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/sidekiq/archive'
-require 'travis/logs/sidekiq/aggregate'
 
 module Travis
   module Logs
@@ -39,20 +38,6 @@ module Travis
           ids = aggregatable_ids
           if ids.empty?
             Travis.logger.info('no aggregatable ids')
-            return
-          end
-
-          if aggregate_async?
-            Travis.logger.info(
-              'aggregating',
-              action: 'aggregate', async: true,
-              :'sample#aggregatable-logs' => ids.length
-            )
-
-            ids.each do |log_id|
-              Travis::Logs::Sidekiq::Aggregate.perform_async(log_id)
-            end
-
             return
           end
 
@@ -154,10 +139,6 @@ module Travis
 
         private def archive?
           Travis.config.logs.archive
-        end
-
-        private def aggregate_async?
-          Travis.config.logs.aggregate_async
         end
       end
     end
