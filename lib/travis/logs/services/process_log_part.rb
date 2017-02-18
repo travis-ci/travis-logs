@@ -95,6 +95,10 @@ module Travis
         end
 
         private def aggregate_async
+          Travis.logger.info(
+            'scheduling async aggregation',
+            job_id: payload['id'], log_id: log_id
+          )
           Travis::Logs::Sidekiq::Aggregate.perform_in(intervals[:regular], log_id)
         end
 

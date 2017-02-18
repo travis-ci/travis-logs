@@ -23,6 +23,21 @@ module Travis
         end
       end
 
+      def run_sf
+        per_page = ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 5000
+        cursor = nil
+
+        loop do
+          begin
+            cursor = aggregator.run_sf(cursor, per_page)
+          rescue Exception => e
+            # Travis::Exceptions.handle(e)
+            puts e.message, e.backtrace
+          end
+          sleep 1
+        end
+      end
+
       def aggregate_logs
         aggregator.run
       rescue Exception => e

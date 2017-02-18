@@ -33,7 +33,7 @@ module Travis
         end
 
         def run
-          Travis.logger.info('fetching aggregatable ids', min_log_part_id: min_log_part_id)
+          Travis.logger.info('fetching aggregatable ids')
 
           ids = aggregatable_ids
           if ids.empty?
@@ -47,8 +47,7 @@ module Travis
           )
           Travis.logger.info(
             'starting aggregation batch',
-            action: 'aggregate', :'sample#aggregatable-logs' => ids.length,
-            min_log_part_id: min_log_part_id
+            action: 'aggregate', :'sample#aggregatable-logs' => ids.length
           )
 
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
@@ -57,6 +56,35 @@ module Travis
           pool.wait_for_termination
 
           Travis.logger.info('finished aggregation batch', action: 'aggregate')
+        end
+
+        def run_sf(cursor, per_page)
+          cursor ||= database.min_log_part_id
+
+          Travis.logger.info('fetching aggregatable ids', cursor: cursor)
+          cursor, ids = database.aggregatable_log_parts_page(cursor, per_page)
+
+          if ids.empty?
+            Travis.logger.info('no aggregatable ids')
+            return
+          end
+
+          Travis.logger.debug(
+            'aggregating with pool config',
+            pool_config.merge(action: 'aggregate')
+          )
+          Travis.logger.info(
+            'starting aggregation batch',
+            action: 'aggregate', :'sample#aggregatable-logs' => ids.length
+          )
+
+          pool = Concurrent::ThreadPoolExecutor.new(pool_config)
+          ids.each { |i| pool.post { aggregate_log(i) } }
+          pool.shutdown
+          pool.wait_for_termination
+
+          Travis.logger.info('finished aggregation batch', action: 'aggregate')
+          cursor
         end
 
         def aggregate_log(log_id)
@@ -119,20 +147,9 @@ module Travis
         end
 
         private def aggregatable_ids
-          if min_log_part_id
-            database.aggregatable_log_parts_with_min_id(
-              min_log_part_id,
-              intervals[:regular], intervals[:force], per_aggregate_limit
-            ).uniq
-          else
-            database.aggregatable_log_parts(
-              intervals[:regular], intervals[:force], per_aggregate_limit
-            ).uniq
-          end
-        end
-
-        private def min_log_part_id
-          ENV['TRAVIS_LOGS_AGGREGATE_MIN_LOG_PART_ID']
+          database.aggregatable_log_parts(
+            intervals[:regular], intervals[:force], per_aggregate_limit
+          ).uniq
         end
 
         private def intervals

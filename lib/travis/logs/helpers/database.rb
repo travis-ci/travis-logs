@@ -170,19 +170,27 @@ module Travis
         end
 
         AGGREGATABLE_SELECT_WITH_MIN_ID_SQL = <<-SQL.split.join(' ').freeze
-          SELECT log_id
+          SELECT id, log_id
             FROM log_parts
-           WHERE id > ?
-             AND ((created_at <= NOW() - interval '? seconds' AND final = ?)
-                OR created_at <= NOW() - interval '? seconds')
-           LIMIT ?
+           WHERE id BETWEEN ? AND ?
+           ORDER BY id
         SQL
 
-        def aggregatable_log_parts_with_min_id(min_log_part_id, regular_interval, force_interval, limit)
-          @db[
+        def min_log_part_id
+          @db['SELECT min(id) AS id FROM log_parts'].first[:id]
+        end
+
+        def aggregatable_log_parts_page(cursor, per_page)
+          result = @db[
             AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
-            min_log_part_id, regular_interval, true, force_interval, limit
-          ].map(:log_id).uniq
+            cursor, cursor + per_page
+          ].to_a
+
+          last = result.last || {}
+          cursor = last[:id].to_i + 1
+          ids = result.map { |part| part[:log_id] }.uniq
+
+          [cursor, ids]
         end
 
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ').freeze
