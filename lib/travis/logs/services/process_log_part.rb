@@ -126,7 +126,7 @@ module Travis
         end
 
         private def final?
-          !payload['final'].nil?
+          !!payload['final']
         end
 
         private def filter(chars)
