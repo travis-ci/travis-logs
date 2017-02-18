@@ -33,7 +33,7 @@ module Travis
         end
 
         def run
-          Travis.logger.info('fetching aggregatable ids')
+          Travis.logger.info('fetching aggregatable ids', min_log_part_id: min_log_part_id)
 
           ids = aggregatable_ids
           if ids.empty?
@@ -47,7 +47,8 @@ module Travis
           )
           Travis.logger.info(
             'starting aggregation batch',
-            action: 'aggregate', :'sample#aggregatable-logs' => ids.length
+            action: 'aggregate', :'sample#aggregatable-logs' => ids.length,
+            min_log_part_id: min_log_part_id
           )
 
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
@@ -118,9 +119,20 @@ module Travis
         end
 
         private def aggregatable_ids
-          database.aggregatable_log_parts(
-            intervals[:regular], intervals[:force], per_aggregate_limit
-          ).uniq
+          if min_log_part_id
+            database.aggregatable_log_parts_with_min_id(
+              min_log_part_id,
+              intervals[:regular], intervals[:force], per_aggregate_limit
+            ).uniq
+          else
+            database.aggregatable_log_parts(
+              intervals[:regular], intervals[:force], per_aggregate_limit
+            ).uniq
+          end
+        end
+
+        private def min_log_part_id
+          ENV['TRAVIS_LOGS_AGGREGATE_MIN_LOG_PART_ID']
         end
 
         private def intervals
