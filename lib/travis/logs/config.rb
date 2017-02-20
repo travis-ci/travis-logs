@@ -47,6 +47,13 @@ module Travis
             ENV['PER_AGGREGATE_LIMIT'] || 500
           )
         end
+
+        def vacuum_skip_empty?
+          %w(1 yes on).include?(
+            ENV['TRAVIS_LOGS_VACUUM_SKIP_EMPTY'] ||
+            ENV['VACUUM_SKIP_EMPTY'] || 'on'
+          )
+        end
       end
 
       def env
@@ -69,7 +76,8 @@ module Travis
             regular: 3 * 60,
             force: 3 * 60 * 60,
             purge: 6
-          }
+          },
+          vacuum_skip_empty: vacuum_skip_empty?
         },
         log_level: :info,
         logger: { format_type: 'l2met', thread_id: true },

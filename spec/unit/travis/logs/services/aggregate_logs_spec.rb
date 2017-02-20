@@ -18,6 +18,7 @@ describe Travis::Logs::Services::AggregateLogs do
     allow(database).to receive(:log_for_id) { |id| { id: id, content: 'foo' } }
     allow(database).to receive(:aggregate)
     allow(database).to receive(:delete_log_parts)
+    allow(service).to receive(:skip_empty?) { true }
   end
 
   it 'exposes .run' do

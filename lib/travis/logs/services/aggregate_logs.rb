@@ -62,7 +62,7 @@ module Travis
           measure do
             database.transaction do
               aggregate(log_id)
-              vacuum(log_id) unless log_empty?(log_id)
+              vacuum(log_id) unless skip_empty? && log_empty?(log_id)
             end
           end
           queue_archiving(log_id)
@@ -133,6 +133,10 @@ module Travis
 
         private def archive?
           Travis.config.logs.archive
+        end
+
+        private def skip_empty?
+          Travis.config.logs.vacuum_skip_empty
         end
       end
     end
