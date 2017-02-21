@@ -24,14 +24,16 @@ module Travis
       end
 
       def run_ranges
-        cursor = Integer(
-          ENV['TRAVIS_LOGS_AGGREGATE_START']
-        ) if ENV.key?('TRAVIS_LOGS_AGGREGATE_START')
+        if ENV.key?('TRAVIS_LOGS_AGGREGATE_START')
+          cursor = Integer(
+            ENV['TRAVIS_LOGS_AGGREGATE_START']
+          )
+        end
         max_id = Integer(
-          ENV['TRAVIS_LOGS_AGGREGATE_MAX_ID'] || 31116000000
+          ENV['TRAVIS_LOGS_AGGREGATE_MAX_ID'] || 31_116_000_000
         ) # 2017-02-19 01:31:40
         per_page = Integer(
-          ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 100000
+          ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 100_000
         )
 
         loop do
