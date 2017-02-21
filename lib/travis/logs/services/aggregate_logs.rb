@@ -58,7 +58,7 @@ module Travis
           Travis.logger.info('finished aggregation batch', action: 'aggregate')
         end
 
-        def run_sf(cursor, per_page)
+        def run_ranges(cursor, per_page)
           cursor ||= database.min_log_part_id
 
           Travis.logger.info('fetching aggregatable ids', cursor: cursor)

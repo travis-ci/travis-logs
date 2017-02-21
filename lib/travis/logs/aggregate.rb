@@ -23,20 +23,26 @@ module Travis
         end
       end
 
-      def run_sf
-        cursor   = Integer(ENV['TRAVIS_LOGS_AGGREGATE_START']) if ENV.key?('TRAVIS_LOGS_AGGREGATE_START')
-        max_id   = Integer(ENV['TRAVIS_LOGS_AGGREGATE_MAX_ID'] || 31116000000) # 2017-02-19 01:31:40
-        per_page = Integer(ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 100000)
+      def run_ranges
+        cursor = Integer(
+          ENV['TRAVIS_LOGS_AGGREGATE_START']
+        ) if ENV.key?('TRAVIS_LOGS_AGGREGATE_START')
+        max_id = Integer(
+          ENV['TRAVIS_LOGS_AGGREGATE_MAX_ID'] || 31116000000
+        ) # 2017-02-19 01:31:40
+        per_page = Integer(
+          ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 100000
+        )
 
         loop do
           begin
-            cursor = aggregator.run_sf(cursor, per_page)
+            cursor = aggregator.run_ranges(cursor, per_page)
             break if cursor.to_i > max_id
           rescue Exception => e
-            # Travis::Exceptions.handle(e)
-            puts e.message, e.backtrace
+            Travis.logger.error(
+              e.message, backtrace: e.backtrace.join("\n")
+            )
           end
-          # sleep 1
         end
       end
 
