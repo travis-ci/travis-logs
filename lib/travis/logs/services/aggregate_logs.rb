@@ -62,7 +62,7 @@ module Travis
           cursor ||= database.min_log_part_id
 
           Travis.logger.info('fetching aggregatable ids', cursor: cursor)
-          ids = database.aggregatable_log_parts_page(cursor, per_page)
+          ids = database.aggregatable_logs_page(cursor, per_page)
 
           if ids.empty?
             # Travis.logger.info('no aggregatable ids')
@@ -147,9 +147,11 @@ module Travis
         end
 
         private def aggregatable_ids
-          database.aggregatable_log_parts(
-            intervals[:regular], intervals[:force], per_aggregate_limit
-          ).uniq
+          database.aggregatable_logs(
+            intervals[:regular], intervals[:force],
+            per_aggregate_limit,
+            order: aggregatable_order
+          )
         end
 
         private def intervals
@@ -166,6 +168,10 @@ module Travis
 
         private def skip_empty?
           Travis.config.logs.vacuum_skip_empty
+        end
+
+        private def aggregatable_order
+          Travis.config.logs.aggregatable_order
         end
       end
     end

@@ -54,6 +54,11 @@ module Travis
             ENV['VACUUM_SKIP_EMPTY'] || 'on'
           )
         end
+
+        def aggregatable_order
+          ENV['TRAVIS_LOGS_AGGREGATABLE_ORDER'] ||
+            ENV['AGGREGATABLE_ORDER'] || nil
+        end
       end
 
       def env
@@ -62,6 +67,7 @@ module Travis
 
       define(
         logs: {
+          aggregatable_order: aggregatable_order,
           archive: true,
           purge: false,
           threads: 10,

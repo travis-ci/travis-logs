@@ -154,19 +154,25 @@ module Travis
                             updated_at: Time.now.utc)
         end
 
-        AGGREGATABLE_SELECT_SQL = <<-SQL.split.join(' ').freeze
-          SELECT log_id
-            FROM log_parts
-           WHERE (created_at <= NOW() - interval '? seconds' AND final = ?)
-              OR  created_at <= NOW() - interval '? seconds'
-           LIMIT ?
-        SQL
+        def aggregatable_logs(regular_interval, force_interval, limit,
+                              order: :created_at)
+          query = @db[:log_parts]
+                  .select(:log_id)
+                  .where(
+                    "created_at <= NOW() - interval '? seconds' AND final = ?",
+                    regular_interval, true
+                  )
+                  .or(
+                    "created_at <= NOW() - interval '? seconds'",
+                    force_interval
+                  )
+                  .limit(limit)
+          query = query.order(order.to_sym) unless order.nil?
+          query.map(:log_id).uniq
+        end
 
-        def aggregatable_log_parts(regular_interval, force_interval, limit)
-          @db[
-            AGGREGATABLE_SELECT_SQL,
-            regular_interval, true, force_interval, limit
-          ].map(:log_id).uniq
+        def min_log_part_id
+          @db['SELECT min(id) AS id FROM log_parts'].first[:id]
         end
 
         AGGREGATABLE_SELECT_WITH_MIN_ID_SQL = <<-SQL.split.join(' ').freeze
@@ -176,11 +182,7 @@ module Travis
            ORDER BY id
         SQL
 
-        def min_log_part_id
-          @db['SELECT min(id) AS id FROM log_parts'].first[:id]
-        end
-
-        def aggregatable_log_parts_page(cursor, per_page)
+        def aggregatable_logs_page(cursor, per_page)
           @db[
             AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
             cursor, cursor + per_page
