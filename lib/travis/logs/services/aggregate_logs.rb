@@ -47,7 +47,8 @@ module Travis
           )
           Travis.logger.info(
             'starting aggregation batch',
-            action: 'aggregate', :'sample#aggregatable-logs' => ids.length
+            size: ids.length, action: 'aggregate',
+            :'sample#aggregatable-logs' => ids.length
           )
 
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
@@ -55,7 +56,10 @@ module Travis
           pool.shutdown
           pool.wait_for_termination
 
-          Travis.logger.info('finished aggregation batch', action: 'aggregate')
+          Travis.logger.info(
+            'finished aggregation batch',
+            size: ids.length, action: 'aggregate'
+          )
         end
 
         def run_ranges(cursor, per_page)
