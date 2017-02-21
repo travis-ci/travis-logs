@@ -58,6 +58,35 @@ module Travis
           Travis.logger.info('finished aggregation batch', action: 'aggregate')
         end
 
+        def run_sf(cursor, per_page)
+          cursor ||= database.min_log_part_id
+
+          Travis.logger.info('fetching aggregatable ids', cursor: cursor)
+          ids = database.aggregatable_log_parts_page(cursor, per_page)
+
+          if ids.empty?
+            # Travis.logger.info('no aggregatable ids')
+            return cursor + per_page
+          end
+
+          Travis.logger.debug(
+            'aggregating with pool config',
+            pool_config.merge(action: 'aggregate')
+          )
+          Travis.logger.info(
+            'starting aggregation batch',
+            action: 'aggregate', :'sample#aggregatable-logs' => ids.length
+          )
+
+          pool = Concurrent::ThreadPoolExecutor.new(pool_config)
+          ids.each { |i| pool.post { aggregate_log(i) } }
+          pool.shutdown
+          pool.wait_for_termination
+
+          Travis.logger.info('finished aggregation batch', action: 'aggregate')
+          cursor + per_page
+        end
+
         def aggregate_log(log_id)
           measure do
             database.transaction do

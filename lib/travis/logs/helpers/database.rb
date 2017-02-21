@@ -169,6 +169,24 @@ module Travis
           ].map(:log_id).uniq
         end
 
+        AGGREGATABLE_SELECT_WITH_MIN_ID_SQL = <<-SQL.split.join(' ').freeze
+          SELECT id, log_id
+            FROM log_parts
+           WHERE id BETWEEN ? AND ?
+           ORDER BY id
+        SQL
+
+        def min_log_part_id
+          @db['SELECT min(id) AS id FROM log_parts'].first[:id]
+        end
+
+        def aggregatable_log_parts_page(cursor, per_page)
+          @db[
+            AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
+            cursor, cursor + per_page
+          ].map(:log_id).uniq
+        end
+
         AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ').freeze
           SELECT array_to_string(
                    array_agg(log_parts.content ORDER BY number, id), ''

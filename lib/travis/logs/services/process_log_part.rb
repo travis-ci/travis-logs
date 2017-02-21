@@ -95,7 +95,11 @@ module Travis
         end
 
         private def aggregate_async
-          Travis::Logs::Sidekiq::Aggregate.perform_async(log_id) if final?
+          Travis.logger.info(
+            'scheduling async aggregation',
+            job_id: payload['id'], log_id: log_id
+          )
+          Travis::Logs::Sidekiq::Aggregate.perform_in(intervals[:regular], log_id)
         end
 
         private def log_id
@@ -157,6 +161,10 @@ module Travis
 
         private def existence_check?
           Travis::Logs.config.channels_existence_check
+        end
+
+        private def intervals
+          Travis.config.logs.intervals
         end
       end
     end
