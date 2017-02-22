@@ -108,7 +108,7 @@ module Travis
                     Base64.decode64(data['content'])
                   else
                     halt 400, JSON.dump('error' => 'invalid encoding, only base64 supported')
-        end
+                  end
 
         @log_part_service.new(
           {
