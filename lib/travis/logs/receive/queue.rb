@@ -36,16 +36,17 @@ module Travis
         end
 
         def receive(message, payload)
+          decoded_payload = nil
           smart_retry do
-            payload = decode(payload)
-            if payload
-              Travis.uuid = payload.delete('uuid')
-              handler.run(payload)
+            decoded_payload = decode(payload)
+            if decoded_payload
+              Travis.uuid = decoded_payload.delete('uuid')
+              handler.run(decoded_payload)
             end
           end
           message.ack
         rescue => e
-          log_exception(e, payload)
+          log_exception(e, decoded_payload)
           message.reject(requeue: true)
           Metriks.meter("#{METRIKS_PREFIX}.receive.retry").mark
           error '[queue:receive] message requeued'
