@@ -10,6 +10,7 @@ require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/process_log_part'
+require 'travis/logs/services/fetch_log'
 require 'rack/ssl'
 
 module Travis
@@ -123,6 +124,33 @@ module Travis
         ).run
 
         status 204
+      end
+
+      put '/logs/:job_id/archived' do
+        # TODO: de-duplicate auth stuff
+        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
+        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+
+        halt 501
+      end
+
+      get '/logs/:job_id' do
+        # TODO: de-duplicate auth stuff
+        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
+        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+
+        result = fetch_log_service.run(job_id: Integer(params[:job_id]))
+        halt 404 if result.nil?
+        halt 302, 'Location' => result.archive_url if result.archived?
+        content_type :text, charset: 'utf-8'
+        status 200
+        result.content
+      end
+
+      private def fetch_log_service
+        @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
+          database: database
+        )
       end
     end
   end

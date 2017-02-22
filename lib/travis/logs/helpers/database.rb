@@ -100,6 +100,10 @@ module Travis
           log[:id] if log
         end
 
+        def log_for_job_id(job_id)
+          @db.call(:find_log_by_job_id, job_id: job_id)
+        end
+
         def log_content_length_for_id(log_id)
           @db[:logs]
             .select { [id, job_id, octet_length(content).as(content_length)] }
@@ -210,6 +214,13 @@ module Travis
           @db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
         end
 
+        def aggregated_on_demand(log_id)
+          @db[
+            AGGREGATE_PARTS_SELECT_SQL,
+            log_id
+          ].first.fetch(:array_to_string, '') || ''
+        end
+
         def transaction(&block)
           @db.transaction(&block)
         end
@@ -225,6 +236,11 @@ module Travis
             .select(:id)
             .where(job_id: :$job_id)
             .prepare(:first, :find_log_id)
+
+          @db[:logs]
+            .select(:id, :content, :archived_at, :aggregated_at)
+            .where(job_id: :$job_id)
+            .prepare(:first, :find_log_by_job_id)
 
           @db[:logs]
             .prepare(:insert, :create_log,
