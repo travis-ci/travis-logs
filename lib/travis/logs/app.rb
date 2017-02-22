@@ -141,7 +141,7 @@ module Travis
 
         result = fetch_log_service.run(job_id: Integer(params[:job_id]))
         halt 404 if result.nil?
-        halt 302, 'Location' => result.archive_url if result.archived?
+        redirect result.archive_url if result.archived?
         content_type :text, charset: 'utf-8'
         status 200
         result.content
