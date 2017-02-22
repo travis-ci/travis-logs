@@ -32,12 +32,11 @@ class FakeWarningLogger
     @warnings = []
   end
 
-  def warn(msg)
-    @warnings << msg
+  def warn(msg, args)
+    @warnings << [msg, args]
   end
 
-  def debug(*)
-  end
+  def debug(*); end
 end
 
 describe Travis::Logs::Services::ArchiveLog do
@@ -70,14 +69,18 @@ describe Travis::Logs::Services::ArchiveLog do
     it 'raises an error' do
       storage_service.return_incorrect_content_length!
 
-      expect { service.run }.to raise_error
+      expect { service.run }.to raise_error(Travis::Logs::Services::ArchiveLog::VerificationFailed)
     end
   end
 
   context 'without investigation enabled' do
     before do
-      allow(Travis.config.investigation).to receive(:enabled?)
-        .and_return(false)
+      Travis.config.investigation[:enabled] = false
+    end
+
+    after do
+      Travis.config.investigation = Hashr.new(enabled: false,
+                                              investigators: {})
     end
 
     it 'does not investigate the log content' do
@@ -112,11 +115,15 @@ describe Travis::Logs::Services::ArchiveLog do
     let(:logger) { FakeWarningLogger.new }
 
     before do
-      allow(Travis.config.investigation).to receive(:enabled?)
-        .and_return(true)
-      allow(Travis.config.investigation).to receive(:investigators)
-        .and_return(investigators)
+      Travis.config.investigation[:enabled] = true
+      Travis.config.investigation[:investigators] = investigators
+
       allow(Travis).to receive(:logger).and_return(logger)
+    end
+
+    after do
+      Travis.config.investigation = Hashr.new(enabled: false,
+                                              investigators: {})
     end
 
     it 'investigates the log content' do
@@ -127,19 +134,19 @@ describe Travis::Logs::Services::ArchiveLog do
     it 'reports matching amazement' do
       expect(service).to receive(:mark).with('amazement.9000')
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=amazement\b/ }).to be_true
+      expect(Travis.logger.warnings.any? { |e| e.last[:result] == 'amazement' }).to be true
     end
 
     it 'reports matching greeting' do
       expect(service).to_not receive(:mark).with(/greeting/)
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=ohhai\b/ }).to be_true
+      expect(Travis.logger.warnings.any? { |e| e.last[:result] == 'ohhai' }).to be true
     end
 
     it 'does not report matching kaboom' do
       expect(service).to_not receive(:mark).with(/kaboom/)
       service.run
-      expect(Travis.logger.warnings.any? { |e| e =~ /\bresult=kaboom-code/ }).to_not be_true
+      expect(Travis.logger.warnings.any? { |e| e.last[:result] == 'kaboom-code' }).to_not be true
     end
   end
 end

@@ -1,9 +1,10 @@
 language: ruby
 rvm:
-- jruby-9.0.4.0
-- 2.2.2
-jdk: openjdk7
+- jruby-9.1.5.0
+- 2.3.1
+jdk: openjdk8
 sudo: false
+dist: trusty
 env:
   global:
   - PG_DISABLE_SSL='1'
@@ -11,9 +12,10 @@ cache: bundler
 services:
   - redis
   - rabbitmq
-  - postgresql
+addons:
+  postgresql: 9.3
 before_script:
   - createdb -U postgres travis_logs_test
   - cp config/travis.example.yml config/travis.yml
-  - bundle exec rake db:migrate
+  - psql -q travis_logs_test < $(bundle show travis-migrations)/db/logs/structure.sql
 script: bundle exec rspec spec

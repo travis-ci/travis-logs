@@ -1,11 +1,12 @@
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/existence'
+require 'travis/logs/sidekiq/aggregate'
 require 'pusher'
 require 'coder'
 
-# pusher requires this in a method, which sometimes
-# causes and uninitialized constant error
+# pusher requires this in a method, which sometimes causes an uninitialized
+# constant error
 require 'net/https'
 
 module Travis
@@ -14,7 +15,7 @@ module Travis
       class ProcessLogPart
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.process_log_part'
+        METRIKS_PREFIX = 'logs.process_log_part'.freeze
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -26,7 +27,8 @@ module Travis
 
         attr_reader :payload
 
-        def initialize(payload, database = nil, pusher_client = nil, existence = nil)
+        def initialize(payload, database = nil, pusher_client = nil,
+                       existence = nil)
           @payload = payload
           @database = database || Travis::Logs.database_connection
           @pusher_client = pusher_client || Travis::Logs::Helpers::Pusher.new
@@ -41,26 +43,37 @@ module Travis
           end
         end
 
-        private
-
         attr_reader :database, :pusher_client, :existence
+        private :database
+        private :pusher_client
+        private :existence
 
-        def create_part
+        private def create_part
           valid_log_id?
-          database.create_log_part(log_id: log_id, content: chars, number: number, final: final?)
+          database.create_log_part(
+            log_id: log_id, content: chars, number: number, final: final?
+          )
+          aggregate_async if final?
         rescue Sequel::Error => e
-          Travis.logger.warn "[warn] could not save log_park in create_part job_id: #{payload['id']}: #{e.message}"
-          Travis.logger.warn e.backtrace
+          Travis.logger.warn(
+            'Could not save log_part in create_part',
+            job_id: payload['id'], warning: e.message
+          )
+          Travis.logger.warn(e.backtrace.join("\n"))
         end
 
-        def valid_log_id?
+        private def valid_log_id?
           if log_id == 0
-            Travis.logger.warn "action=process job_id=#{payload['id']} result=invalid_id log_id=#{log_id.inspect}"
+            Travis.logger.warn(
+              'invalid log id',
+              action: 'process', job_id: payload['id'],
+              result: 'invalid_id', log_id: log_id
+            )
             mark('log.id_invalid')
           end
         end
 
-        def notify
+        private def notify
           if existence_check_metrics? || existence_check?
             if channel_occupied?(channel_name)
               mark('pusher.send')
@@ -75,43 +88,57 @@ module Travis
             pusher_client.push(pusher_payload)
           end
         rescue => e
-          Travis.logger.error("Error notifying of log update: #{e.message} (from #{e.backtrace.first})")
+          Travis.logger.error(
+            'Error notifying of log update',
+            err: e.message, from: e.backtrace.first
+          )
         end
 
-        def log_id
+        private def aggregate_async
+          Travis.logger.info(
+            'scheduling async aggregation',
+            job_id: payload['id'], log_id: log_id
+          )
+          Travis::Logs::Sidekiq::Aggregate.perform_in(intervals[:regular], log_id)
+        end
+
+        private def log_id
           @log_id ||= find_log_id || create_log
         end
-        alias_method :find_or_create_log, :log_id
+        alias find_or_create_log log_id
 
-        def find_log_id
-          log = database.log_for_job_id(payload['id'])
-          log ? log[:id] : nil
+        private def find_log_id
+          database.log_id_for_job_id(payload['id'])
         end
 
-        def create_log
-          Travis.logger.warn "action=process job_id=#{payload['id']} message=log_created"
+        private def create_log
           mark('log.create')
-          database.create_log(payload['id'])
+          created = database.create_log(payload['id'])
+          Travis.logger.warn(
+            'created log',
+            action: 'process', job_id: payload['id'], message: 'log_created'
+          )
+          created
         end
 
-        def chars
+        private def chars
           @chars ||= filter(payload['log'])
         end
 
-        def number
+        private def number
           payload['number']
         end
 
-        def final?
-          !!payload['final']
+        private def final?
+          !!payload['final'] # rubocop:disable Style/DoubleNegation
         end
 
-        def filter(chars)
+        private def filter(chars)
           # postgres seems to have issues with null chars
           Coder.clean!(chars.to_s.delete("\0"))
         end
 
-        def pusher_payload
+        private def pusher_payload
           {
             'id' => payload['id'],
             'chars' => chars,
@@ -120,20 +147,24 @@ module Travis
           }
         end
 
-        def channel_occupied?(channel_name)
+        private def channel_occupied?(channel_name)
           existence.occupied?(channel_name)
         end
 
-        def channel_name
+        private def channel_name
           pusher_client.pusher_channel_name(payload)
         end
 
-        def existence_check_metrics?
-          Logs.config.channels_existence_metrics
+        private def existence_check_metrics?
+          Travis::Logs.config.channels_existence_metrics
         end
 
-        def existence_check?
-          Logs.config.channels_existence_check
+        private def existence_check?
+          Travis::Logs.config.channels_existence_check
+        end
+
+        private def intervals
+          Travis.config.logs.intervals
         end
       end
     end
