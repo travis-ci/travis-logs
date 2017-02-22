@@ -58,11 +58,19 @@ module Travis
           rescue Timeout::Error, Sequel::PoolTimeout
             if retry_count < 2
               retry_count += 1
-              Travis.logger.error "[queue] Processing of AMQP message exceeded 3 seconds, retrying #{retry_count} of 2"
+              Travis.logger.error(
+                'Processing of AMQP message exceeded 3 seconds',
+                action: 'receive',
+                retry: retry_count,
+                max_retries: 2
+              )
               Metriks.meter("#{METRIKS_PREFIX}.timeout.retry").mark
               retry
             else
-              Travis.logger.error '[queue] Failed to process AMQP message after 3 retries, aborting'
+              Travis.logger.error(
+                'Failed to process AMQP message after 3 retries, aborting',
+                action: 'receive'
+              )
               Metriks.meter("#{METRIKS_PREFIX}.timeout.error").mark
               raise
             end
@@ -80,11 +88,16 @@ module Travis
         end
 
         def log_exception(error, payload)
-          Travis.logger.error "[queue] Exception caught in queue #{name.inspect} while processing #{payload.inspect}"
+          Travis.logger.error(
+            'Exception caught in queue while processing payload',
+            action: 'receive',
+            queue: name,
+            payload: payload.inspect
+          )
           Travis::Exceptions.handle(error)
         rescue Exception => e
-          Travis.logger.error "!!!FAILSAFE!!! #{e.message}"
-          Travis.logger.error e.backtrace.first
+          Travis.logger.error("!!!FAILSAFE!!! #{e.message}")
+          Travis.logger.error(e.backtrace.first)
         end
       end
     end

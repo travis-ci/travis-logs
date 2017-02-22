@@ -38,7 +38,10 @@ module Travis
           store
           verify
           confirm
-          Travis.logger.debug "action=archive id=#{log_id} job_id=#{job_id} result=successful"
+          Travis.logger.debug(
+            'archived log',
+            action: 'archive', id: log_id, job_id: job_id, result: 'successful'
+          )
           queue_purge
           investigate if investigation_enabled?
         ensure
@@ -49,7 +52,10 @@ module Travis
           @log ||= begin
             log = database.log_for_id(log_id)
             unless log
-              Travis.logger.warn "action=archive id=#{log_id} result=not_found"
+              Travis.logger.warn(
+                'log not found',
+                action: 'archive', id: log_id, result: 'not_found'
+              )
               mark('log.not_found')
             end
             log
@@ -63,7 +69,10 @@ module Travis
 
         def content_blank?
           if content.blank?
-            Travis.logger.warn "action=archive id=#{log_id} result=empty"
+            Travis.logger.warn(
+              'content empty',
+              action: 'archive', id: log_id, result: 'empty'
+            )
             mark('log.empty')
             true
           else
@@ -86,8 +95,9 @@ module Travis
               expected = content.bytesize
               unless actual == expected
                 Travis.logger.error(
-                  "action=archive id=#{log_id} result=verification-failed " \
-                  "expected=#{expected} actual=#{actual}"
+                  'error while verifying',
+                  action: 'archive', id: log_id, result: 'verification-failed',
+                  expected: expected, actual: actual
                 )
                 raise VerificationFailed.new(log_id, target_url, expected, actual)
               end
@@ -117,8 +127,9 @@ module Travis
 
             mark(result.marking) unless result.marking.empty?
             Travis.logger.warn(
-              "action=investigate investigator=#{investigator.name} " \
-              "result=#{result.label} id=#{log_id} job_id=#{job_id}"
+              'investigator matched',
+              action: 'investigate', investigator: investigator.name,
+              result: result.label, id: log_id, job_id: job_id
             )
           end
         end
@@ -151,19 +162,22 @@ module Travis
           count ||= 0
           if times > (count += 1) && ENV['RACK_ENV'] != 'test'
             Travis.logger.debug(
-              "action=archive retrying=#{header} " \
-              "error=#{JSON.dump(e.backtrace)} type=#{e.class.name}"
+              'error while archiving',
+              action: 'archive', retrying: header,
+              error: JSON.dump(e.backtrace), type: e.class.name
             )
             Travis.logger.warn(
-              "action=archive retrying=#{header} " \
-              "reason=#{e.message} id=#{log_id} job_id=#{job_id}"
+              'error while archiving',
+              action: 'archive', retrying: header,
+              reason: e.message, id: log_id, job_id: job_id
             )
             sleep count * 1
             retry
           else
             Travis.logger.error(
-              "action=archive retrying=#{header} exceeded=#{times} " \
-              "error=#{e.backtrace.first} type=#{e.class.name}"
+              'error while archiving',
+              action: 'archive', retrying: header, exceeded: times,
+              error: e.backtrace.first, type: e.class.name
             )
             raise
           end

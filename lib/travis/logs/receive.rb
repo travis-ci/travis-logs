@@ -6,16 +6,18 @@ require 'travis/support/metrics'
 require 'travis/logs/receive/queue'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/helpers/database'
+require 'travis/logs/sidekiq'
 require 'active_support/core_ext/logger'
 
 module Travis
   module Logs
     class Receive
       def setup
-        Travis.logger.info('** Starting Log Parts Processor **')
+        Travis.logger.info('Starting Log Parts Processor')
         Travis::Amqp.setup(amqp_config)
         Travis::Exceptions::Reporter.start
         Travis::Metrics.setup
+        Travis::Logs::Sidekiq.setup
 
         db = Travis::Logs::Helpers::Database.connect
         Travis::Logs.database_connection = db
