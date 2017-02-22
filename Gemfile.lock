@@ -177,6 +177,7 @@ DEPENDENCIES
   aws-sdk
   bunny
   coder!
+  concurrent-ruby
   connection_pool
   excon
   faraday
@@ -212,4 +213,4 @@ DEPENDENCIES
   travis-support!
 
 BUNDLED WITH
-   1.13.7
+   1.14.4

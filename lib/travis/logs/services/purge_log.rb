@@ -38,7 +38,10 @@ module Travis
 
         def process_empty_log_content
           if content_length_from_s3.nil?
-            Travis.logger.warn("action=purge id=#{@log_id} result=content_missing")
+            Travis.logger.warn(
+              'no content',
+              action: 'purge', id: @log_id, result: 'content_missing'
+            )
             mark('log.content_empty')
           else
             measure('already_purged') do
@@ -47,7 +50,10 @@ module Travis
                 @database.purge(@log_id)
               end
             end
-            Travis.logger.info("action=purge id=#{@log_id} result=already_archived")
+            Travis.logger.info(
+              'no content',
+              action: 'purge', id: @log_id, result: 'already_archived'
+            )
           end
         end
 
@@ -56,13 +62,22 @@ module Travis
             measure('purged') do
               @database.purge(@log_id)
             end
-            Travis.logger.debug("action=purge id=#{@log_id} result=successful content_length=#{content_length_from_db}")
+            Travis.logger.debug(
+              'content lengths match',
+              action: 'purge', id: @log_id,
+              result: 'successful', content_length: content_length_from_db
+            )
           else
             measure('requeued_for_achiving') do
               @database.mark_not_archived(@log_id)
               @archiver.call(@log_id)
             end
-            Travis.logger.info("action=purge id=#{@log_id} result=requeued db_content_length=#{content_length_from_db} s3_content_length=#{content_length_from_s3}")
+            Travis.logger.info(
+              'content lengths do not match',
+              action: 'purge', id: @log_id, result: 'requeued',
+              db_content_length: content_length_from_db,
+              s3_content_length: content_length_from_s3
+            )
           end
         end
 
@@ -88,7 +103,10 @@ module Travis
           unless defined?(@log)
             @log = @database.log_content_length_for_id(@log_id)
             unless @log
-              Travis.logger.warn("action=purge id=#{@log_id} result=not_found")
+              Travis.logger.warn(
+                'log not found',
+                action: 'purge', id: @log_id, result: 'not_found'
+              )
               mark('log.not_found')
             end
           end

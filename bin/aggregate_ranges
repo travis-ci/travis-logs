@@ -10,4 +10,4 @@ $stderr.sync = true
 
 app = Travis::Logs::Aggregate.new
 app.setup
-app.run
+app.run_ranges
