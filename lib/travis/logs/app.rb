@@ -86,7 +86,13 @@ module Travis
         request.body.rewind
         content = request.body.read
         content = nil if content.empty?
-        database.set_log_content(log_id, content, removed_by: params[:removed_by])
+
+        database.transaction do
+          database.set_log_content(
+            log_id, content, removed_by: params[:removed_by]
+          )
+          database.delete_log_parts(log_id) if params[:clear] == '1'
+        end
 
         status 204
       end
