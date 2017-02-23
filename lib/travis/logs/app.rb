@@ -1,6 +1,7 @@
 require 'json'
 require 'raven'
 require 'sinatra/base'
+require 'sinatra/json'
 require 'logger'
 require 'pusher'
 require 'jwt'
@@ -141,10 +142,9 @@ module Travis
 
         result = fetch_log_service.run(job_id: Integer(params[:job_id]))
         halt 404 if result.nil?
-        redirect result.archive_url if result.archived?
-        content_type :text, charset: 'utf-8'
+        content_type :json, charset: 'utf-8'
         status 200
-        result.content
+        json result.merge(:@type => 'log')
       end
 
       private def fetch_log_service
