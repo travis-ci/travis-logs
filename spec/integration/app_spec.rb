@@ -129,12 +129,13 @@ describe Travis::Logs::App do
 
       it 'tells the database to set the log content' do
         expect(database).to receive(:set_log_content)
-          .with(@log_id, 'hello, world')
+          .with(@log_id, 'hello, world', removed_by: nil)
         put "/logs/#{@job_id}", 'hello, world'
       end
 
       it 'does not set log content if the given body was empty' do
-        expect(database).to receive(:set_log_content).with(@log_id, nil)
+        expect(database).to receive(:set_log_content)
+          .with(@log_id, nil, removed_by: nil)
         put "/logs/#{@job_id}", ''
       end
     end

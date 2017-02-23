@@ -153,13 +153,15 @@ module Travis
           @db.call(:delete_log_parts, log_id: log_id)
         end
 
-        def set_log_content(log_id, content)
+        def set_log_content(log_id, content, removed_by: nil)
           delete_log_parts(log_id)
           aggregated_at = Time.now.utc unless content.nil?
+          removed_at = Time.now.utc unless removed_by.nil?
           @db[:logs].where(id: log_id)
                     .update(content: content, aggregated_at: aggregated_at,
                             archived_at: nil, archive_verified: nil,
-                            updated_at: Time.now.utc)
+                            updated_at: Time.now.utc,
+                            removed_by: removed_by, removed_at: removed_at)
         end
 
         def aggregatable_logs(regular_interval, force_interval, limit,
