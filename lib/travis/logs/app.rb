@@ -98,18 +98,21 @@ module Travis
       end
 
       put '/log-parts/:job_id/:log_part_id' do
-        halt 500, 'key is not set' if @rsa_public_key.nil?
-
-        Travis.uuid = request.env['HTTP_X_REQUEST_ID']
-
         auth_header = request.env['HTTP_AUTHORIZATION']
-        if auth_header.nil? || !request.env['HTTP_AUTHORIZATION'].start_with?('Bearer ')
-          halt 403
-        end
+        halt 403 if auth_header.nil?
 
-        begin
-          JWT.decode(auth_header[7..-1], @rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
-        rescue JWT::DecodeError
+        if auth_header.start_with?('Bearer ')
+          halt 500, 'key is not set' if @rsa_public_key.nil?
+          Travis.uuid = request.env['HTTP_X_REQUEST_ID']
+          begin
+            JWT.decode(auth_header[7..-1], @rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
+          rescue JWT::DecodeError
+            halt 403
+          end
+        elsif auth_header.start_with?('token ')
+          halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
+          halt 403 if auth_header != "token #{ENV['AUTH_TOKEN']}"
+        else
           halt 403
         end
 

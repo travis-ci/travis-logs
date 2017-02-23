@@ -38,6 +38,7 @@ module Travis
         def run
           measure do
             find_or_create_log
+            normalize_number
             create_part
             notify
           end
@@ -106,6 +107,11 @@ module Travis
           @log_id ||= find_log_id || create_log
         end
         alias find_or_create_log log_id
+
+        private def normalize_number
+          return unless payload['number'] == 'last'
+          payload['number'] = database.max_log_part_number_for_log(log_id)
+        end
 
         private def find_log_id
           database.log_id_for_job_id(payload['id'])

@@ -185,6 +185,15 @@ module Travis
           @db['SELECT min(id) AS id FROM log_parts'].first[:id]
         end
 
+        def max_log_part_number_for_log(log_id)
+          (
+            @db[
+              'SELECT MAX(number) AS number FROM log_parts WHERE log_id = ?',
+              log_id
+            ].first || {}
+          )[:number] || 0
+        end
+
         AGGREGATABLE_SELECT_WITH_MIN_ID_SQL = <<-SQL.split.join(' ').freeze
           SELECT id, log_id
             FROM log_parts
@@ -231,9 +240,7 @@ module Travis
           @db.transaction(&block)
         end
 
-        private
-
-        def prepare_statements
+        private def prepare_statements
           @db[:logs]
             .where(id: :$log_id)
             .prepare(:select, :find_log)
