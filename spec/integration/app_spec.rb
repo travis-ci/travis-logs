@@ -98,6 +98,7 @@ describe Travis::Logs::App do
       @old_auth_token = ENV['AUTH_TOKEN']
       @auth_token = ENV['AUTH_TOKEN'] = 'very-secret'
 
+      allow(database).to receive(:transaction) { |&b| b.call }
       allow(database).to receive(:set_log_content)
       allow(database).to receive(:log_id_for_job_id)
         .with(anything).and_return(nil)
