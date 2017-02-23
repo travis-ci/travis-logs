@@ -28,7 +28,10 @@ module Travis
             ].join('')
           end
 
-          result.merge(content: content)
+          result.merge(
+            content: content,
+            aggregated_at: result[:updated_at] || Time.now.utc - 60
+          )
         end
       end
     end
