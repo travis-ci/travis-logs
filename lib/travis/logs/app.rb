@@ -95,6 +95,7 @@ module Travis
         end
 
         status 204
+        body nil
       end
 
       put '/log-parts/:job_id/:log_part_id' do
