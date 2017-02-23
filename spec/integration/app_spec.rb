@@ -24,9 +24,22 @@ describe Travis::Logs::App do
   end
 
   describe 'GET /uptime' do
+    before do
+      allow(database).to receive(:now) { Time.now.utc }
+    end
+
     it 'returns 204' do
       response = get '/uptime'
-      expect(response.status).to eq(204)
+      expect(response.status).to eq(200)
+    end
+
+    it 'contains uptime, greeting, now, pong, and version' do
+      response = get '/uptime'
+      body = JSON.parse(response.body)
+      %w(uptime greeting now pong version).each do |key|
+        expect(body).to include(key)
+        expect(body[key]).to_not be_nil
+      end
     end
   end
 

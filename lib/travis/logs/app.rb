@@ -16,6 +16,8 @@ require 'rack/ssl'
 
 module Travis
   module Logs
+    BOOT_TIME = Time.now.utc.freeze
+
     class SentryMiddleware < Sinatra::Base
       configure do
         Raven.configure { |c| c.tags = { environment: environment } }
@@ -66,7 +68,11 @@ module Travis
       end
 
       get '/uptime' do
-        status 204
+        json uptime: Time.now.utc - BOOT_TIME,
+             greeting: 'hello, human 👋!',
+             pong: redis_ping,
+             now: database.now,
+             version: Travis::Logs.version
       end
 
       put '/logs/:job_id' do
@@ -155,6 +161,10 @@ module Travis
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
           database: database
         )
+      end
+
+      private def redis_ping
+        Travis::Logs.redis_pool.with { |conn| conn.ping.to_s }
       end
     end
   end

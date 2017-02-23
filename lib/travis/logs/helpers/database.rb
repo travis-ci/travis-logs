@@ -91,6 +91,10 @@ module Travis
           prepare_statements
         end
 
+        def now
+          @db['select now()'].first.fetch(:now)
+        end
+
         def log_for_id(log_id)
           @db.call(:find_log, log_id: log_id).first
         end
