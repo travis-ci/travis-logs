@@ -31,6 +31,7 @@ module Travis
       end
 
       configure do
+        enable :logging if Travis::Logs.config.logs.api_logging?
         use SentryMiddleware if ENV['SENTRY_DSN']
       end
 
