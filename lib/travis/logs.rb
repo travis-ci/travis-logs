@@ -34,7 +34,7 @@ module Travis
 
       def version
         @version ||=
-          `git rev-parse HEAD 2>/dev/null || echo ${SOURCE_VERSION:-fafafaf}`.strip
+          `git rev-parse HEAD 2>/dev/null || echo ${HEROKU_SLUG_COMMIT:-fafafaf}`.strip
       end
     end
   end
