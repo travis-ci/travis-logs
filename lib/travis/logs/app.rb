@@ -135,12 +135,15 @@ module Travis
         halt 501
       end
 
-      get '/logs/:job_id' do
+      get '/logs/:id' do
         # TODO: de-duplicate auth stuff
         halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
         halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
 
-        result = fetch_log_service.run(job_id: Integer(params[:job_id]))
+        result = nil
+        result = fetch_log_service.run(
+          (params[:by] || :job_id).to_sym => Integer(params[:id])
+        )
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200
