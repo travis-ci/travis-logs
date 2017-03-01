@@ -173,7 +173,7 @@ module Travis
         halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
 
         result = nil
-        result = database.log_id_for_job_id(params[:job_id])
+        result = database.log_id_for_job_id(Integer(params[:job_id]))
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200
