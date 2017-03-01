@@ -167,6 +167,19 @@ module Travis
         json result.merge(:@type => 'log')
       end
 
+      get '/logs/:job_id/id' do
+        # TODO: de-duplicate auth stuff
+        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
+        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+
+        result = nil
+        result = database.log_id_for_job_id(params[:job_id])
+        halt 404 if result.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json id: result, :@type => 'log'
+      end
+
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
           database: database
