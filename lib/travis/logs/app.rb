@@ -1,18 +1,19 @@
 require 'json'
+require 'jwt'
+require 'logger'
+require 'pusher'
+require 'rack/ssl'
 require 'raven'
 require 'sinatra/base'
 require 'sinatra/json'
-require 'logger'
-require 'pusher'
-require 'jwt'
 
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
 require 'travis/logs/helpers/pusher'
-require 'travis/logs/services/process_log_part'
 require 'travis/logs/services/fetch_log'
-require 'rack/ssl'
+require 'travis/logs/services/process_log_part'
+require 'travis/logs/services/upsert_log'
 
 module Travis
   module Logs
@@ -79,19 +80,37 @@ module Travis
         halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
         halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
 
-        job_id = Integer(params[:job_id])
-
-        log_id = database.log_id_for_job_id(job_id) || database.create_log(job_id)
-
         request.body.rewind
         content = request.body.read
         content = nil if content.empty?
 
-        database.transaction do
-          database.set_log_content(
-            log_id, content, removed_by: params[:removed_by]
+        upsert_log_service.run(
+          job_id: Integer(params[:job_id]),
+          content: content,
+          removed_by: params[:removed_by],
+          clear: params[:clear]
+        )
+
+        status 204
+        body nil
+      end
+
+      post '/logs/multi' do
+        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
+        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+
+        request.body.rewind
+
+        items = Array(JSON.parse(request.body.read))
+        halt 400 unless all_items_valid?(items)
+
+        items.each do |item|
+          upsert_log_service.run(
+            job_id: job_id,
+            content: item.fetch('content', ''),
+            removed_by: item['removed_by'],
+            clear: item['clear']
           )
-          database.delete_log_parts(log_id) if params[:clear] == '1'
         end
 
         status 204
@@ -186,8 +205,20 @@ module Travis
         )
       end
 
+      private def upsert_log_service
+        @upsert_log_service ||= Travis::Logs::Services::UpsertLog.new(
+          database: database
+        )
+      end
+
       private def redis_ping
         Travis::Logs.redis_pool.with { |conn| conn.ping.to_s }
+      end
+
+      private def all_items_valid?(items)
+        items.all? do |item|
+          item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
+        end
       end
     end
   end
