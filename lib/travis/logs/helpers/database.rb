@@ -16,78 +16,81 @@ module Travis
       # No database-specific logic (such as table names and SQL queries) should
       # be outside of this class.
       class Database
-        # This method should only be called for "maintenance" tasks (such as
-        # creating the tables or debugging).
-        def self.create_sequel
-          config = Travis::Logs.config.logs_database.to_h
-          uri = jdbc_uri_from_config(config) if jruby?
-          uri = uri_from_config(config) unless jruby?
+        class << self
+          # This method should only be called for "maintenance" tasks (such as
+          # creating the tables or debugging).
+          def create_sequel
+            config = Travis::Logs.config.logs_database.to_h
+            uri = jdbc_uri_from_config(config) if jruby?
+            uri = uri_from_config(config) unless jruby?
 
-          Sequel.default_timezone = :utc
-          conn = Sequel.connect(
-            uri, max_connections: config[:pool],
-            after_connect: ->(c) { after_connect(c) }
-          )
-          conn.loggers << Logger.new($stdout) if config[:sql_logging]
-          conn
-        end
-
-        def self.uri_from_config(config)
-          host = config[:host] || 'localhost'
-          port = config[:port] || 5432
-          database = config[:database]
-          username = config[:username] || ENV['USER']
-
-          params = {
-            user: username,
-            password: config[:password]
-          }
-
-          enc_params = URI.encode_www_form(params)
-          "postgres://#{host}:#{port}/#{database}?#{enc_params}"
-        end
-
-        def self.jdbc_uri_from_config(config)
-          host = config[:host] || 'localhost'
-          port = config[:port] || 5432
-          database = config[:database]
-          username = config[:username] || ENV['USER']
-
-          params = {
-            user: username,
-            password: config[:password]
-          }
-
-          if config[:ssl]
-            params[:ssl] = true
-            params[:sslfactory] = 'org.postgresql.ssl.NonValidatingFactory'
+            Sequel.default_timezone = :utc
+            conn = Sequel.connect(
+              uri,
+              max_connections: config[:pool],
+              after_connect: ->(c) { after_connect(c) }
+            )
+            conn.loggers << Logger.new($stdout) if config[:sql_logging]
+            conn
           end
 
-          enc_params = URI.encode_www_form(params)
-          "jdbc:postgresql://#{host}:#{port}/#{database}?#{enc_params}"
-        end
+          def uri_from_config(config)
+            host = config[:host] || 'localhost'
+            port = config[:port] || 5432
+            database = config[:database]
+            username = config[:username] || ENV['USER']
 
-        def self.connect
-          new.tap(&:connect)
-        end
+            params = {
+              user: username,
+              password: config[:password]
+            }
 
-        def self.after_connect(conn)
-          command = "SET application_name TO '#{application_name}'"
-          if conn.respond_to?(:exec)
-            return conn.exec(command)
-          elsif conn.respond_to?(:execute)
-            return conn.execute(command)
-          elsif conn.respond_to?(:create_statement)
-            st = conn.create_statement
-            st.execute(command)
-            st.close
+            enc_params = URI.encode_www_form(params)
+            "postgres://#{host}:#{port}/#{database}?#{enc_params}"
           end
-        end
 
-        def self.application_name
-          @application_name ||= [
-            'logs', Travis.env, ENV['DYNO']
-          ].compact.join('.')
+          def jdbc_uri_from_config(config)
+            host = config[:host] || 'localhost'
+            port = config[:port] || 5432
+            database = config[:database]
+            username = config[:username] || ENV['USER']
+
+            params = {
+              user: username,
+              password: config[:password]
+            }
+
+            if config[:ssl]
+              params[:ssl] = true
+              params[:sslfactory] = 'org.postgresql.ssl.NonValidatingFactory'
+            end
+
+            enc_params = URI.encode_www_form(params)
+            "jdbc:postgresql://#{host}:#{port}/#{database}?#{enc_params}"
+          end
+
+          def connect
+            new.tap(&:connect)
+          end
+
+          def after_connect(conn)
+            command = "SET application_name TO '#{application_name}'"
+            if conn.respond_to?(:exec)
+              return conn.exec(command)
+            elsif conn.respond_to?(:execute)
+              return conn.execute(command)
+            elsif conn.respond_to?(:create_statement)
+              st = conn.create_statement
+              st.execute(command)
+              st.close
+            end
+          end
+
+          def application_name
+            @application_name ||= [
+              'logs', Travis.env, ENV['DYNO']
+            ].compact.join('.')
+          end
         end
 
         def initialize
