@@ -23,17 +23,10 @@ module Travis
           uri = jdbc_uri_from_config(config) if jruby?
           uri = uri_from_config(config) unless jruby?
 
-          after_connect = proc do |c|
-            if c.respond_to?(:execute)
-              c.execute("SET application_name TO 'logs'")
-            elsif c.respond_to?(:exec)
-              c.exec("SET application_name TO 'logs'")
-            end
-          end
-
           Sequel.default_timezone = :utc
           conn = Sequel.connect(
-            uri, max_connections: config[:pool], after_connect: after_connect
+            uri, max_connections: config[:pool],
+            after_connect: ->(c) { after_connect(c) }
           )
           conn.loggers << Logger.new($stdout) if config[:sql_logging]
           conn
@@ -76,6 +69,25 @@ module Travis
 
         def self.connect
           new.tap(&:connect)
+        end
+
+        def self.after_connect(conn)
+          command = "SET application_name TO '#{application_name}'"
+          if conn.respond_to?(:exec)
+            return conn.exec(command)
+          elsif conn.respond_to?(:execute)
+            return conn.execute(command)
+          elsif conn.respond_to?(:create_statement)
+            st = conn.create_statement
+            st.execute(command)
+            st.close
+          end
+        end
+
+        def self.application_name
+          @application_name ||= [
+            'logs', Travis.env, ENV['DYNO']
+          ].compact.join('.')
         end
 
         def initialize
