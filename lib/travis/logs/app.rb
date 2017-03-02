@@ -106,7 +106,7 @@ module Travis
 
         items.each do |item|
           upsert_log_service.run(
-            job_id: job_id,
+            job_id: Integer(item.fetch('job_id')),
             content: item.fetch('content', ''),
             removed_by: item['removed_by'],
             clear: item['clear']
