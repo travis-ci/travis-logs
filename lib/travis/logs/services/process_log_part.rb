@@ -16,6 +16,7 @@ module Travis
         include Helpers::Metrics
 
         METRIKS_PREFIX = 'logs.process_log_part'.freeze
+        INT_MAX = 2_147_483_647
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -110,7 +111,7 @@ module Travis
 
         private def normalize_number
           return unless payload['number'] == 'last'
-          payload['number'] = database.max_log_part_number_for_log(log_id)
+          payload['number'] = INT_MAX
         end
 
         private def find_log_id

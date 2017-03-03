@@ -18,8 +18,6 @@ require 'travis/logs/services/upsert_log'
 
 module Travis
   module Logs
-    BOOT_TIME = Time.now.utc.freeze
-
     class SentryMiddleware < Sinatra::Base
       configure do
         Raven.configure { |c| c.tags = { environment: environment } }
@@ -28,8 +26,6 @@ module Travis
     end
 
     class App < Sinatra::Base
-      attr_reader :existence, :pusher, :database, :log_part_service
-
       configure(:production, :staging) do
         use Rack::SSL
         use Travis::Logs::Helpers::MetricsMiddleware
@@ -40,17 +36,24 @@ module Travis
         use SentryMiddleware if ENV['SENTRY_DSN']
       end
 
-      def initialize(existence = nil, pusher = nil, database = nil, log_part_service = nil)
-        super()
+      def initialize(auth_token: ENV['AUTH_TOKEN'].to_s,
+                     rsa_public_key_string: ENV['JWT_RSA_PUBLIC_KEY'].to_s)
+        super
+
         Travis::Metrics.setup
-        @existence = existence || Travis::Logs::Existence.new
-        @pusher    = pusher || Travis::Logs::Helpers::Pusher.new
-        @database  = database || Travis::Logs::Helpers::Database.connect
-        @log_part_service = log_part_service || Travis::Logs::Services::ProcessLogPart
-        unless ENV['JWT_RSA_PUBLIC_KEY'].to_s.strip.empty?
-          @rsa_public_key = OpenSSL::PKey::RSA.new(ENV['JWT_RSA_PUBLIC_KEY'])
+
+        @auth_token = auth_token.strip
+        @boot_time = Time.now.utc.freeze
+
+        unless rsa_public_key_string.strip.empty?
+          @rsa_public_key = OpenSSL::PKey::RSA.new(rsa_public_key_string)
         end
       end
+
+      attr_reader :auth_token, :rsa_public_key, :boot_time
+      private :auth_token
+      private :rsa_public_key
+      private :boot_time
 
       post '/pusher/existence' do
         webhook = pusher.webhook(request)
@@ -72,7 +75,7 @@ module Travis
       end
 
       get '/uptime' do
-        json uptime: Time.now.utc - BOOT_TIME,
+        json uptime: Time.now.utc - boot_time,
              greeting: 'hello, human 👋!',
              pong: redis_ping,
              now: database.now,
@@ -80,8 +83,8 @@ module Travis
       end
 
       put '/logs/:job_id' do
-        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
-        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
 
         request.body.rewind
         content = request.body.read
@@ -99,21 +102,23 @@ module Travis
       end
 
       post '/logs/multi' do
-        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
-        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
 
         request.body.rewind
 
         items = Array(JSON.parse(request.body.read))
         halt 400 unless all_items_valid?(items)
 
-        items.each do |item|
-          upsert_log_service.run(
-            job_id: Integer(item.fetch('job_id')),
-            content: item.fetch('content', ''),
-            removed_by: item['removed_by'],
-            clear: item['clear']
-          )
+        database.transaction do
+          items.each do |item|
+            upsert_log_service.run(
+              job_id: Integer(item.fetch('job_id')),
+              content: item.fetch('content', ''),
+              removed_by: item['removed_by'],
+              clear: item['clear']
+            )
+          end
         end
 
         status 204
@@ -125,16 +130,16 @@ module Travis
         halt 403 if auth_header.nil?
 
         if auth_header.start_with?('Bearer ')
-          halt 500, 'key is not set' if @rsa_public_key.nil?
+          halt 500, 'key is not set' if rsa_public_key.nil?
           Travis.uuid = request.env['HTTP_X_REQUEST_ID']
           begin
-            JWT.decode(auth_header[7..-1], @rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
+            JWT.decode(auth_header[7..-1], rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
           rescue JWT::DecodeError
             halt 403
           end
         elsif auth_header.start_with?('token ')
-          halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
-          halt 403 if auth_header != "token #{ENV['AUTH_TOKEN']}"
+          halt 500, 'authentication token is not set' if auth_token.empty?
+          halt 403 unless authorized?(request)
         else
           halt 403
         end
@@ -151,7 +156,7 @@ module Travis
                     halt 400, JSON.dump('error' => 'invalid encoding, only base64 supported')
                   end
 
-        @log_part_service.new(
+        process_log_part_service_class.new(
           {
             'id' => Integer(params[:job_id]),
             'log' => content,
@@ -167,19 +172,16 @@ module Travis
       end
 
       put '/logs/:job_id/archived' do
-        # TODO: de-duplicate auth stuff
-        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
-        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
 
         halt 501
       end
 
       get '/logs/:id' do
-        # TODO: de-duplicate auth stuff
-        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
-        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
 
-        result = nil
         result = fetch_log_service.run(
           (params[:by] || :job_id).to_sym => Integer(params[:id])
         )
@@ -190,16 +192,21 @@ module Travis
       end
 
       get '/logs/:job_id/id' do
-        # TODO: de-duplicate auth stuff
-        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
-        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
 
-        result = nil
         result = database.log_id_for_job_id(Integer(params[:job_id]))
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200
         json id: result, :@type => 'log'
+      end
+
+      private def authorized?(request)
+        Rack::Utils.secure_compare(
+          request.env['HTTP_AUTHORIZATION'].to_s,
+          "token #{auth_token}"
+        )
       end
 
       private def fetch_log_service
@@ -212,6 +219,23 @@ module Travis
         @upsert_log_service ||= Travis::Logs::Services::UpsertLog.new(
           database: database
         )
+      end
+
+      private def process_log_part_service_class
+        @process_log_part_service_class ||=
+          Travis::Logs::Services::ProcessLogPart
+      end
+
+      private def existence
+        @existence ||= Travis::Logs::Existence.new
+      end
+
+      private def pusher
+        @pusher ||= Travis::Logs::Helpers::Pusher.new
+      end
+
+      private def database
+        @database ||= Travis::Logs::Helpers::Database.connect
       end
 
       private def redis_ping

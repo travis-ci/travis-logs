@@ -10,17 +10,26 @@ describe Travis::Logs::App do
   include Rack::Test::Methods
 
   def app
-    Travis::Logs::App.new(existence, pusher, database, log_part_service)
+    Travis::Logs::App.new(auth_token: auth_token)
   end
 
   let(:pusher) { double(:pusher) }
   let(:existence) { Travis::Logs::Existence.new }
   let(:database) { double(:database) }
   let(:log_part_service) { double(:log_part_service) }
+  let(:auth_token) { 'very-secret' }
 
   before do
     existence.vacant!('foo')
     existence.vacant!('bar')
+    allow_any_instance_of(described_class)
+      .to receive(:existence).and_return(existence)
+    allow_any_instance_of(described_class)
+      .to receive(:pusher).and_return(pusher)
+    allow_any_instance_of(described_class)
+      .to receive(:database).and_return(database)
+    allow_any_instance_of(described_class)
+      .to receive(:process_log_part_service_class).and_return(log_part_service)
   end
 
   describe 'GET /uptime' do
@@ -95,8 +104,6 @@ describe Travis::Logs::App do
     before do
       @job_id = 123
       @log_id = 234
-      @old_auth_token = ENV['AUTH_TOKEN']
-      @auth_token = ENV['AUTH_TOKEN'] = 'very-secret'
 
       allow(database).to receive(:transaction) { |&b| b.call }
       allow(database).to receive(:set_log_content)
@@ -106,13 +113,9 @@ describe Travis::Logs::App do
         .with(@job_id).and_return(@log_id)
     end
 
-    after do
-      ENV['AUTH_TOKEN'] = @old_auth_token
-    end
-
     context 'with correct authentication' do
       before do
-        header 'Authorization', "token #{@auth_token}"
+        header 'Authorization', "token #{auth_token}"
       end
 
       it 'returns 204' do
@@ -141,11 +144,14 @@ describe Travis::Logs::App do
       end
     end
 
-    it "returns 500 if the auth token isn't set" do
-      ENV['AUTH_TOKEN'] = ''
-      header 'Authorization', 'token '
-      response = put "/logs/#{@job_id}", ''
-      expect(response.status).to be == 500
+    context 'without an empty auth_token' do
+      let(:auth_token) { '' }
+
+      it "returns 500 if the auth token isn't set" do
+        header 'Authorization', 'token '
+        response = put "/logs/#{@job_id}", ''
+        expect(response.status).to be == 500
+      end
     end
 
     it "returns 403 if the Authorization header isn't set" do
@@ -154,7 +160,7 @@ describe Travis::Logs::App do
     end
 
     it 'returns 403 if the Authorization header is incorrect' do
-      header 'Authorization', "token not-#{@auth_token}"
+      header 'Authorization', "token not-#{auth_token}"
       response = put "/logs/#{@job_id}", ''
       expect(response.status).to be == 403
     end

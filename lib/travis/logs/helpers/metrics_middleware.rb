@@ -40,8 +40,8 @@ module Travis
               .gsub(/[[:digit:]]+/, 'id')
               .gsub(/\.+/, '.')
           ].join('.')
-           .gsub(/[^\.[:alnum:]]+/, '_')
-           .gsub(/[\._]+$/, '')
+                 .gsub(/[^\.[:alnum:]]+/, '_')
+                 .gsub(/[\._]+$/, '')
           return name if KNOWN_TIMER_NAMES.include?(name)
           'unk.unk'
         end

@@ -76,9 +76,9 @@ module Travis
           def after_connect(conn)
             command = "SET application_name TO '#{application_name}'"
             if conn.respond_to?(:exec)
-              return conn.exec(command)
+              conn.exec(command)
             elsif conn.respond_to?(:execute)
-              return conn.execute(command)
+              conn.execute(command)
             elsif conn.respond_to?(:create_statement)
               st = conn.create_statement
               st.execute(command)
