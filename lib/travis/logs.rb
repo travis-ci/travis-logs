@@ -14,7 +14,7 @@ module Travis
 
   module Logs
     class << self
-      attr_writer :config, :database_connection, :redis
+      attr_writer :config, :database_connection, :redis_pool
 
       def config
         @config ||= Travis::Logs::Config.load
@@ -33,8 +33,10 @@ module Travis
       end
 
       def version
-        @version ||=
-          `git rev-parse HEAD 2>/dev/null || echo ${HEROKU_SLUG_COMMIT:-fafafaf}`.strip
+        @version ||= ENV.fetch(
+          'HEROKU_SLUG_COMMIT',
+          `git rev-parse HEAD 2>/dev/null`
+        ).strip
       end
     end
   end
