@@ -10,6 +10,7 @@ require 'sinatra/json'
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
 require 'travis/logs/services/process_log_part'
@@ -31,6 +32,7 @@ module Travis
 
       configure(:production, :staging) do
         use Rack::SSL
+        use Travis::Logs::Helpers::MetricsMiddleware
       end
 
       configure do
@@ -40,6 +42,7 @@ module Travis
 
       def initialize(existence = nil, pusher = nil, database = nil, log_part_service = nil)
         super()
+        Travis::Metrics.setup
         @existence = existence || Travis::Logs::Existence.new
         @pusher    = pusher || Travis::Logs::Helpers::Pusher.new
         @database  = database || Travis::Logs::Helpers::Database.connect
