@@ -207,7 +207,7 @@ EOF
       allow(log_part_service).to receive(:run).with(
         'id' => @job_id,
         'log' => 'fafafaf',
-        'number' => 1,
+        'number' => '1',
         'final' => false
       ).and_return(nil)
     end

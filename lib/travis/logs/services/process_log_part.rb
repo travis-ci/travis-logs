@@ -111,8 +111,10 @@ module Travis
         end
 
         private def normalize_number(payload)
-          return payload unless payload['number'] == 'last'
-          payload.merge('number' => INT_MAX)
+          if payload['number'] == 'last'
+            return payload.merge('number' => INT_MAX)
+          end
+          payload.merge('number' => Integer(payload['number']))
         end
 
         private def find_log_id(payload)
