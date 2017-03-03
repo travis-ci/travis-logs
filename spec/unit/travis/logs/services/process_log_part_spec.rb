@@ -32,7 +32,12 @@ describe Travis::Logs::Services::ProcessLogPart do
   let(:database) { FakeDatabase.new }
   let(:pusher_client) { double('pusher-client', push: nil) }
 
-  let(:service) { described_class.new(payload, database, pusher_client) }
+  let(:service) do
+    described_class.new(
+      database: database,
+      pusher_client: pusher_client
+    )
+  end
 
   before(:each) do
     Travis::Logs.config.channels_existence_check = true
@@ -44,7 +49,7 @@ describe Travis::Logs::Services::ProcessLogPart do
 
   context 'without an existing log' do
     it 'creates a log' do
-      service.run
+      service.run(payload)
 
       expect(database.log_id_for_job_id(2)).not_to be_nil
     end
@@ -54,7 +59,7 @@ describe Travis::Logs::Services::ProcessLogPart do
       expect(Metriks).to receive(:meter).with('logs.process_log_part.log.create').and_return(meter)
       expect(meter).to receive(:mark)
 
-      service.run
+      service.run(payload)
     end
   end
 
@@ -64,7 +69,7 @@ describe Travis::Logs::Services::ProcessLogPart do
     end
 
     it 'does not create another log' do
-      service.run
+      service.run(payload)
 
       expect(database.logs.count { |log| log[:job_id] == 2 }).to eq(1)
     end
@@ -80,12 +85,12 @@ describe Travis::Logs::Services::ProcessLogPart do
       expect(Metriks).to receive(:meter).with('logs.process_log_part.log.id_invalid').and_return(meter)
       expect(meter).to receive(:mark)
 
-      service.run
+      service.run(payload)
     end
   end
 
   it 'creates a log part' do
-    service.run
+    service.run(payload)
 
     expect(database.log_parts.last).to include(content: 'hello, world', number: 1, final: false)
   end
@@ -98,7 +103,7 @@ describe Travis::Logs::Services::ProcessLogPart do
       expect(service).to receive(:mark).with('pusher.ignore')
       expect(pusher_client).to receive(:push).with(any_args)
 
-      service.run
+      service.run(payload)
     end
 
     it 'ignores a part if channel is not occupied' do
@@ -107,7 +112,7 @@ describe Travis::Logs::Services::ProcessLogPart do
       expect(service).to receive(:mark).with('pusher.ignore')
       expect(pusher_client).to_not receive(:push)
 
-      service.run
+      service.run(payload)
     end
 
     it 'sends a part if channel is occupied' do
@@ -116,7 +121,7 @@ describe Travis::Logs::Services::ProcessLogPart do
       expect(service).to receive(:mark).with('pusher.send')
       expect(pusher_client).to receive(:push).with(any_args)
 
-      service.run
+      service.run(payload)
     end
   end
 
@@ -130,7 +135,7 @@ describe Travis::Logs::Services::ProcessLogPart do
         .with(
           'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false
         )
-      service.run
+      service.run(payload)
     end
   end
 
@@ -144,7 +149,7 @@ describe Travis::Logs::Services::ProcessLogPart do
         .with(
           'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false
         )
-      service.run
+      service.run(payload)
     end
   end
 end

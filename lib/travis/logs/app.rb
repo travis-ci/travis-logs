@@ -156,17 +156,12 @@ module Travis
                     halt 400, JSON.dump('error' => 'invalid encoding, only base64 supported')
                   end
 
-        process_log_part_service_class.new(
-          {
-            'id' => Integer(params[:job_id]),
-            'log' => content,
-            'number' => Integer(params[:log_part_id]),
-            'final' => data['final']
-          },
-          database,
-          pusher,
-          existence
-        ).run
+        process_log_part_service.run(
+          'id' => Integer(params[:job_id]),
+          'log' => content,
+          'number' => Integer(params[:log_part_id]),
+          'final' => data['final']
+        )
 
         status 204
       end
@@ -221,9 +216,13 @@ module Travis
         )
       end
 
-      private def process_log_part_service_class
-        @process_log_part_service_class ||=
-          Travis::Logs::Services::ProcessLogPart
+      private def process_log_part_service
+        @process_log_part_service ||=
+          Travis::Logs::Services::ProcessLogPart.new(
+            database: database,
+            pusher_client: pusher,
+            existence: existence
+          )
       end
 
       private def existence

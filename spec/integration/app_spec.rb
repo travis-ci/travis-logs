@@ -29,7 +29,7 @@ describe Travis::Logs::App do
     allow_any_instance_of(described_class)
       .to receive(:database).and_return(database)
     allow_any_instance_of(described_class)
-      .to receive(:process_log_part_service_class).and_return(log_part_service)
+      .to receive(:process_log_part_service).and_return(log_part_service)
   end
 
   describe 'GET /uptime' do
@@ -204,17 +204,12 @@ EOF
       @job_id = 1
       @log_id = 456
 
-      allow(log_part_service).to receive(:new).with(
-        {
-          'id' => @job_id,
-          'log' => 'fafafaf',
-          'number' => 1,
-          'final' => false
-        },
-        database,
-        pusher,
-        existence
-      ).and_return(double(:log_part_service_instance, run: nil))
+      allow(log_part_service).to receive(:run).with(
+        'id' => @job_id,
+        'log' => 'fafafaf',
+        'number' => 1,
+        'final' => false
+      ).and_return(nil)
     end
 
     context 'with valid authorization header' do
@@ -225,11 +220,13 @@ EOF
       end
 
       it 'returns 204' do
-        response = put "/log-parts/#{@job_id}/1",
-                       JSON.dump('@type' => 'log_part',
-                                 'final' => false,
-                                 'content' => Base64.encode64('fafafaf'),
-                                 'encoding' => 'base64')
+        body = JSON.dump(
+          '@type' => 'log_part',
+          'final' => false,
+          'content' => Base64.encode64('fafafaf'),
+          'encoding' => 'base64'
+        )
+        response = put "/log-parts/#{@job_id}/1", body
         expect(response.status).to be == 204
       end
     end
