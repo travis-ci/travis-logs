@@ -15,6 +15,7 @@ require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/services/upsert_log'
+require 'travis/logs/sidekiq'
 
 module Travis
   module Logs
@@ -40,14 +41,14 @@ module Travis
                      rsa_public_key_string: ENV['JWT_RSA_PUBLIC_KEY'].to_s)
         super
 
-        Travis::Metrics.setup
-
         @auth_token = auth_token.strip
         @boot_time = Time.now.utc.freeze
 
         unless rsa_public_key_string.strip.empty?
           @rsa_public_key = OpenSSL::PKey::RSA.new(rsa_public_key_string)
         end
+
+        setup
       end
 
       attr_reader :auth_token, :rsa_public_key, :boot_time
@@ -237,6 +238,11 @@ module Travis
 
       private def database
         @database ||= Travis::Logs::Helpers::Database.connect
+      end
+
+      private def setup
+        Travis::Metrics.setup
+        Travis::Logs::Sidekiq.setup
       end
 
       private def redis_ping
