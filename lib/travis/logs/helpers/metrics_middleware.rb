@@ -25,9 +25,7 @@ module Travis
         private def timer_name(env)
           [
             (env['REQUEST_METHOD'] || 'unk').downcase,
-            (
-              env['PATH_INFO'].to_s
-            ).sub('/', '').gsub(/[[:digit:]]+/, 'id')
+            env['PATH_INFO'].to_s.sub('/', '').gsub(/[[:digit:]]+/, 'id')
           ].join('.').gsub(/[^\.[:alnum:]]+/, '_')
         end
       end
