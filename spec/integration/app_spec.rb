@@ -111,6 +111,14 @@ describe Travis::Logs::App do
         .with(anything).and_return(nil)
       allow(database).to receive(:log_id_for_job_id)
         .with(@job_id).and_return(@log_id)
+      allow(database).to receive(:log_for_job_id)
+        .with(@job_id)
+        .and_return(
+          job_id: @job_id,
+          id: @log_id,
+          content: '',
+          aggregated_at: Time.now.utc
+        )
     end
 
     context 'with correct authentication' do
@@ -120,15 +128,19 @@ describe Travis::Logs::App do
 
       it 'returns 204' do
         response = put "/logs/#{@job_id}"
-        expect(response.status).to be == 204
+        expect(response.status).to be == 200
       end
 
       it "creates the log if it doesn't exist" do
+        result = { id: @log_id + 1, job_id: @job_id + 1, content: '' }
+        allow(database).to receive(:log_for_job_id)
+          .with(@job_id + 1)
+          .and_return(result.merge(aggregated_at: Time.now.utc))
         expect(database).to receive(:create_log).with(@job_id + 1)
-          .and_return(id: @log_id + 1, job_id: @job_id + 1, content: '')
+          .and_return(result)
 
         response = put "/logs/#{@job_id + 1}"
-        expect(response.status).to be == 204
+        expect(response.status).to be == 200
       end
 
       it 'tells the database to set the log content' do

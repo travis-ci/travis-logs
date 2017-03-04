@@ -98,8 +98,13 @@ module Travis
           clear: params[:clear]
         )
 
-        status 204
-        body nil
+        result = fetch_log_service.run(
+          job_id: Integer(params[:job_id])
+        )
+        halt 404 if result.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json result.merge(:@type => 'log')
       end
 
       post '/logs/multi' do
