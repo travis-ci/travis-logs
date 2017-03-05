@@ -6,6 +6,7 @@ require 'travis/support/metrics'
 require 'travis/logs/receive/queue'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/database_table_lookup'
 require 'travis/logs/sidekiq'
 require 'active_support/core_ext/logger'
 
@@ -19,7 +20,11 @@ module Travis
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
 
-        db = Travis::Logs::Helpers::Database.connect
+        db = Travis::Logs::Helpers::Database.connect(
+          table_lookup: Travis::Logs::Helpers::DatabaseTableLookup.new(
+            mapping: Travis::Logs.config.logs.table_lookup_mapping.to_h
+          )
+        )
         Travis::Logs.database_connection = db
 
         declare_exchanges

@@ -75,6 +75,15 @@ module Travis
             ENV['SPOOF_ARCHIVED_CUTOFF'] || 0
           )
         end
+
+        def table_lookup_mapping
+          JSON.load(
+            ENV['TRAVIS_LOGS_TABLE_LOOKUP_MAPPING'] ||
+            ENV['TABLE_LOOKUP_MAPPING'] ||
+            'null',
+            symbolize_names: true
+          )
+        end
       end
 
       def env
@@ -89,6 +98,7 @@ module Travis
           per_aggregate_limit: per_aggregate_limit,
           purge: false,
           spoof_archived_cutoff: spoof_archived_cutoff,
+          table_lookup_mapping: table_lookup_mapping || {},
           threads: 10,
           vacuum_skip_empty: vacuum_skip_empty?,
           aggregate_pool: {

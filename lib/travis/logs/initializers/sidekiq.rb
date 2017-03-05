@@ -4,6 +4,7 @@ require 'travis/logs'
 require 'travis/support'
 require 'travis/support/exceptions/reporter'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/database_table_lookup'
 require 'travis/logs/helpers/s3'
 require 'active_support/core_ext/logger'
 require 'travis/logs/sidekiq'
@@ -16,7 +17,11 @@ Travis::Logs::Helpers::S3.setup
 Travis::Exceptions::Reporter.start
 Travis::Metrics.setup
 
-Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
+Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect(
+  table_lookup: Travis::Logs::Helpers::DatabaseTableLookup.new(
+    mapping: Travis::Logs.config.logs.table_lookup_mapping.to_h
+  )
+)
 
 Travis::Logs::Sidekiq.setup
 

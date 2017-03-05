@@ -10,6 +10,7 @@ require 'sinatra/json'
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/database_table_lookup'
 require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
@@ -240,7 +241,11 @@ module Travis
       end
 
       private def database
-        @database ||= Travis::Logs::Helpers::Database.connect
+        @database ||= Travis::Logs::Helpers::Database.connect(
+          table_lookup: Travis::Logs::Helpers::DatabaseTableLookup.new(
+            mapping: Travis::Logs.config.logs.table_lookup_mapping.to_h
+          )
+        )
       end
 
       private def setup

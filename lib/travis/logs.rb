@@ -1,5 +1,7 @@
 require 'sidekiq/redis_connection'
 require 'travis/logs/config'
+require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/database_table_lookup'
 
 if RUBY_PLATFORM =~ /^java/
   require 'jrjackson'
@@ -21,7 +23,11 @@ module Travis
       end
 
       def database_connection
-        @database_connection ||= Travis::Logs::Helpers::Database.connect
+        @database_connection ||= Travis::Logs::Helpers::Database.connect(
+          table_lookup: Travis::Logs::Helpers::DatabaseTableLookup.new(
+            mapping: config.logs.table_lookup_mapping.to_h
+          )
+        )
       end
 
       def redis_pool

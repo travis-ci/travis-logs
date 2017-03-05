@@ -71,8 +71,8 @@ module Travis
             "jdbc:postgresql://#{host}:#{port}/#{database}?#{enc_params}"
           end
 
-          def connect
-            new.tap(&:connect)
+          def connect(table_lookup: nil)
+            new(table_lookup: table_lookup).tap(&:connect)
           end
 
           def after_connect(conn)
