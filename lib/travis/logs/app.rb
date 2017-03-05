@@ -165,9 +165,9 @@ module Travis
         process_log_part_service.run(
           'id' => Integer(params[:job_id]),
           'log' => content,
-          'number' => params[:log_part_id], # NOTE: `log_part_id` is *not* cast
-                                            # via Integer because it may be a
-                                            # string `"last"`.
+          # NOTE: `log_part_id` is *not* cast via Integer because it may be a
+          # string `"last"`.
+          'number' => params[:log_part_id],
           'final' => data['final']
         )
 
