@@ -2,17 +2,23 @@ module Travis
   module Logs
     module Services
       class FetchLog
-        def initialize(database: nil)
+        def initialize(database: nil, spoof_archived_cutoff: 0)
           @database = database || Travis::Logs.database_connection
+          @spoof_archived_cutoff = Integer(spoof_archived_cutoff).abs
         end
 
-        attr_reader :database
+        attr_reader :database, :spoof_archived_cutoff
         private :database
+        private :spoof_archived_cutoff
 
         def run(job_id: nil, id: nil)
           return nil if job_id.nil? && id.nil?
           if job_id && id
             raise ArgumentError, 'only one of job_id or id allowed'
+          end
+
+          if spoof_archived?(job_id, id)
+            return spoofed_archived_result(job_id, id)
           end
 
           result = nil
@@ -34,6 +40,22 @@ module Travis
             aggregated_at: result[:updated_at] || Time.now.utc - 60,
             removed_by_id: removed_by_id
           )
+        end
+
+        private def spoof_archived?(job_id, id)
+          id ||= database.log_id_for_job_id(job_id)
+          return false if id.nil?
+          spoof_archived_cutoff > id
+        end
+
+        private def spoofed_archived_result(job_id, id)
+          {
+            id: id,
+            job_id: job_id,
+            content: nil,
+            archived_at: Time.now.utc - 60,
+            archive_verified: true
+          }
         end
       end
     end

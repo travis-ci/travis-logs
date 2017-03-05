@@ -8,6 +8,8 @@ require 'jdbc/postgres' if jruby?
 require 'pg' unless jruby?
 require 'delegate'
 
+require 'travis/logs/helpers/database_table_lookup'
+
 module Travis
   module Logs
     module Helpers
@@ -93,12 +95,18 @@ module Travis
           end
         end
 
-        def initialize
+        def initialize(table_lookup: nil)
           @db = self.class.create_sequel
+          @table_lookup = table_lookup ||
+            Travis::Logs::Helpers::DatabaseTableLookup.new
         end
 
+        attr_reader :db, :table_lookup
+        private :db
+        private :table_lookup
+
         def connect
-          @db.test_connection
+          db.test_connection
 
           # TODO: run prepare_statements for every connection,
           # not just the first connection in the pool
@@ -107,53 +115,58 @@ module Travis
         end
 
         def now
-          @db['select now()'].first.fetch(:now)
+          db['select now()'].first.fetch(:now)
         end
 
         def log_for_id(log_id)
-          @db.call(:find_log, log_id: log_id).first
+          table_name = table_lookup.logs_table_for_log_id(log_id)
+          db.call(:"#{table_name}_find_log", log_id: log_id).first
         end
 
         def log_id_for_job_id(job_id)
-          log = @db.call(:find_log_id, job_id: job_id)
+          table_name = table_lookup.logs_table_for_job_id(job_id)
+          log = db.call(:"#{table_name}_find_log_id", job_id: job_id)
           log[:id] if log
         end
 
         def log_for_job_id(job_id)
-          @db.call(:find_log_by_job_id, job_id: job_id).first
+          table_name = table_lookup.logs_table_for_job_id(job_id)
+          db.call(:"#{table_name}_find_log_by_job_id", job_id: job_id).first
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs]
+          db[table_lookup.logs_table_for_log_id(log_id)]
             .select { [id, job_id, octet_length(content).as(content_length)] }
             .where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
-          @db[:logs].where(id: log_id).update(archiving: archiving)
+          db[table_lookup.logs_table_for_log_id(log_id)]
+            .where(id: log_id).update(archiving: archiving)
         end
 
         def mark_archive_verified(log_id)
-          @db[:logs]
+          db[table_lookup.logs_table_for_log_id(log_id)]
             .where(id: log_id)
             .update(archived_at: Time.now.utc, archive_verified: true)
         end
 
         def mark_not_archived(log_id)
-          @db[:logs]
+          db[table_lookup.logs_table_for_log_id(log_id)]
             .where(id: log_id)
             .update(archived_at: nil, archive_verified: false)
         end
 
         def purge(log_id)
-          @db[:logs]
+          db[table_lookup.logs_table_for_log_id(log_id)]
             .where(id: log_id)
             .update(purged_at: Time.now.utc, content: nil)
         end
 
         def create_log(job_id)
-          @db.call(
-            :create_log,
+          table_name = table_lookup.logs_table_for_job_id(job_id)
+          db.call(
+            :"#{table_name}_create_log",
             job_id: job_id,
             created_at: Time.now.utc,
             updated_at: Time.now.utc
@@ -161,27 +174,33 @@ module Travis
         end
 
         def create_log_part(params)
-          @db.call(:create_log_part, params.merge(created_at: Time.now.utc))
+          table_name = table_lookup.log_parts_table_for_log_id(params[:log_id])
+          db.call(
+            :"#{table_name}_create_log_part",
+            params.merge(created_at: Time.now.utc)
+          )
         end
 
         def delete_log_parts(log_id)
-          @db.call(:delete_log_parts, log_id: log_id)
+          table_name = table_lookup.log_parts_table_for_log_id(log_id)
+          db.call(:"#{table_name}_delete_log_parts", log_id: log_id)
         end
 
         def set_log_content(log_id, content, removed_by: nil)
           delete_log_parts(log_id)
           aggregated_at = Time.now.utc unless content.nil?
           removed_at = Time.now.utc unless removed_by.nil?
-          @db[:logs].where(id: log_id)
-                    .update(content: content, aggregated_at: aggregated_at,
-                            archived_at: nil, archive_verified: nil,
-                            updated_at: Time.now.utc,
-                            removed_by: removed_by, removed_at: removed_at)
+          db[table_lookup.logs_table_for_log_id(log_id)]
+            .where(id: log_id)
+            .update(content: content, aggregated_at: aggregated_at,
+                    archived_at: nil, archive_verified: nil,
+                    updated_at: Time.now.utc,
+                    removed_by: removed_by, removed_at: removed_at)
         end
 
         def aggregatable_logs(regular_interval, force_interval, limit,
                               order: :created_at)
-          query = @db[:log_parts]
+          query = db[table_lookup.active_log_parts_table]
                   .select(:log_id)
                   .where(
                     "created_at <= NOW() - interval '? seconds' AND final = ?",
@@ -197,83 +216,95 @@ module Travis
         end
 
         def min_log_part_id
-          @db['SELECT min(id) AS id FROM log_parts'].first[:id]
+          table_name = table_lookup.active_log_parts_table
+          db["SELECT min(id) AS id FROM #{table_name}"].first[:id]
         end
 
-        AGGREGATABLE_SELECT_WITH_MIN_ID_SQL = <<-SQL.split.join(' ').freeze
-          SELECT id, log_id
-            FROM log_parts
-           WHERE id BETWEEN ? AND ?
-           ORDER BY id
-        SQL
-
         def aggregatable_logs_page(cursor, per_page)
-          @db[
-            AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
+          db[
+            <<-SQL.split.join(' ').freeze,
+              SELECT id, log_id
+                FROM #{table_lookup.active_log_parts_table}
+               WHERE id BETWEEN ? AND ?
+               ORDER BY id
+            SQL
             cursor, cursor + per_page
           ].map(:log_id).uniq
         end
 
-        AGGREGATE_PARTS_SELECT_SQL = <<-SQL.split.join(' ').freeze
-          SELECT array_to_string(
-                   array_agg(log_parts.content ORDER BY number, id), ''
-                 )
-            FROM log_parts
-           WHERE log_id = ?
-        SQL
+        def aggregate_parts_select_sql(log_id)
+          <<-SQL.split.join(' ').freeze
+            SELECT array_to_string(
+                     array_agg(log_parts.content ORDER BY number, id), ''
+                   )
+              FROM #{table_lookup.log_parts_table_for_log_id(log_id)}
+             WHERE log_id = ?
+          SQL
+        end
 
-        AGGREGATE_UPDATE_SQL = <<-SQL.split.join(' ').freeze
-          UPDATE logs
-             SET aggregated_at = ?,
-                 content = (
-                   COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL})
-                 )
-           WHERE logs.id = ?
-        SQL
+        def aggregate_update_sql(log_id)
+          <<-SQL.split.join(' ').freeze
+            UPDATE #{table_lookup.logs_table_for_log_id(log_id)}
+               SET aggregated_at = ?,
+                   content = (
+                     COALESCE(content, '') || (
+                       #{aggregate_parts_select_sql(log_id)}
+                     )
+                   )
+             WHERE logs.id = ?
+          SQL
+        end
 
         def aggregate(log_id)
-          @db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
+          db[
+            aggregate_update_sql(log_id),
+            Time.now.utc, log_id, log_id
+          ].update
         end
 
         def aggregated_on_demand(log_id)
-          @db[
-            AGGREGATE_PARTS_SELECT_SQL,
+          db[
+            aggregate_parts_select_sql(log_id),
             log_id
           ].first.fetch(:array_to_string, '') || ''
         end
 
         def transaction(&block)
-          @db.transaction(&block)
+          db.transaction(&block)
         end
 
         private def prepare_statements
-          @db[:logs]
-            .where(id: :$log_id)
-            .prepare(:select, :find_log)
+          table_lookup.logs_tables.each do |logs_table|
+            db[logs_table]
+              .where(id: :$log_id)
+              .prepare(:select, :"#{logs_table}_find_log")
 
-          @db[:logs]
-            .select(:id)
-            .where(job_id: :$job_id)
-            .prepare(:first, :find_log_id)
+            db[logs_table]
+              .select(:id)
+              .where(job_id: :$job_id)
+              .prepare(:first, :"#{logs_table}_find_log_id")
 
-          @db[:logs]
-            .where(job_id: :$job_id)
-            .prepare(:select, :find_log_by_job_id)
+            db[logs_table]
+              .where(job_id: :$job_id)
+              .prepare(:select, :"#{logs_table}_find_log_by_job_id")
 
-          @db[:logs]
-            .prepare(:insert, :create_log,
-                     job_id: :$job_id, created_at: :$created_at,
-                     updated_at: :$updated_at)
+            db[logs_table]
+              .prepare(:insert, :"#{logs_table}_create_log",
+                       job_id: :$job_id, created_at: :$created_at,
+                       updated_at: :$updated_at)
+          end
 
-          @db[:log_parts]
-            .prepare(:insert, :create_log_part,
-                     log_id: :$log_id, content: :$content,
-                     number: :$number, final: :$final,
-                     created_at: :$created_at)
+          table_lookup.log_parts_tables.each do |log_parts_table|
+            db[log_parts_table]
+              .prepare(:insert, :"#{log_parts_table}_create_log_part",
+                       log_id: :$log_id, content: :$content,
+                       number: :$number, final: :$final,
+                       created_at: :$created_at)
 
-          @db[:log_parts]
-            .where(log_id: :$log_id)
-            .prepare(:delete, :delete_log_parts)
+            db[log_parts_table]
+              .where(log_id: :$log_id)
+              .prepare(:delete, :"#{log_parts_table}_delete_log_parts")
+          end
         end
       end
     end

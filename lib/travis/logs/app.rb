@@ -214,7 +214,8 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
-          database: database
+          database: database,
+          spoof_archived_cutoff: Travis::Logs.config.logs.spoof_archived_cutoff
         )
       end
 

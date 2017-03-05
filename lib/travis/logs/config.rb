@@ -68,6 +68,13 @@ module Travis
           ENV['TRAVIS_LOGS_AGGREGATABLE_ORDER'] ||
             ENV['AGGREGATABLE_ORDER'] || nil
         end
+
+        def spoof_archived_cutoff
+          Integer(
+            ENV['TRAVIS_LOGS_SPOOF_ARCHIVED_CUTOFF'] ||
+            ENV['SPOOF_ARCHIVED_CUTOFF'] || 0
+          )
+        end
       end
 
       def env
@@ -79,9 +86,11 @@ module Travis
           aggregatable_order: aggregatable_order,
           api_logging: api_logging?,
           archive: true,
-          purge: false,
-          threads: 10,
           per_aggregate_limit: per_aggregate_limit,
+          purge: false,
+          spoof_archived_cutoff: spoof_archived_cutoff,
+          threads: 10,
+          vacuum_skip_empty: vacuum_skip_empty?,
           aggregate_pool: {
             min_threads: aggregate_pool_min_threads,
             max_threads: aggregate_pool_max_threads,
@@ -92,8 +101,7 @@ module Travis
             regular: 3 * 60,
             force: 3 * 60 * 60,
             purge: 6
-          },
-          vacuum_skip_empty: vacuum_skip_empty?
+          }
         },
         log_level: :info,
         logger: { format_type: 'l2met', thread_id: true },
