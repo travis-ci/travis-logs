@@ -102,7 +102,6 @@ module Travis
           job_id: Integer(params[:job_id])
         )
         halt 404 if result.nil?
-        content_type :json, charset: 'utf-8'
         status 200
         json result.merge(:@type => 'log')
       end
@@ -189,7 +188,6 @@ module Travis
           (params[:by] || :job_id).to_sym => Integer(params[:id])
         )
         halt 404 if result.nil?
-        content_type :json, charset: 'utf-8'
         status 200
         json result.merge(:@type => 'log')
       end
@@ -200,7 +198,6 @@ module Travis
 
         result = database.log_id_for_job_id(Integer(params[:job_id]))
         halt 404 if result.nil?
-        content_type :json, charset: 'utf-8'
         status 200
         json id: result, :@type => 'log'
       end

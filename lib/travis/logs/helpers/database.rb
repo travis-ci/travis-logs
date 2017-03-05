@@ -98,7 +98,7 @@ module Travis
         def initialize(table_lookup: nil)
           @db = self.class.create_sequel
           @table_lookup = table_lookup ||
-            Travis::Logs::Helpers::DatabaseTableLookup.new
+                          Travis::Logs::Helpers::DatabaseTableLookup.new
         end
 
         attr_reader :db, :table_lookup
