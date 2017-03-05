@@ -69,10 +69,17 @@ module Travis
             ENV['AGGREGATABLE_ORDER'] || nil
         end
 
-        def spoof_archived_cutoff
+        def spoof_archived_cutoffs_log_id
           Integer(
-            ENV['TRAVIS_LOGS_SPOOF_ARCHIVED_CUTOFF'] ||
-            ENV['SPOOF_ARCHIVED_CUTOFF'] || 0
+            ENV['TRAVIS_LOGS_SPOOF_ARCHIVED_CUTOFFS_LOG_ID'] ||
+            ENV['SPOOF_ARCHIVED_CUTOFFS_LOG_ID'] || 0
+          )
+        end
+
+        def spoof_archived_cutoffs_job_id
+          Integer(
+            ENV['TRAVIS_LOGS_SPOOF_ARCHIVED_CUTOFFS_JOB_ID'] ||
+            ENV['SPOOF_ARCHIVED_CUTOFFS_JOB_ID'] || 0
           )
         end
 
@@ -97,7 +104,10 @@ module Travis
           archive: true,
           per_aggregate_limit: per_aggregate_limit,
           purge: false,
-          spoof_archived_cutoff: spoof_archived_cutoff,
+          spoof_archived_cutoffs: {
+            log_id: spoof_archived_cutoffs_log_id,
+            job_id: spoof_archived_cutoffs_job_id
+          },
           table_lookup_mapping: table_lookup_mapping || {},
           threads: 10,
           vacuum_skip_empty: vacuum_skip_empty?,

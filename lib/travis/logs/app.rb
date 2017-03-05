@@ -213,7 +213,7 @@ module Travis
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
           database: database,
-          spoof_archived_cutoff: Travis::Logs.config.logs.spoof_archived_cutoff
+          spoof_archived_cutoffs: config_logs.spoof_archived_cutoffs.to_h
         )
       end
 
@@ -243,7 +243,7 @@ module Travis
       private def database
         @database ||= Travis::Logs::Helpers::Database.connect(
           table_lookup: Travis::Logs::Helpers::DatabaseTableLookup.new(
-            mapping: Travis::Logs.config.logs.table_lookup_mapping.to_h
+            mapping: config_logs.table_lookup_mapping.to_h
           )
         )
       end
@@ -261,6 +261,10 @@ module Travis
         items.all? do |item|
           item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
         end
+      end
+
+      private def config_logs
+        Travis::Logs.config.logs
       end
     end
   end
