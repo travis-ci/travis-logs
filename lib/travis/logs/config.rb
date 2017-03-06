@@ -84,7 +84,7 @@ module Travis
         end
 
         def table_lookup_mapping
-          JSON.load(
+          JSON.parse(
             ENV['TRAVIS_LOGS_TABLE_LOOKUP_MAPPING'] ||
             ENV['TABLE_LOOKUP_MAPPING'] ||
             'null',

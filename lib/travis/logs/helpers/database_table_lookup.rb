@@ -33,8 +33,8 @@ module Travis
 
         def initialize(mapping: nil)
           @map = normalize_mapping(
-             ((mapping.nil? || mapping.empty?) ? nil : mapping) ||
-             DEFAULT_MAPPING
+            (mapping.nil? || mapping.empty? ? nil : mapping) ||
+            DEFAULT_MAPPING
           )
         end
 
