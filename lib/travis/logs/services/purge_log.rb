@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
 require 'travis/logs/sidekiq'
@@ -9,7 +10,7 @@ module Travis
       class PurgeLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.purge'.freeze
+        METRIKS_PREFIX = 'logs.purge'
 
         def self.metriks_prefix
           METRIKS_PREFIX

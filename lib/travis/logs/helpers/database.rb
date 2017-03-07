@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 def jruby?
   RUBY_PLATFORM =~ /^java/
 end

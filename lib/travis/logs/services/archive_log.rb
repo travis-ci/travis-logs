@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
 require 'travis/logs/investigator'
@@ -11,7 +12,7 @@ module Travis
       class ArchiveLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.archive'.freeze
+        METRIKS_PREFIX = 'logs.archive'
 
         def self.metriks_prefix
           METRIKS_PREFIX

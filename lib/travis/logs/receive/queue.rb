@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'coder'
 require 'json'
 require 'timeout'
@@ -8,7 +9,7 @@ module Travis
       class Queue
         include Logging
 
-        METRIKS_PREFIX = 'logs.queue'.freeze
+        METRIKS_PREFIX = 'logs.queue'
 
         def self.subscribe(name, handler)
           new(name, handler).subscribe

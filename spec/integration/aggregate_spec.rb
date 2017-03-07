@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs'
 require 'travis/logs/helpers/database'
 require 'travis/logs/services/aggregate_logs'
@@ -23,10 +24,9 @@ describe 'aggregation' do
   end
 
   def word_salad(n = 100)
-    ''.tap do |s|
-      n.times { s << "#{lorem_ipsum_words.sample} " }
-      s << "\n"
-    end
+    s = ''
+    n.times { s += "#{lorem_ipsum_words.sample} " }
+    s + "\n"
   end
 
   def create_payload(job_id, n)

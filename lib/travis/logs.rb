@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sidekiq/redis_connection'
 require 'travis/logs/config'
 require 'travis/logs/helpers/database'
