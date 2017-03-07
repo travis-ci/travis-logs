@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+libdir = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
+
+require 'bundler/setup'
+require 'travis/logs/partition_ensurer'
+
+$stdout.sync = true
+$stderr.sync = true
+
+Travis::Logs::PartitionEnsurer.new.run

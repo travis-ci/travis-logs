@@ -16,7 +16,7 @@ module Travis
         include Helpers::Metrics
 
         METRIKS_PREFIX = 'logs.process_log_part'.freeze
-        INT_MAX = 2_147_483_647
+        INT_MAX = 9_223_372_036_854_775_807
 
         def self.metriks_prefix
           METRIKS_PREFIX

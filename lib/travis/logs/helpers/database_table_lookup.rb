@@ -4,7 +4,7 @@ module Travis
   module Logs
     module Helpers
       class DatabaseTableLookup
-        INT_MAX = 2_147_483_647
+        INT_MAX = 9_223_372_036_854_775_807
         DEFAULT_MAPPING = {
           logs: {
             log_id: [
