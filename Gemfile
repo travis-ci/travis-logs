@@ -22,6 +22,8 @@ gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rails_12factor'
 gem 'rake'
+gem 'redis-namespace'
+gem 'redlock'
 gem 'rspec', group: :test
 gem 'rubocop', require: false
 gem 'sentry-raven', github: 'getsentry/raven-ruby'
