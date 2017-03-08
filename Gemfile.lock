@@ -117,6 +117,8 @@ GEM
     rainbow (2.0.0)
     rake (10.5.0)
     redis (3.2.2)
+    redis-namespace (1.5.3)
+      redis (~> 3.0, >= 3.0.4)
     redlock (0.2.0)
       redis (~> 3, >= 3.0.0)
     rspec (2.14.1)
@@ -186,6 +188,7 @@ DEPENDENCIES
   rack-test
   rails_12factor
   rake
+  redis-namespace
   redlock
   rspec
   rubocop
