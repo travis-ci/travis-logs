@@ -28,7 +28,7 @@ module Travis
       def run
         1.upto(Travis::Logs.config.logs.threads) do
           Travis::Logs::Receive::Queue.subscribe(
-            'logs', Travis::Logs::Services::ProcessLogPart
+            'logs', Travis::Logs::Services::ProcessLogPart.new
           )
         end
       end

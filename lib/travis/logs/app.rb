@@ -1,16 +1,21 @@
 require 'json'
-require 'raven'
-require 'sinatra/base'
+require 'jwt'
 require 'logger'
 require 'pusher'
-require 'jwt'
+require 'rack/ssl'
+require 'raven'
+require 'sinatra/base'
+require 'sinatra/json'
 
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
+require 'travis/logs/services/fetch_log'
 require 'travis/logs/services/process_log_part'
-require 'rack/ssl'
+require 'travis/logs/services/upsert_log'
+require 'travis/logs/sidekiq'
 
 module Travis
   module Logs
@@ -22,26 +27,34 @@ module Travis
     end
 
     class App < Sinatra::Base
-      attr_reader :existence, :pusher, :database, :log_part_service
-
       configure(:production, :staging) do
         use Rack::SSL
+        use Travis::Logs::Helpers::MetricsMiddleware
       end
 
       configure do
+        enable :logging if Travis::Logs.config.logs.api_logging?
         use SentryMiddleware if ENV['SENTRY_DSN']
       end
 
-      def initialize(existence = nil, pusher = nil, database = nil, log_part_service = nil)
-        super()
-        @existence = existence || Travis::Logs::Existence.new
-        @pusher    = pusher || Travis::Logs::Helpers::Pusher.new
-        @database  = database || Travis::Logs::Helpers::Database.connect
-        @log_part_service = log_part_service || Travis::Logs::Services::ProcessLogPart
-        unless ENV['JWT_RSA_PUBLIC_KEY'].to_s.strip.empty?
-          @rsa_public_key = OpenSSL::PKey::RSA.new(ENV['JWT_RSA_PUBLIC_KEY'])
+      def initialize(auth_token: ENV['AUTH_TOKEN'].to_s,
+                     rsa_public_key_string: ENV['JWT_RSA_PUBLIC_KEY'].to_s)
+        super
+
+        @auth_token = auth_token.strip
+        @boot_time = Time.now.utc.freeze
+
+        unless rsa_public_key_string.strip.empty?
+          @rsa_public_key = OpenSSL::PKey::RSA.new(rsa_public_key_string)
         end
+
+        setup
       end
+
+      attr_reader :auth_token, :rsa_public_key, :boot_time
+      private :auth_token
+      private :rsa_public_key
+      private :boot_time
 
       post '/pusher/existence' do
         webhook = pusher.webhook(request)
@@ -63,38 +76,77 @@ module Travis
       end
 
       get '/uptime' do
-        status 204
+        json uptime: Time.now.utc - boot_time,
+             greeting: 'hello, human 👋!',
+             pong: redis_ping,
+             now: database.now,
+             version: Travis::Logs.version
       end
 
       put '/logs/:job_id' do
-        halt 500, 'authentication token is not set' if ENV['AUTH_TOKEN'].to_s.strip.empty?
-        halt 403 if request.env['HTTP_AUTHORIZATION'] != "token #{ENV['AUTH_TOKEN']}"
-
-        job_id = Integer(params[:job_id])
-
-        log_id = database.log_id_for_job_id(job_id) || database.create_log(job_id)
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
 
         request.body.rewind
         content = request.body.read
         content = nil if content.empty?
-        database.set_log_content(log_id, content)
+
+        upsert_log_service.run(
+          job_id: Integer(params[:job_id]),
+          content: content,
+          removed_by: params[:removed_by],
+          clear: params[:clear]
+        )
+
+        result = fetch_log_service.run(
+          job_id: Integer(params[:job_id])
+        )
+        halt 404 if result.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json result.merge(:@type => 'log')
+      end
+
+      post '/logs/multi' do
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
+
+        request.body.rewind
+
+        items = Array(JSON.parse(request.body.read))
+        halt 400 unless all_items_valid?(items)
+
+        database.transaction do
+          items.each do |item|
+            upsert_log_service.run(
+              job_id: Integer(item.fetch('job_id')),
+              content: item.fetch('content', ''),
+              removed_by: item['removed_by'],
+              clear: item['clear']
+            )
+          end
+        end
 
         status 204
+        body nil
       end
 
       put '/log-parts/:job_id/:log_part_id' do
-        halt 500, 'key is not set' if @rsa_public_key.nil?
-
-        Travis.uuid = request.env['HTTP_X_REQUEST_ID']
-
         auth_header = request.env['HTTP_AUTHORIZATION']
-        if auth_header.nil? || !request.env['HTTP_AUTHORIZATION'].start_with?('Bearer ')
-          halt 403
-        end
+        halt 403 if auth_header.nil?
 
-        begin
-          JWT.decode(auth_header[7..-1], @rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
-        rescue JWT::DecodeError
+        if auth_header.start_with?('Bearer ')
+          halt 500, 'key is not set' if rsa_public_key.nil?
+          Travis.uuid = request.env['HTTP_X_REQUEST_ID']
+          begin
+            JWT.decode(auth_header[7..-1], rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
+          rescue JWT::DecodeError
+            halt 403
+          end
+        elsif auth_header.start_with?('token ')
+          halt 500, 'authentication token is not set' if auth_token.empty?
+          halt 403 unless authorized?(request)
+        else
           halt 403
         end
 
@@ -110,19 +162,102 @@ module Travis
                     halt 400, JSON.dump('error' => 'invalid encoding, only base64 supported')
                   end
 
-        @log_part_service.new(
-          {
-            'id' => Integer(params[:job_id]),
-            'log' => content,
-            'number' => Integer(params[:log_part_id]),
-            'final' => data['final']
-          },
-          database,
-          pusher,
-          existence
-        ).run
+        process_log_part_service.run(
+          'id' => Integer(params[:job_id]),
+          'log' => content,
+          # NOTE: `log_part_id` is *not* cast via Integer because it may be a
+          # string `"last"`.
+          'number' => params[:log_part_id],
+          'final' => data['final']
+        )
 
         status 204
+      end
+
+      put '/logs/:job_id/archived' do
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
+
+        halt 501
+      end
+
+      get '/logs/:id' do
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
+
+        result = fetch_log_service.run(
+          (params[:by] || :job_id).to_sym => Integer(params[:id])
+        )
+        halt 404 if result.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json result.merge(:@type => 'log')
+      end
+
+      get '/logs/:job_id/id' do
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
+
+        result = database.log_id_for_job_id(Integer(params[:job_id]))
+        halt 404 if result.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json id: result, :@type => 'log'
+      end
+
+      private def authorized?(request)
+        Rack::Utils.secure_compare(
+          request.env['HTTP_AUTHORIZATION'].to_s,
+          "token #{auth_token}"
+        )
+      end
+
+      private def fetch_log_service
+        @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
+          database: database
+        )
+      end
+
+      private def upsert_log_service
+        @upsert_log_service ||= Travis::Logs::Services::UpsertLog.new(
+          database: database
+        )
+      end
+
+      private def process_log_part_service
+        @process_log_part_service ||=
+          Travis::Logs::Services::ProcessLogPart.new(
+            database: database,
+            pusher_client: pusher,
+            existence: existence
+          )
+      end
+
+      private def existence
+        @existence ||= Travis::Logs::Existence.new
+      end
+
+      private def pusher
+        @pusher ||= Travis::Logs::Helpers::Pusher.new
+      end
+
+      private def database
+        @database ||= Travis::Logs::Helpers::Database.connect
+      end
+
+      private def setup
+        Travis::Metrics.setup
+        Travis::Logs::Sidekiq.setup
+      end
+
+      private def redis_ping
+        Travis::Logs.redis_pool.with { |conn| conn.ping.to_s }
+      end
+
+      private def all_items_valid?(items)
+        items.all? do |item|
+          item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
+        end
       end
     end
   end
