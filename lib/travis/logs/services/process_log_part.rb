@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/existence'
@@ -15,8 +16,8 @@ module Travis
       class ProcessLogPart
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.process_log_part'.freeze
-        INT_MAX = 2_147_483_647
+        METRIKS_PREFIX = 'logs.process_log_part'
+        INT_MAX = 9_223_372_036_854_775_807
 
         def self.metriks_prefix
           METRIKS_PREFIX

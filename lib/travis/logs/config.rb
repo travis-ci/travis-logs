@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/config'
 require 'travis/support'
 
@@ -68,6 +69,29 @@ module Travis
           ENV['TRAVIS_LOGS_AGGREGATABLE_ORDER'] ||
             ENV['AGGREGATABLE_ORDER'] || nil
         end
+
+        def spoof_archived_cutoffs_log_id
+          Integer(
+            ENV['TRAVIS_LOGS_SPOOF_ARCHIVED_CUTOFFS_LOG_ID'] ||
+            ENV['SPOOF_ARCHIVED_CUTOFFS_LOG_ID'] || 0
+          )
+        end
+
+        def spoof_archived_cutoffs_job_id
+          Integer(
+            ENV['TRAVIS_LOGS_SPOOF_ARCHIVED_CUTOFFS_JOB_ID'] ||
+            ENV['SPOOF_ARCHIVED_CUTOFFS_JOB_ID'] || 0
+          )
+        end
+
+        def table_lookup_mapping
+          JSON.parse(
+            ENV['TRAVIS_LOGS_TABLE_LOOKUP_MAPPING'] ||
+            ENV['TABLE_LOOKUP_MAPPING'] ||
+            'null',
+            symbolize_names: true
+          )
+        end
       end
 
       def env
@@ -79,9 +103,15 @@ module Travis
           aggregatable_order: aggregatable_order,
           api_logging: api_logging?,
           archive: true,
-          purge: false,
-          threads: 10,
           per_aggregate_limit: per_aggregate_limit,
+          purge: false,
+          spoof_archived_cutoffs: {
+            log_id: spoof_archived_cutoffs_log_id,
+            job_id: spoof_archived_cutoffs_job_id
+          },
+          table_lookup_mapping: table_lookup_mapping || {},
+          threads: 10,
+          vacuum_skip_empty: vacuum_skip_empty?,
           aggregate_pool: {
             min_threads: aggregate_pool_min_threads,
             max_threads: aggregate_pool_max_threads,
@@ -92,8 +122,7 @@ module Travis
             regular: 3 * 60,
             force: 3 * 60 * 60,
             purge: 6
-          },
-          vacuum_skip_empty: vacuum_skip_empty?
+          }
         },
         log_level: :info,
         logger: { format_type: 'l2met', thread_id: true },

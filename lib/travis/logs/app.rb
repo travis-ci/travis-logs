@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'json'
 require 'jwt'
 require 'logger'
@@ -10,6 +11,7 @@ require 'sinatra/json'
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/database'
+require 'travis/logs/helpers/database_table_lookup'
 require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
@@ -102,7 +104,6 @@ module Travis
           job_id: Integer(params[:job_id])
         )
         halt 404 if result.nil?
-        content_type :json, charset: 'utf-8'
         status 200
         json result.merge(:@type => 'log')
       end
@@ -189,7 +190,6 @@ module Travis
           (params[:by] || :job_id).to_sym => Integer(params[:id])
         )
         halt 404 if result.nil?
-        content_type :json, charset: 'utf-8'
         status 200
         json result.merge(:@type => 'log')
       end
@@ -200,7 +200,6 @@ module Travis
 
         result = database.log_id_for_job_id(Integer(params[:job_id]))
         halt 404 if result.nil?
-        content_type :json, charset: 'utf-8'
         status 200
         json id: result, :@type => 'log'
       end
@@ -214,7 +213,8 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
-          database: database
+          database: database,
+          spoof_archived_cutoffs: config_logs.spoof_archived_cutoffs.to_h
         )
       end
 
@@ -242,7 +242,11 @@ module Travis
       end
 
       private def database
-        @database ||= Travis::Logs::Helpers::Database.connect
+        @database ||= Travis::Logs::Helpers::Database.connect(
+          table_lookup: Travis::Logs::Helpers::DatabaseTableLookup.new(
+            mapping: config_logs.table_lookup_mapping.to_h
+          )
+        )
       end
 
       private def setup
@@ -258,6 +262,10 @@ module Travis
         items.all? do |item|
           item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
         end
+      end
+
+      private def config_logs
+        Travis::Logs.config.logs
       end
     end
   end

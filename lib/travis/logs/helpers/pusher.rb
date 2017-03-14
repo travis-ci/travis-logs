@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'pusher'
 require 'multi_json'
 
@@ -18,8 +19,8 @@ module Travis
 
         def pusher_channel_name(payload)
           channel = ''
-          channel << 'private-' if secure?
-          channel << "job-#{payload['id']}"
+          channel += 'private-' if secure?
+          channel += "job-#{payload['id']}"
           channel
         end
 
