@@ -5,37 +5,9 @@ module Travis
   module Logs
     module Helpers
       class DatabaseTableLookup
-        INT_MAX = 9_223_372_036_854_775_807
-        DEFAULT_MAPPING = {
-          logs: {
-            log_id: [
-              {
-                range: [0, INT_MAX],
-                table: 'logs'
-              }
-            ],
-            job_id: [
-              {
-                range: [0, INT_MAX],
-                table: 'logs'
-              }
-            ]
-          },
-          log_parts: {
-            log_id: [
-              {
-                range: [0, INT_MAX],
-                table: 'log_parts'
-              }
-            ],
-            active: 'log_parts'
-          }
-        }.freeze
-
         def initialize(mapping: nil)
           @map = normalize_mapping(
-            (mapping.nil? || mapping.empty? ? nil : mapping) ||
-            DEFAULT_MAPPING
+            mapping.nil? || mapping.empty? ? {} : mapping
           )
         end
 

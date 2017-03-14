@@ -23,9 +23,6 @@ module Travis
         else
           db.transaction { db.run(sql) }
         end
-
-        $stdout.puts '// partial json config:'
-        $stdout.puts JSON.pretty_generate(partial_config)
       end
 
       private def db
@@ -101,7 +98,7 @@ module Travis
       end
 
       private def generate_structure_sql
-        ret = ''
+        ret = []
 
         log_parts_table_exists = db.table_exists?(log_parts_table)
         logs_table_exists = db.table_exists?(logs_table)
@@ -205,38 +202,7 @@ module Travis
 
         SQL
 
-        ret
-      end
-
-      private def partial_config
-        require 'travis/logs/helpers/database_table_lookup'
-        int_max = Travis::Logs::Helpers::DatabaseTableLookup::INT_MAX
-        {
-          logs: {
-            log_id: [
-              {
-                range: [0, logs_id_start - 1],
-                table: 'logs'
-              },
-              {
-                range: [logs_id_start, int_max],
-                table: logs_table
-              }
-            ]
-          },
-          log_parts: {
-            log_id: [
-              {
-                range: [0, log_parts_id_start - 1],
-                table: 'log_parts'
-              },
-              {
-                range: [log_parts_id_start, int_max],
-                table: log_parts_table
-              }
-            ]
-          }
-        }
+        ret.join("\n")
       end
     end
   end
