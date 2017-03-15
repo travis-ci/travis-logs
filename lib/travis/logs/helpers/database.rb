@@ -73,23 +73,39 @@ module Travis
             new.tap(&:connect)
           end
 
-          def after_connect(conn)
-            command = "SET application_name TO '#{application_name}'"
-            if conn.respond_to?(:exec)
-              conn.exec(command)
-            elsif conn.respond_to?(:execute)
-              conn.execute(command)
-            elsif conn.respond_to?(:create_statement)
-              st = conn.create_statement
-              st.execute(command)
-              st.close
-            end
+          private def after_connect(conn)
+            execute_compat(
+              conn, "SET application_name = '#{application_name}'"
+            )
+            execute_compat(
+              conn, "SET statement_timeout = #{statement_timeout_ms}"
+            )
           end
 
-          def application_name
+          private def application_name
             @application_name ||= [
               'logs', Travis.env, ENV['DYNO']
             ].compact.join('.')
+          end
+
+          private def statement_timeout_ms
+            @statement_timeout_ms ||= if ENV['DYNO'].to_s.start_with?('web.')
+                                        30 * 1_000
+                                      else
+                                        30 * 60 * 1_000
+                                      end
+          end
+
+          private def execute_compat(conn, statement)
+            if conn.respond_to?(:exec)
+              conn.exec(statement)
+            elsif conn.respond_to?(:execute)
+              conn.execute(statement)
+            elsif conn.respond_to?(:create_statement)
+              st = conn.create_statement
+              st.execute(statement)
+              st.close
+            end
           end
         end
 
