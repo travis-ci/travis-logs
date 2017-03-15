@@ -9,7 +9,7 @@ module Travis
         attr_reader :database
         private :database
 
-        def run(job_id: nil, id: nil)
+        def run(job_id: nil, id: nil, aggregate_on_demand: true)
           return nil if job_id.nil? && id.nil?
           if job_id && id
             raise ArgumentError, 'only one of job_id or id allowed'
@@ -22,7 +22,7 @@ module Travis
 
           content = result[:content]
 
-          if result[:aggregated_at].nil?
+          if aggregate_on_demand && result[:aggregated_at].nil?
             content = [
               content, database.aggregated_on_demand(result[:id])
             ].join('')
