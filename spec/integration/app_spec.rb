@@ -127,7 +127,7 @@ describe Travis::Logs::App do
 
       it 'returns 200' do
         allow(database).to receive(:set_log_content)
-          .and_return(id: @log_id, job_id: @job_id, content: '')
+          .and_return([{ id: @log_id, job_id: @job_id, content: '' }])
         response = put "/logs/#{@job_id}"
         expect(response.status).to be == 200
       end
@@ -138,7 +138,7 @@ describe Travis::Logs::App do
           .and_return(result)
         expect(database).to receive(:set_log_content)
           .with(@log_id + 1, nil, removed_by: nil)
-          .and_return(result)
+          .and_return([result])
 
         response = put "/logs/#{@job_id + 1}"
         expect(response.status).to be == 200
@@ -147,12 +147,18 @@ describe Travis::Logs::App do
       it 'tells the database to set the log content' do
         expect(database).to receive(:set_log_content)
           .with(@log_id, 'hello, world', removed_by: nil)
+          .and_return(
+            [{ id: @log_id, job_id: @job_id, content: 'hello, world' }]
+          )
         put "/logs/#{@job_id}", 'hello, world'
       end
 
       it 'does not set log content if the given body was empty' do
         expect(database).to receive(:set_log_content)
           .with(@log_id, nil, removed_by: nil)
+          .and_return(
+            [{ id: @log_id, job_id: @job_id, content: 'hello, world' }]
+          )
         put "/logs/#{@job_id}", ''
       end
     end

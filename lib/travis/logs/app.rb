@@ -89,16 +89,16 @@ module Travis
         content = request.body.read
         content = nil if content.empty?
 
-        result = upsert_log_service.run(
+        results = upsert_log_service.run(
           job_id: Integer(params[:job_id]),
           content: content,
           removed_by: params[:removed_by]
         )
 
-        halt 404 if result.nil?
+        halt 404 if results.nil? || results.empty?
         content_type :json, charset: 'utf-8'
         status 200
-        json result.merge(:@type => 'log')
+        json results.first.merge(:@type => 'log')
       end
 
       post '/logs/multi' do

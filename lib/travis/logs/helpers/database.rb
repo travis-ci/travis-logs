@@ -198,14 +198,14 @@ module Travis
             aggregated_at = Time.now.utc unless content.nil?
             removed_at = Time.now.utc unless removed_by.nil?
             db.call(:set_log_content,
-                     log_id: log_id,
-                     content: content,
-                     aggregated_at: aggregated_at,
-                     archived_at: nil,
-                     archive_verified: nil,
-                     updated_at: Time.now.utc,
-                     removed_by: removed_by,
-                     removed_at: removed_at)
+                    log_id: log_id,
+                    content: content,
+                    aggregated_at: aggregated_at,
+                    archived_at: nil,
+                    archive_verified: nil,
+                    updated_at: Time.now.utc,
+                    removed_by: removed_by,
+                    removed_at: removed_at)
           end
         end
 
