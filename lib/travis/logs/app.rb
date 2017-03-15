@@ -91,17 +91,12 @@ module Travis
         content = request.body.read
         content = nil if content.empty?
 
-        upsert_log_service.run(
+        result = upsert_log_service.run(
           job_id: Integer(params[:job_id]),
           content: content,
-          removed_by: params[:removed_by],
-          clear: params[:clear]
+          removed_by: params[:removed_by]
         )
 
-        result = fetch_log_service.run(
-          job_id: Integer(params[:job_id]),
-          aggregate_on_demand: false
-        )
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200
@@ -122,8 +117,7 @@ module Travis
             upsert_log_service.run(
               job_id: Integer(item.fetch('job_id')),
               content: item.fetch('content', ''),
-              removed_by: item['removed_by'],
-              clear: item['clear']
+              removed_by: item['removed_by']
             )
           end
         end

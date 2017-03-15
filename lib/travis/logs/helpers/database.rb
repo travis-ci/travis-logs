@@ -127,7 +127,7 @@ module Travis
         end
 
         def log_for_id(log_id)
-          @db.call(:find_log, log_id: log_id).first
+          @db.call(:find_log, log_id: log_id)
         end
 
         def log_id_for_job_id(job_id)
@@ -136,7 +136,7 @@ module Travis
         end
 
         def log_for_job_id(job_id)
-          @db.call(:find_log_by_job_id, job_id: job_id).first
+          @db.call(:find_log_by_job_id, job_id: job_id)
         end
 
         def log_content_length_for_id(log_id)
@@ -185,14 +185,20 @@ module Travis
         end
 
         def set_log_content(log_id, content, removed_by: nil)
-          delete_log_parts(log_id)
-          aggregated_at = Time.now.utc unless content.nil?
-          removed_at = Time.now.utc unless removed_by.nil?
-          @db[:logs].where(id: log_id)
-                    .update(content: content, aggregated_at: aggregated_at,
-                            archived_at: nil, archive_verified: nil,
-                            updated_at: Time.now.utc,
-                            removed_by: removed_by, removed_at: removed_at)
+          transaction do
+            delete_log_parts(log_id)
+            aggregated_at = Time.now.utc unless content.nil?
+            removed_at = Time.now.utc unless removed_by.nil?
+            @db.call(:set_log_content,
+                     log_id: log_id,
+                     content: content,
+                     aggregated_at: aggregated_at,
+                     archived_at: nil,
+                     archive_verified: nil,
+                     updated_at: Time.now.utc,
+                     removed_by: removed_by,
+                     removed_at: removed_at)
+          end
         end
 
         def aggregatable_logs(regular_interval, force_interval, limit,
@@ -265,7 +271,7 @@ module Travis
         private def prepare_statements
           @db[:logs]
             .where(id: :$log_id)
-            .prepare(:select, :find_log)
+            .prepare(:first, :find_log)
 
           @db[:logs]
             .select(:id)
@@ -274,12 +280,24 @@ module Travis
 
           @db[:logs]
             .where(job_id: :$job_id)
-            .prepare(:select, :find_log_by_job_id)
+            .prepare(:first, :find_log_by_job_id)
 
           @db[:logs]
             .prepare(:insert, :create_log,
                      job_id: :$job_id, created_at: :$created_at,
                      updated_at: :$updated_at)
+
+          @db[:logs]
+            .where(id: :$log_id)
+            .returning
+            .prepare(:update, :set_log_content,
+                     content: :$content,
+                     aggregated_at: :$aggregated_at,
+                     archived_at: :$archived_at,
+                     archive_verified: :$archive_verified,
+                     updated_at: :$updated_at,
+                     removed_by: :$removed_by,
+                     removed_at: :$removed_at)
 
           @db[:log_parts]
             .prepare(:insert, :create_log_part,
