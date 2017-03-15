@@ -99,7 +99,8 @@ module Travis
         )
 
         result = fetch_log_service.run(
-          job_id: Integer(params[:job_id])
+          job_id: Integer(params[:job_id]),
+          aggregate_on_demand: false
         )
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
