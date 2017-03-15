@@ -22,7 +22,7 @@ module Travis
         private def find_or_create_log(job_id)
           log_id = database.log_id_for_job_id(job_id)
           return log_id if log_id
-          database.create_log(job_id).fetch(:id)
+          database.create_log(job_id)
         end
 
         private def update_log(log_id, content, removed_by)
