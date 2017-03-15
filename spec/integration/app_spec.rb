@@ -135,7 +135,7 @@ describe Travis::Logs::App do
       it "creates the log if it doesn't exist" do
         result = { id: @log_id + 1, job_id: @job_id + 1, content: '' }
         expect(database).to receive(:create_log).with(@job_id + 1)
-          .and_return(result)
+          .and_return(@log_id + 1)
         expect(database).to receive(:set_log_content)
           .with(@log_id + 1, nil, removed_by: nil)
           .and_return([result])
