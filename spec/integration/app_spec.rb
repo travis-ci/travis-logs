@@ -106,7 +106,6 @@ describe Travis::Logs::App do
       @log_id = 234
 
       allow(database).to receive(:transaction) { |&b| b.call }
-      allow(database).to receive(:set_log_content)
       allow(database).to receive(:log_id_for_job_id)
         .with(anything).and_return(nil)
       allow(database).to receive(:log_id_for_job_id)
@@ -126,18 +125,20 @@ describe Travis::Logs::App do
         header 'Authorization', "token #{auth_token}"
       end
 
-      it 'returns 204' do
+      it 'returns 200' do
+        allow(database).to receive(:set_log_content)
+          .and_return([{ id: @log_id, job_id: @job_id, content: '' }])
         response = put "/logs/#{@job_id}"
         expect(response.status).to be == 200
       end
 
       it "creates the log if it doesn't exist" do
         result = { id: @log_id + 1, job_id: @job_id + 1, content: '' }
-        allow(database).to receive(:log_for_job_id)
-          .with(@job_id + 1)
-          .and_return(result.merge(aggregated_at: Time.now.utc))
         expect(database).to receive(:create_log).with(@job_id + 1)
           .and_return(result)
+        expect(database).to receive(:set_log_content)
+          .with(@log_id + 1, nil, removed_by: nil)
+          .and_return([result])
 
         response = put "/logs/#{@job_id + 1}"
         expect(response.status).to be == 200
@@ -146,12 +147,18 @@ describe Travis::Logs::App do
       it 'tells the database to set the log content' do
         expect(database).to receive(:set_log_content)
           .with(@log_id, 'hello, world', removed_by: nil)
+          .and_return(
+            [{ id: @log_id, job_id: @job_id, content: 'hello, world' }]
+          )
         put "/logs/#{@job_id}", 'hello, world'
       end
 
       it 'does not set log content if the given body was empty' do
         expect(database).to receive(:set_log_content)
           .with(@log_id, nil, removed_by: nil)
+          .and_return(
+            [{ id: @log_id, job_id: @job_id, content: 'hello, world' }]
+          )
         put "/logs/#{@job_id}", ''
       end
     end

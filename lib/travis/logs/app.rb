@@ -1,6 +1,5 @@
 require 'json'
 require 'jwt'
-require 'logger'
 require 'pusher'
 require 'rack/ssl'
 require 'raven'
@@ -9,7 +8,6 @@ require 'sinatra/json'
 
 require 'travis/logs'
 require 'travis/logs/existence'
-require 'travis/logs/helpers/database'
 require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
@@ -91,20 +89,16 @@ module Travis
         content = request.body.read
         content = nil if content.empty?
 
-        upsert_log_service.run(
+        results = upsert_log_service.run(
           job_id: Integer(params[:job_id]),
           content: content,
-          removed_by: params[:removed_by],
-          clear: params[:clear]
+          removed_by: params[:removed_by]
         )
 
-        result = fetch_log_service.run(
-          job_id: Integer(params[:job_id])
-        )
-        halt 404 if result.nil?
+        halt 404 if results.nil? || results.empty?
         content_type :json, charset: 'utf-8'
         status 200
-        json result.merge(:@type => 'log')
+        json results.first.merge(:@type => 'log')
       end
 
       post '/logs/multi' do
@@ -121,8 +115,7 @@ module Travis
             upsert_log_service.run(
               job_id: Integer(item.fetch('job_id')),
               content: item.fetch('content', ''),
-              removed_by: item['removed_by'],
-              clear: item['clear']
+              removed_by: item['removed_by']
             )
           end
         end
@@ -242,7 +235,7 @@ module Travis
       end
 
       private def database
-        @database ||= Travis::Logs::Helpers::Database.connect
+        @database ||= Travis::Logs.database_connection
       end
 
       private def setup
