@@ -18,10 +18,6 @@ module Travis
         Travis::Exceptions::Reporter.start
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
-
-        db = Travis::Logs::Helpers::Database.connect
-        Travis::Logs.database_connection = db
-
         declare_exchanges
       end
 

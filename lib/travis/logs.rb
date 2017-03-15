@@ -1,5 +1,6 @@
 require 'sidekiq/redis_connection'
 require 'travis/logs/config'
+require 'travis/logs/helpers/database'
 
 if RUBY_PLATFORM =~ /^java/
   require 'jrjackson'

@@ -111,10 +111,18 @@ module Travis
 
         def initialize
           @db = self.class.create_sequel
+          Travis.logger.info(
+            'new database connection',
+            object_id: object_id,
+            max_size: db.pool.max_size
+          )
         end
 
+        attr_reader :db
+        private :db
+
         def connect
-          @db.test_connection
+          db.test_connection
 
           # TODO: run prepare_statements for every connection,
           # not just the first connection in the pool
@@ -123,52 +131,52 @@ module Travis
         end
 
         def now
-          @db['select now()'].first.fetch(:now)
+          db['select now()'].first.fetch(:now)
         end
 
         def log_for_id(log_id)
-          @db.call(:find_log, log_id: log_id)
+          db.call(:find_log, log_id: log_id)
         end
 
         def log_id_for_job_id(job_id)
-          log = @db.call(:find_log_id, job_id: job_id)
+          log = db.call(:find_log_id, job_id: job_id)
           log[:id] if log
         end
 
         def log_for_job_id(job_id)
-          @db.call(:find_log_by_job_id, job_id: job_id)
+          db.call(:find_log_by_job_id, job_id: job_id)
         end
 
         def log_content_length_for_id(log_id)
-          @db[:logs]
+          db[:logs]
             .select { [id, job_id, octet_length(content).as(content_length)] }
             .where(id: log_id).first
         end
 
         def update_archiving_status(log_id, archiving)
-          @db[:logs].where(id: log_id).update(archiving: archiving)
+          db[:logs].where(id: log_id).update(archiving: archiving)
         end
 
         def mark_archive_verified(log_id)
-          @db[:logs]
+          db[:logs]
             .where(id: log_id)
             .update(archived_at: Time.now.utc, archive_verified: true)
         end
 
         def mark_not_archived(log_id)
-          @db[:logs]
+          db[:logs]
             .where(id: log_id)
             .update(archived_at: nil, archive_verified: false)
         end
 
         def purge(log_id)
-          @db[:logs]
+          db[:logs]
             .where(id: log_id)
             .update(purged_at: Time.now.utc, content: nil)
         end
 
         def create_log(job_id)
-          @db.call(
+          db.call(
             :create_log,
             job_id: job_id,
             created_at: Time.now.utc,
@@ -177,11 +185,11 @@ module Travis
         end
 
         def create_log_part(params)
-          @db.call(:create_log_part, params.merge(created_at: Time.now.utc))
+          db.call(:create_log_part, params.merge(created_at: Time.now.utc))
         end
 
         def delete_log_parts(log_id)
-          @db.call(:delete_log_parts, log_id: log_id)
+          db.call(:delete_log_parts, log_id: log_id)
         end
 
         def set_log_content(log_id, content, removed_by: nil)
@@ -189,7 +197,7 @@ module Travis
             delete_log_parts(log_id)
             aggregated_at = Time.now.utc unless content.nil?
             removed_at = Time.now.utc unless removed_by.nil?
-            @db.call(:set_log_content,
+            db.call(:set_log_content,
                      log_id: log_id,
                      content: content,
                      aggregated_at: aggregated_at,
@@ -203,7 +211,7 @@ module Travis
 
         def aggregatable_logs(regular_interval, force_interval, limit,
                               order: :created_at)
-          query = @db[:log_parts]
+          query = db[:log_parts]
                   .select(:log_id)
                   .where(
                     "created_at <= NOW() - interval '? seconds' AND final = ?",
@@ -219,7 +227,7 @@ module Travis
         end
 
         def min_log_part_id
-          @db['SELECT min(id) AS id FROM log_parts'].first[:id]
+          db['SELECT min(id) AS id FROM log_parts'].first[:id]
         end
 
         AGGREGATABLE_SELECT_WITH_MIN_ID_SQL = <<-SQL.split.join(' ').freeze
@@ -230,7 +238,7 @@ module Travis
         SQL
 
         def aggregatable_logs_page(cursor, per_page)
-          @db[
+          db[
             AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
             cursor, cursor + per_page
           ].map(:log_id).uniq
@@ -254,40 +262,40 @@ module Travis
         SQL
 
         def aggregate(log_id)
-          @db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
+          db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
         end
 
         def aggregated_on_demand(log_id)
-          @db[
+          db[
             AGGREGATE_PARTS_SELECT_SQL,
             log_id
           ].first.fetch(:array_to_string, '') || ''
         end
 
         def transaction(&block)
-          @db.transaction(&block)
+          db.transaction(&block)
         end
 
         private def prepare_statements
-          @db[:logs]
+          db[:logs]
             .where(id: :$log_id)
             .prepare(:first, :find_log)
 
-          @db[:logs]
+          db[:logs]
             .select(:id)
             .where(job_id: :$job_id)
             .prepare(:first, :find_log_id)
 
-          @db[:logs]
+          db[:logs]
             .where(job_id: :$job_id)
             .prepare(:first, :find_log_by_job_id)
 
-          @db[:logs]
+          db[:logs]
             .prepare(:insert, :create_log,
                      job_id: :$job_id, created_at: :$created_at,
                      updated_at: :$updated_at)
 
-          @db[:logs]
+          db[:logs]
             .where(id: :$log_id)
             .returning
             .prepare(:update, :set_log_content,
@@ -299,13 +307,13 @@ module Travis
                      removed_by: :$removed_by,
                      removed_at: :$removed_at)
 
-          @db[:log_parts]
+          db[:log_parts]
             .prepare(:insert, :create_log_part,
                      log_id: :$log_id, content: :$content,
                      number: :$number, final: :$final,
                      created_at: :$created_at)
 
-          @db[:log_parts]
+          db[:log_parts]
             .where(log_id: :$log_id)
             .prepare(:delete, :delete_log_parts)
         end

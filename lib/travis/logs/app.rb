@@ -1,6 +1,5 @@
 require 'json'
 require 'jwt'
-require 'logger'
 require 'pusher'
 require 'rack/ssl'
 require 'raven'
@@ -9,7 +8,6 @@ require 'sinatra/json'
 
 require 'travis/logs'
 require 'travis/logs/existence'
-require 'travis/logs/helpers/database'
 require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
@@ -237,7 +235,7 @@ module Travis
       end
 
       private def database
-        @database ||= Travis::Logs::Helpers::Database.connect
+        @database ||= Travis::Logs.database_connection
       end
 
       private def setup
