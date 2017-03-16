@@ -57,7 +57,7 @@ describe 'aggregation' do
 
   before do
     Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
-    Travis.config.logs.intervals[:regular] = 0
+    Travis.config.logs.intervals[:sweeper] = 0
     db.run('TRUNCATE log_parts; TRUNCATE logs')
     populate_logs(pusher_client, existence, 100)
   end

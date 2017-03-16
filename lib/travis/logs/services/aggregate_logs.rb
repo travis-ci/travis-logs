@@ -152,7 +152,7 @@ module Travis
 
         private def aggregatable_ids
           database.aggregatable_logs(
-            intervals[:regular], intervals[:force],
+            intervals[:sweeper], intervals[:force],
             per_aggregate_limit,
             order: aggregatable_order
           )
