@@ -209,6 +209,14 @@ module Travis
           end
         end
 
+        def set_log_archived(log_id, archived_at: nil, archive_verified: nil)
+          db.call(:set_log_archived,
+                  log_id: log_id,
+                  updated_at: Time.now.utc,
+                  archived_at: archived_at,
+                  archive_verified: archive_verified)
+        end
+
         def aggregatable_logs(regular_interval, force_interval, limit,
                               order: :created_at)
           query = db[:log_parts]
@@ -306,6 +314,13 @@ module Travis
                      updated_at: :$updated_at,
                      removed_by: :$removed_by,
                      removed_at: :$removed_at)
+
+          db[:logs]
+            .where(id: :$log_id)
+            .returning
+            .prepare(:update, :set_log_archived,
+                     archived_at: :$archived_at,
+                     archive_verified: :$archive_verified)
 
           db[:log_parts]
             .prepare(:insert, :create_log_part,
