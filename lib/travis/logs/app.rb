@@ -148,7 +148,7 @@ module Travis
           request.body.rewind
           data = JSON.parse(request.body.read)
         rescue => e
-          halt 500, JSON.dump('error' => e.to_s)
+          halt 400, JSON.dump('error' => e.to_s)
         end
 
         if data['@type'] != 'log_part'
@@ -187,7 +187,7 @@ module Travis
           data = JSON.parse(request.body.read)
           log_id = Integer(params[:log_id])
         rescue => e
-          halt 500, JSON.dump('error' => e.to_s)
+          halt 400, JSON.dump('error' => e.to_s)
         end
 
         unless data.respond_to?(:key?) &&
@@ -200,7 +200,7 @@ module Travis
         begin
           archived_at = Time.parse(data['archived_at'])
         rescue => e
-          halt 500, JSON.dump('error' => e.to_s)
+          halt 400, JSON.dump('error' => e.to_s)
         end
 
         if data['@type'] != 'log.archived'
