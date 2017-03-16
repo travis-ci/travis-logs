@@ -89,6 +89,7 @@ module Travis
           },
           intervals: {
             vacuum: intervals_vacuum,
+            sweeper: 10 * 60,
             regular: 3 * 60,
             force: 3 * 60 * 60,
             purge: 6
