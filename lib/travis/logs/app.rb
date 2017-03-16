@@ -106,7 +106,6 @@ module Travis
         halt 403 unless authorized?(request)
 
         request.body.rewind
-
         items = Array(JSON.parse(request.body.read))
         halt 400 unless all_items_valid?(items)
 
@@ -143,7 +142,15 @@ module Travis
           halt 403
         end
 
-        data = JSON.parse(request.body.read)
+        data = nil
+
+        begin
+          request.body.rewind
+          data = JSON.parse(request.body.read)
+        rescue => e
+          halt 400, JSON.dump('error' => e.to_s)
+        end
+
         if data['@type'] != 'log_part'
           halt 400, JSON.dump('error' => '@type should be log_part')
         end
@@ -167,11 +174,54 @@ module Travis
         status 204
       end
 
-      put '/logs/:job_id/archived' do
+      put '/logs/:log_id/archived' do
         halt 500, 'authentication token is not set' if auth_token.empty?
         halt 403 unless authorized?(request)
 
-        halt 501
+        data = nil
+        log_id = nil
+        archived_at = nil
+
+        begin
+          request.body.rewind
+          data = JSON.parse(request.body.read)
+          log_id = Integer(params[:log_id])
+        rescue => e
+          halt 400, JSON.dump('error' => e.to_s)
+        end
+
+        unless data.respond_to?(:key?) &&
+               data.key?('@type') &&
+               data.key?('archived_at') &&
+               data.key?('archive_verified')
+          halt 400, JSON.dump('error' => 'invalid body')
+        end
+
+        begin
+          archived_at = Time.parse(data['archived_at'])
+        rescue => e
+          halt 400, JSON.dump('error' => e.to_s)
+        end
+
+        if data['@type'] != 'log.archived'
+          halt 400, JSON.dump('error' => '@type should be log.archived')
+        end
+
+        result = database.set_log_archived(
+          log_id,
+          archived_at: archived_at,
+          archive_verified: data['archive_verified']
+        )
+
+        halt 404 if result.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json(
+          :@type => 'log.archived',
+          id: log_id,
+          archived_at: archived_at,
+          archive_verified: data['archive_verified']
+        )
       end
 
       get '/logs/:id' do

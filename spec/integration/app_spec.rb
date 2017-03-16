@@ -279,4 +279,85 @@ EOF
       end
     end
   end
+
+  describe 'PUT /logs/:log_id/archived' do
+    let(:archived_at) { Time.now.utc }
+    let(:log_id) { 8 }
+
+    context 'with correct authentication' do
+      before do
+        header 'Authorization', "token #{auth_token}"
+      end
+
+      it 'updates log archived fields' do
+        expect(database).to receive(:set_log_archived)
+          .with(log_id, archived_at: Time.parse(archived_at.iso8601),
+                        archive_verified: true)
+          .and_return(archived_at: archived_at, archive_verified: true)
+
+        body = JSON.dump(
+          '@type' => 'log.archived',
+          'archived_at' => archived_at,
+          'archive_verified' => true
+        )
+        response = put "/logs/#{log_id}/archived", body
+        expect(response.status).to be == 200
+      end
+    end
+
+    context 'with no authorization header' do
+      it 'returns 403' do
+        response = put "/logs/#{log_id}/archived", ''
+        expect(response.status).to be == 403
+      end
+    end
+
+    context 'with invalid payload' do
+      before do
+        header 'Authorization', "token #{auth_token}"
+      end
+
+      it 'returns 400' do
+        response = put "/logs/#{log_id}/archived", '{"huh":null}'
+        expect(response.status).to be == 400
+      end
+    end
+
+    context 'with incorrect payload type' do
+      before do
+        header 'Authorization', "token #{auth_token}"
+      end
+
+      it 'returns 400' do
+        body = JSON.dump(
+          '@type' => 'log.nah',
+          'archived_at' => archived_at,
+          'archive_verified' => true
+        )
+        response = put "/logs/#{log_id}/archived", body
+        expect(response.status).to be == 400
+      end
+    end
+
+    context 'with nonexistent log id' do
+      before do
+        header 'Authorization', "token #{auth_token}"
+      end
+
+      it 'returns 404' do
+        expect(database).to receive(:set_log_archived)
+          .with(42, archived_at: Time.parse(archived_at.iso8601),
+                    archive_verified: true)
+          .and_return(nil)
+
+        body = JSON.dump(
+          '@type' => 'log.archived',
+          'archived_at' => archived_at,
+          'archive_verified' => true
+        )
+        response = put '/logs/42/archived', body
+        expect(response.status).to be == 404
+      end
+    end
+  end
 end
