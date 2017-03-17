@@ -88,11 +88,7 @@ module Travis
         request.body.rewind
         content = request.body.read
         content = nil if content.empty?
-        removed_by = if params[:removed_by]
-                       Integer(params[:removed_by])
-                     else
-                       nil
-                     end
+        removed_by = (Integer(params[:removed_by]) if params[:removed_by])
 
         results = upsert_log_service.run(
           job_id: Integer(params[:job_id]),
@@ -117,11 +113,7 @@ module Travis
 
         database.transaction do
           items.each do |item|
-            removed_by = if item['removed_by']
-                           Integer(item['removed_by'])
-                         else
-                           nil
-                         end
+            removed_by = (Integer(item['removed_by']) if item['removed_by'])
             upsert_log_service.run(
               job_id: Integer(item.fetch('job_id')),
               content: item.fetch('content', ''),
