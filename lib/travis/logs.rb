@@ -1,4 +1,6 @@
+require 'sidekiq/redis_connection'
 require 'travis/logs/config'
+require 'travis/logs/helpers/database'
 
 if RUBY_PLATFORM =~ /^java/
   require 'jrjackson'
@@ -13,12 +15,30 @@ module Travis
 
   module Logs
     class << self
+      attr_writer :config, :database_connection, :redis_pool
+
       def config
         @config ||= Travis::Logs::Config.load
       end
 
-      attr_writer :config
-      attr_accessor :database_connection
+      def database_connection
+        @database_connection ||= Travis::Logs::Helpers::Database.connect
+      end
+
+      def redis_pool
+        @redis_pool ||= ::Sidekiq::RedisConnection.create(
+          url: config.redis.url,
+          namespace: config.sidekiq.namespace,
+          size: config.sidekiq.pool_size
+        )
+      end
+
+      def version
+        @version ||= ENV.fetch(
+          'HEROKU_SLUG_COMMIT',
+          `git rev-parse HEAD 2>/dev/null`
+        ).strip
+      end
     end
   end
 end

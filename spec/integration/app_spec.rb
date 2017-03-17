@@ -10,23 +10,45 @@ describe Travis::Logs::App do
   include Rack::Test::Methods
 
   def app
-    Travis::Logs::App.new(existence, pusher, database, log_part_service)
+    Travis::Logs::App.new(auth_token: auth_token)
   end
 
   let(:pusher) { double(:pusher) }
   let(:existence) { Travis::Logs::Existence.new }
   let(:database) { double(:database) }
   let(:log_part_service) { double(:log_part_service) }
+  let(:auth_token) { 'very-secret' }
 
   before do
     existence.vacant!('foo')
     existence.vacant!('bar')
+    allow_any_instance_of(described_class)
+      .to receive(:existence).and_return(existence)
+    allow_any_instance_of(described_class)
+      .to receive(:pusher).and_return(pusher)
+    allow_any_instance_of(described_class)
+      .to receive(:database).and_return(database)
+    allow_any_instance_of(described_class)
+      .to receive(:process_log_part_service).and_return(log_part_service)
   end
 
   describe 'GET /uptime' do
+    before do
+      allow(database).to receive(:now) { Time.now.utc }
+    end
+
     it 'returns 204' do
       response = get '/uptime'
-      expect(response.status).to eq(204)
+      expect(response.status).to eq(200)
+    end
+
+    it 'contains uptime, greeting, now, pong, and version' do
+      response = get '/uptime'
+      body = JSON.parse(response.body)
+      %w(uptime greeting now pong version).each do |key|
+        expect(body).to include(key)
+        expect(body[key]).to_not be_nil
+      end
     end
   end
 
@@ -82,55 +104,73 @@ describe Travis::Logs::App do
     before do
       @job_id = 123
       @log_id = 234
-      @old_auth_token = ENV['AUTH_TOKEN']
-      @auth_token = ENV['AUTH_TOKEN'] = 'very-secret'
 
-      allow(database).to receive(:set_log_content)
+      allow(database).to receive(:transaction) { |&b| b.call }
       allow(database).to receive(:log_id_for_job_id)
         .with(anything).and_return(nil)
       allow(database).to receive(:log_id_for_job_id)
         .with(@job_id).and_return(@log_id)
-    end
-
-    after do
-      ENV['AUTH_TOKEN'] = @old_auth_token
+      allow(database).to receive(:log_for_job_id)
+        .with(@job_id)
+        .and_return(
+          job_id: @job_id,
+          id: @log_id,
+          content: '',
+          aggregated_at: Time.now.utc
+        )
     end
 
     context 'with correct authentication' do
       before do
-        header 'Authorization', "token #{@auth_token}"
+        header 'Authorization', "token #{auth_token}"
       end
 
-      it 'returns 204' do
+      it 'returns 200' do
+        allow(database).to receive(:set_log_content)
+          .and_return([{ id: @log_id, job_id: @job_id, content: '' }])
         response = put "/logs/#{@job_id}"
-        expect(response.status).to be == 204
+        expect(response.status).to be == 200
       end
 
       it "creates the log if it doesn't exist" do
+        result = { id: @log_id + 1, job_id: @job_id + 1, content: '' }
         expect(database).to receive(:create_log).with(@job_id + 1)
-          .and_return(id: @log_id + 1, job_id: @job_id + 1, content: '')
+          .and_return(@log_id + 1)
+        expect(database).to receive(:set_log_content)
+          .with(@log_id + 1, nil, removed_by: nil)
+          .and_return([result])
 
         response = put "/logs/#{@job_id + 1}"
-        expect(response.status).to be == 204
+        expect(response.status).to be == 200
       end
 
       it 'tells the database to set the log content' do
         expect(database).to receive(:set_log_content)
-          .with(@log_id, 'hello, world')
+          .with(@log_id, 'hello, world', removed_by: nil)
+          .and_return(
+            [{ id: @log_id, job_id: @job_id, content: 'hello, world' }]
+          )
         put "/logs/#{@job_id}", 'hello, world'
       end
 
       it 'does not set log content if the given body was empty' do
-        expect(database).to receive(:set_log_content).with(@log_id, nil)
+        expect(database).to receive(:set_log_content)
+          .with(@log_id, nil, removed_by: nil)
+          .and_return(
+            [{ id: @log_id, job_id: @job_id, content: 'hello, world' }]
+          )
         put "/logs/#{@job_id}", ''
       end
     end
 
-    it "returns 500 if the auth token isn't set" do
-      ENV['AUTH_TOKEN'] = ''
-      header 'Authorization', 'token '
-      response = put "/logs/#{@job_id}", ''
-      expect(response.status).to be == 500
+    context 'without an empty auth_token' do
+      let(:auth_token) { '' }
+
+      it "returns 500 if the auth token isn't set" do
+        header 'Authorization', 'token '
+        response = put "/logs/#{@job_id}", ''
+        expect(response.status).to be == 500
+      end
     end
 
     it "returns 403 if the Authorization header isn't set" do
@@ -139,7 +179,7 @@ describe Travis::Logs::App do
     end
 
     it 'returns 403 if the Authorization header is incorrect' do
-      header 'Authorization', "token not-#{@auth_token}"
+      header 'Authorization', "token not-#{auth_token}"
       response = put "/logs/#{@job_id}", ''
       expect(response.status).to be == 403
     end
@@ -183,17 +223,12 @@ EOF
       @job_id = 1
       @log_id = 456
 
-      allow(log_part_service).to receive(:new).with(
-        {
-          'id' => @job_id,
-          'log' => 'fafafaf',
-          'number' => 1,
-          'final' => false
-        },
-        database,
-        pusher,
-        existence
-      ).and_return(double(:log_part_service_instance, run: nil))
+      allow(log_part_service).to receive(:run).with(
+        'id' => @job_id,
+        'log' => 'fafafaf',
+        'number' => '1',
+        'final' => false
+      ).and_return(nil)
     end
 
     context 'with valid authorization header' do
@@ -204,11 +239,13 @@ EOF
       end
 
       it 'returns 204' do
-        response = put "/log-parts/#{@job_id}/1",
-                       JSON.dump('@type' => 'log_part',
-                                 'final' => false,
-                                 'content' => Base64.encode64('fafafaf'),
-                                 'encoding' => 'base64')
+        body = JSON.dump(
+          '@type' => 'log_part',
+          'final' => false,
+          'content' => Base64.encode64('fafafaf'),
+          'encoding' => 'base64'
+        )
+        response = put "/log-parts/#{@job_id}/1", body
         expect(response.status).to be == 204
       end
     end

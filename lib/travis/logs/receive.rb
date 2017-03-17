@@ -18,17 +18,13 @@ module Travis
         Travis::Exceptions::Reporter.start
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
-
-        db = Travis::Logs::Helpers::Database.connect
-        Travis::Logs.database_connection = db
-
         declare_exchanges
       end
 
       def run
         1.upto(Travis::Logs.config.logs.threads) do
           Travis::Logs::Receive::Queue.subscribe(
-            'logs', Travis::Logs::Services::ProcessLogPart
+            'logs', Travis::Logs::Services::ProcessLogPart.new
           )
         end
       end

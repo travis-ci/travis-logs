@@ -38,7 +38,7 @@ describe 'receive_logs' do
     db[:log_parts].delete
     Travis::Logs.database_connection = database
     Travis::Logs::Receive::Queue.subscribe(
-      'logs', Travis::Logs::Services::ProcessLogPart
+      'logs', Travis::Logs::Services::ProcessLogPart.new
     )
     message = double('message', ack: nil)
     queue.call(message, '{"id":123,"log":"hello, world","number":1}')
@@ -56,7 +56,7 @@ describe 'receive_logs' do
     expect(Travis::Amqp::Consumer).to receive(:jobs)
       .with('logs', channel: { prefetch: 1 }) { queue }
     Travis::Logs::Receive::Queue.subscribe(
-      'logs', Travis::Logs::Services::ProcessLogPart
+      'logs', Travis::Logs::Services::ProcessLogPart.new
     )
   end
 
@@ -66,7 +66,7 @@ describe 'receive_logs' do
     expect(Travis::Amqp::Consumer).to receive(:jobs)
       .with('logs', channel: { prefetch: 2 }) { queue }
     Travis::Logs::Receive::Queue.subscribe(
-      'logs', Travis::Logs::Services::ProcessLogPart
+      'logs', Travis::Logs::Services::ProcessLogPart.new
     )
   end
 end

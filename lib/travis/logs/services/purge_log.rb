@@ -19,7 +19,7 @@ module Travis
           @log_id = log_id
           @storage_service = storage_service || Helpers::S3.new
           @database = database || Travis::Logs.database_connection
-          @archiver = archiver || ->(log_id) { Travis::Logs::Sidekiq::Archive.perform_async(log_id) }
+          @archiver = archiver || -> { Travis::Logs::Sidekiq::Archive.perform_async(log_id) }
         end
 
         def run
