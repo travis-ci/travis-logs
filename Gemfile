@@ -39,6 +39,6 @@ gem 'sinatra', '~> 1.4'
 gem 'sinatra-contrib'
 gem 'travis-amqp', git: 'https://github.com/travis-ci/travis-amqp.git'
 gem 'travis-config', '~> 1.0.12'
-gem 'travis-lock', github: 'travis-ci/travis-lock'
+gem 'travis-lock', git: 'https://github.com/travis-ci/travis-lock.git'
 gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git', group: :test
 gem 'travis-support', git: 'https://github.com/travis-ci/travis-support.git'
