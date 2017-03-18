@@ -5,7 +5,7 @@ module Travis
         def measure(name = nil, &block)
           timer_name = [self.class.metriks_prefix, name].compact.join('.')
           Metriks.timer(timer_name).time(&block)
-        rescue => e
+        rescue
           failed_name = [name, 'failed'].compact.join('.')
           mark(failed_name)
           raise

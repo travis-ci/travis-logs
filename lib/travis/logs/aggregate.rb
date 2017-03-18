@@ -13,34 +13,64 @@ module Travis
       include Helpers::Locking
 
       def setup
-        Travis.logger.info('** Starting Logs Aggregation **')
+        Travis.logger.info('Starting Logs Aggregation')
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
-        Logs.database_connection = Travis::Logs::Helpers::Database.connect
       end
 
       def run
         loop do
           aggregate_logs
-          sleep Travis.config.logs.intervals.vacuum
+          sleep sleep_interval
+        end
+      end
+
+      def run_ranges
+        if ENV.key?('TRAVIS_LOGS_AGGREGATE_START')
+          cursor = Integer(
+            ENV['TRAVIS_LOGS_AGGREGATE_START']
+          )
+        end
+        max_id = Integer(
+          ENV['TRAVIS_LOGS_AGGREGATE_MAX_ID'] || 31_116_000_000
+        ) # 2017-02-19 01:31:40
+        per_page = Integer(
+          ENV['TRAVIS_LOGS_AGGREGATE_PER_PAGE'] || 100_000
+        )
+
+        loop do
+          begin
+            cursor = aggregator.run_ranges(cursor, per_page)
+            break if cursor.to_i > max_id
+          rescue Exception => e
+            Travis.logger.error(
+              e.message, backtrace: e.backtrace.join("\n")
+            )
+          end
         end
       end
 
       def aggregate_logs
         exclusive do
           begin 
-            Travis::Logs::Services::AggregateLogs.run
+            aggregator.run
           rescue Exception => e
             Travis::Exceptions.handle(e)
           end
         end
       end
 
-      private
+      private def exclusive(&block)
+        super('logs.aggregate', &block)
+      end
 
-        def exclusive(&block)
-          super('logs.aggregate', &block)
-        end
+      private def aggregator
+        @aggregator ||= Travis::Logs::Services::AggregateLogs.new
+      end
+
+      private def sleep_interval
+        Travis.config.logs.intervals.vacuum
+      end
     end
   end
 end

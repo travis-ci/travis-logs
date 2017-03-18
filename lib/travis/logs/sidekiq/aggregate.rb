@@ -1,3 +1,4 @@
+require 'sidekiq'
 require 'sidekiq/worker'
 require 'travis/logs/services/aggregate_logs'
 
@@ -11,7 +12,11 @@ module Travis
                         unique: :until_and_while_executing
 
         def perform(log_id)
-          Travis::Logs::Services::AggregateLogs.aggregate_log(log_id)
+          aggregate_logs_service.aggregate_log(log_id)
+        end
+
+        private def aggregate_logs_service
+          @aggregate_logs_service ||= Travis::Logs::Services::AggregateLogs.new
         end
       end
     end

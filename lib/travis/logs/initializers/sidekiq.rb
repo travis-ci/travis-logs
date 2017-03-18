@@ -10,14 +10,11 @@ require 'travis/logs/sidekiq'
 require 'core_ext/hash/deep_symbolize_keys'
 
 $stdout.sync = true
-Travis.logger.info('** Setting up Sidekiq **')
+Travis.logger.info('Setting up Sidekiq')
 
 Travis::Logs::Helpers::S3.setup
 Travis::Exceptions::Reporter.start
 Travis::Metrics.setup
-
-Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
-
 Travis::Logs::Sidekiq.setup
 
 require 'travis/logs/sidekiq/aggregate'

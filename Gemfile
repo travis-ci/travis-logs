@@ -6,6 +6,7 @@ gem 'activesupport', '~> 3.2'
 gem 'aws-sdk'
 gem 'bunny', platform: :mri
 gem 'coder', git: 'https://github.com/rkh/coder.git'
+gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'excon'
 gem 'faraday'
@@ -33,10 +34,10 @@ gem 'rubocop', require: false
 gem 'sentry-raven', git: 'https://github.com/getsentry/raven-ruby.git'
 gem 'sequel'
 gem 'sidekiq'
-gem 'sidekiq-unique-jobs', '~> 4'
 gem 'simplecov', require: false
 gem 'sinatra', '~> 1.4'
-gem 'travis-amqp',        github: 'travis-ci/travis-amqp'
+gem 'sinatra-contrib'
+gem 'travis-amqp', git: 'https://github.com/travis-ci/travis-amqp.git'
 gem 'travis-config', '~> 1.0.12'
 gem 'travis-lock', github: 'travis-ci/travis-lock'
 gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git', group: :test

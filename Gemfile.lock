@@ -24,6 +24,12 @@ GIT
     coder (0.4.0)
 
 GIT
+  remote: https://github.com/travis-ci/travis-amqp.git
+  revision: 3966b3651adfd1c544f53d49d5986ac16cd9c4bc
+  specs:
+    travis-amqp (0.0.1)
+
+GIT
   remote: https://github.com/travis-ci/travis-migrations.git
   revision: 90d0a854cf9060ac21bb74217a4207a4c27c05a3
   specs:
@@ -55,6 +61,7 @@ GEM
     aws-sdk-resources (2.6.35)
       aws-sdk-core (= 2.6.35)
     aws-sigv4 (1.0.0)
+    backports (3.6.8)
     bunny (2.6.1)
       amq-protocol (>= 2.0.1)
     coderay (1.1.1)
@@ -155,9 +162,6 @@ GEM
       connection_pool (~> 2.2, >= 2.2.0)
       rack-protection (>= 1.5.0)
       redis (~> 3.2, >= 3.2.1)
-    sidekiq-unique-jobs (4.0.18)
-      sidekiq (>= 2.6)
-      thor
     simplecov (0.12.0)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
@@ -167,10 +171,16 @@ GEM
       rack (~> 1.5)
       rack-protection (~> 1.4)
       tilt (>= 1.3, < 3)
+    sinatra-contrib (1.4.7)
+      backports (>= 2.0)
+      multi_json
+      rack-protection
+      rack-test
+      sinatra (~> 1.4.0)
+      tilt (>= 1.3, < 3)
     slop (3.6.0)
     spoon (0.0.6)
       ffi
-    thor (0.19.4)
     tilt (2.0.5)
     travis-config (1.0.13)
       hashr (~> 2.0.0)
@@ -185,6 +195,7 @@ DEPENDENCIES
   aws-sdk
   bunny
   coder!
+  concurrent-ruby
   connection_pool
   excon
   faraday
@@ -212,9 +223,9 @@ DEPENDENCIES
   sentry-raven!
   sequel
   sidekiq
-  sidekiq-unique-jobs (~> 4)
   simplecov
   sinatra (~> 1.4)
+  sinatra-contrib
   travis-amqp!
   travis-config (~> 1.0.12)
   travis-lock!
@@ -222,4 +233,4 @@ DEPENDENCIES
   travis-support!
 
 BUNDLED WITH
-   1.13.7
+   1.14.4
