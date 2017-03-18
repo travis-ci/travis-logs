@@ -52,7 +52,7 @@ module Travis
 
       def aggregate_logs
         exclusive do
-          begin 
+          begin
             aggregator.run
           rescue Exception => e
             Travis::Exceptions.handle(e)

@@ -1,10 +1,4 @@
 GIT
-  remote: git://github.com/travis-ci/travis-amqp.git
-  revision: 3966b3651adfd1c544f53d49d5986ac16cd9c4bc
-  specs:
-    travis-amqp (0.0.1)
-
-GIT
   remote: git://github.com/travis-ci/travis-lock.git
   revision: b418401c79e082aa53a62364f7b01a9be6f0d768
   specs:
