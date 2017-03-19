@@ -20,26 +20,24 @@ describe Travis::Logs::Helpers::Lock do
   end
 
   [
-    [
-      {},
-      { url: nil }
-    ],
+    [{}, {}],
     [
       nil,
       { official: :config, very: :srs }
     ],
     [
       { unofficial: :config, such: :rogue },
-      { unofficial: :config, such: :rogue, url: nil }
+      { unofficial: :config, such: :rogue }
     ],
     [
       { unofficial: :config, such: :rogue, strategy: :redis },
-      { unofficial: :config, such: :rogue,
+      { unofficial: :config, such: :rogue, strategy: :redis,
         url: 'redis://very.memory.example.com' }
     ]
   ].each do |options, normalized_options|
     it "normalizes locking options #{options.inspect}" do
-      expect(subject.send(:normalized_locking_options, options: {})).to eq url: nil
+      expect(subject.send(:normalized_locking_options, options: options))
+        .to eq normalized_options
     end
   end
 end

@@ -20,9 +20,7 @@ module Travis
 
         private def normalized_locking_options(options: nil)
           options ||= base_lock_config
-          options[:url] ||= if options[:strategy] == :redis
-                              redis_url
-                            end
+          options[:url] ||= redis_url if options[:strategy] == :redis
           options
         end
 
