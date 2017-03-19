@@ -67,7 +67,6 @@ GEM
     excon (0.54.0)
     faraday (0.10.0)
       multipart-post (>= 1.2, < 3)
-    ffi (1.9.14)
     ffi (1.9.14-java)
     hashr (2.0.0)
     hitimes (1.2.4)

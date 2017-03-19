@@ -1,6 +1,6 @@
 require 'travis/logs'
 require 'travis/logs/helpers/database'
-require 'travis/logs/helpers/locking'
+require 'travis/logs/helpers/lock'
 require 'travis/logs/sidekiq'
 require 'travis/support/exceptions/reporter'
 require 'travis/support/metrics'
@@ -10,8 +10,6 @@ require 'active_support/core_ext/logger'
 module Travis
   module Logs
     class Aggregate
-      include Helpers::Locking
-
       def setup
         Travis.logger.info('Starting Logs Aggregation')
         Travis::Metrics.setup
@@ -51,7 +49,7 @@ module Travis
       end
 
       def aggregate_logs
-        exclusive do
+        lock.exclusive do
           begin
             aggregator.run
           rescue Exception => e
@@ -60,16 +58,16 @@ module Travis
         end
       end
 
-      private def exclusive(&block)
-        super('logs.aggregate', &block)
-      end
-
       private def aggregator
         @aggregator ||= Travis::Logs::Services::AggregateLogs.new
       end
 
       private def sleep_interval
         Travis.config.logs.intervals.vacuum
+      end
+
+      private def lock
+        @lock ||= Travis::Logs::Helpers::Lock.new('logs.aggregate')
       end
     end
   end
