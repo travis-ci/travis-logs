@@ -5,19 +5,16 @@ rvm:
 jdk: openjdk8
 sudo: false
 dist: trusty
-env:
-  global:
-  - PG_DISABLE_SSL='1'
 cache: bundler
 services:
 - redis
 - rabbitmq
 addons:
   postgresql: 9.3
+env:
+  global:
+  - PG_DISABLE_SSL='1'
+before_install:
+- gem update bundler
 before_script:
-- createdb -U postgres travis_logs_test
-- cp config/travis.example.yml config/travis.yml
-- psql -q travis_logs_test < $(bundle show travis-migrations)/db/logs/structure.sql
-script:
-- bundle exec rubocop
-- bundle exec rspec spec
+- bundle exec rake setup
