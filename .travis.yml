@@ -14,4 +14,5 @@ addons:
 env:
   global:
   - PG_DISABLE_SSL='1'
-  - PGUSER='postgres'
+before_script:
+- bundle exec rake setup
