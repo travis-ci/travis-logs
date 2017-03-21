@@ -14,6 +14,12 @@ default), the log parts are aggregated into one final log.
 Travis Logs archives logs to S3 and the database records are purged once it is
 verified that the logs are archived correctly.
 
+## Local Development
+
+When developing locally, one may want to set certain config params via env vars,
+such as a `DATABASE_URL` that points to a valid PostgreSQL server.  See the
+`.example.env` file for examples.
+
 ## Process types
 
 Some of the process types listed in [`./Procfile`](./Procfile) depend on other
@@ -60,4 +66,4 @@ re-archiving via Sidekiq.
 
 See LICENSE file.
 
-Copyright (c) 2011-2016 Travis CI GmbH
+Copyright (c) 2011-2017 Travis CI GmbH
