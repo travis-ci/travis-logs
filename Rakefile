@@ -12,12 +12,12 @@ file 'config/travis.yml' do |t|
   cp 'config/travis.example.yml', t.name
 end
 
-desc 'Set up test bits'
-task setup: %w(config/travis.yml databass)
-
 task :databass do
   sh 'createdb travis_logs_test'
-  sh './script/cat-structure-sql | psql -q travis_logs_test' unless ok
+  sh './script/cat-structure-sql | psql -q travis_logs_test'
 end
+
+desc 'Set up test bits'
+task setup: %w(config/travis.yml databass)
 
 task default: %i(rubocop spec)
