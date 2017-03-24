@@ -192,6 +192,14 @@ module Travis
           db.call(:delete_log_parts, log_id: log_id)
         end
 
+        def log_parts(log_id, after: nil, part_numbers: [])
+          query = db[:log_parts].select(:id, :number, :content, :final)
+                                .where(log_id: log_id)
+          query = query.where('number > ?', after) if after
+          query = query.where(number: part_numbers) unless part_numbers.empty?
+          query.order(:number).to_a
+        end
+
         def set_log_content(log_id, content, removed_by: nil)
           transaction do
             delete_log_parts(log_id)

@@ -11,6 +11,7 @@ require 'travis/logs/existence'
 require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
+require 'travis/logs/services/fetch_log_parts'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/services/upsert_log'
 require 'travis/logs/sidekiq'
@@ -126,6 +127,33 @@ module Travis
         body nil
       end
 
+      get '/log-parts/:job_id' do
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
+
+        job_id = Integer(params[:job_id])
+        part_numbers = if params[:part_numbers].nil?
+                         []
+                       else
+                         params[:part_numbers].split(',').map(&:to_i)
+                       end
+        after = if params[:after].nil?
+                  nil
+                else
+                  Integer(params[:after])
+                end
+
+        results = fetch_log_parts_service.run(
+          job_id: job_id,
+          after: after,
+          part_numbers: part_numbers
+        )
+        halt 404 if results.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json log_parts: results, :@type => 'log_parts', job_id: job_id
+      end
+
       put '/log-parts/:job_id/:log_part_id' do
         auth_header = request.env['HTTP_AUTHORIZATION']
         halt 403 if auth_header.nil?
@@ -209,6 +237,12 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
+          database: database
+        )
+      end
+
+      private def fetch_log_parts_service
+        @fetch_log_parts_service ||= Travis::Logs::Services::FetchLogParts.new(
           database: database
         )
       end
