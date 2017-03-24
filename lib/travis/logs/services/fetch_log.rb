@@ -31,7 +31,6 @@ module Travis
           removed_by_id = result.delete(:removed_by)
           result.merge(
             content: content,
-            aggregated_at: result[:updated_at] || Time.now.utc - 60,
             removed_by_id: removed_by_id
           )
         end
