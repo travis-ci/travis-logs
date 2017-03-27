@@ -5,12 +5,14 @@ require 'rack/ssl'
 require 'raven'
 require 'sinatra/base'
 require 'sinatra/json'
+require 'sinatra/param'
 
 require 'travis/logs'
 require 'travis/logs/existence'
 require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
+require 'travis/logs/services/fetch_log_parts'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/services/upsert_log'
 require 'travis/logs/sidekiq'
@@ -25,6 +27,8 @@ module Travis
     end
 
     class App < Sinatra::Base
+      helpers Sinatra::Param
+
       configure(:production, :staging) do
         use Rack::SSL
         use Travis::Logs::Helpers::MetricsMiddleware
@@ -126,6 +130,27 @@ module Travis
         body nil
       end
 
+      get '/log-parts/:job_id' do
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
+
+        param :job_id, Integer
+        param :part_numbers, Array, default: []
+        param :after, Integer
+
+        results = fetch_log_parts_service.run(
+          job_id: params[:job_id],
+          after: params[:after],
+          part_numbers: params[:part_numbers].map { |i| Integer(i) }
+        )
+        halt 404 if results.nil?
+        content_type :json, charset: 'utf-8'
+        status 200
+        json :@type => 'log_parts',
+             log_parts: results,
+             job_id: params[:job_id]
+      end
+
       put '/log-parts/:job_id/:log_part_id' do
         auth_header = request.env['HTTP_AUTHORIZATION']
         halt 403 if auth_header.nil?
@@ -209,6 +234,12 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
+          database: database
+        )
+      end
+
+      private def fetch_log_parts_service
+        @fetch_log_parts_service ||= Travis::Logs::Services::FetchLogParts.new(
           database: database
         )
       end

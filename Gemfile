@@ -35,6 +35,7 @@ gem 'sidekiq'
 gem 'simplecov', require: false, group: :test
 gem 'sinatra', '~> 1'
 gem 'sinatra-contrib'
+gem 'sinatra-param'
 gem 'travis-amqp', git: 'https://github.com/travis-ci/travis-amqp.git'
 gem 'travis-config', '~> 1.0'
 gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git', group: :test
