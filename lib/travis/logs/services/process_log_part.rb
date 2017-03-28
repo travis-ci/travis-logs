@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/existence'
@@ -15,7 +16,7 @@ module Travis
       class ProcessLogPart
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.process_log_part'.freeze
+        METRIKS_PREFIX = 'logs.process_log_part'
         INT_MAX = 2_147_483_647
 
         def self.metriks_prefix
@@ -65,14 +66,13 @@ module Travis
         end
 
         private def valid_log_id?(log_id, payload)
-          if log_id == 0
-            Travis.logger.warn(
-              'invalid log id',
-              action: 'process', job_id: payload['id'],
-              result: 'invalid_id', log_id: log_id
-            )
-            mark('log.id_invalid')
-          end
+          return true unless log_id.zero?
+          Travis.logger.warn(
+            'invalid log id',
+            action: 'process', job_id: payload['id'],
+            result: 'invalid_id', log_id: log_id
+          )
+          mark('log.id_invalid')
         end
 
         private def notify(payload)

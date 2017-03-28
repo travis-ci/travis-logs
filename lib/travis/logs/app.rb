@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'json'
 require 'jwt'
 require 'pusher'
@@ -158,11 +159,7 @@ module Travis
         if auth_header.start_with?('Bearer ')
           halt 500, 'key is not set' if rsa_public_key.nil?
           Travis.uuid = request.env['HTTP_X_REQUEST_ID']
-          begin
-            JWT.decode(auth_header[7..-1], rsa_public_key, true, algorithm: 'RS512', verify_sub: true, 'sub' => params[:job_id])
-          rescue JWT::DecodeError
-            halt 403
-          end
+          jwt_decode!(auth_header[7..-1], params[:job_id])
         elsif auth_header.start_with?('token ')
           halt 500, 'authentication token is not set' if auth_token.empty?
           halt 403 unless authorized?(request)
@@ -175,19 +172,14 @@ module Travis
           halt 400, JSON.dump('error' => '@type should be log_part')
         end
 
-        content = case data['encoding']
-                  when 'base64'
-                    Base64.decode64(data['content'])
-                  else
-                    halt 400, JSON.dump('error' => 'invalid encoding, only base64 supported')
-                  end
+        if data['encoding'] != 'base64'
+          halt 400, JSON.dump(error: 'invalid encoding, only base64 supported')
+        end
 
         process_log_part_service.run(
           'id' => Integer(params[:job_id]),
-          'log' => content,
-          # NOTE: `log_part_id` is *not* cast via Integer because it may be a
-          # string `"last"`.
-          'number' => params[:log_part_id],
+          'log' => Base64.decode64(data['content']),
+          'number' => params[:log_part_id], # NOTE: `log_part_id` may be "last"
           'final' => data['final']
         )
 
@@ -284,6 +276,19 @@ module Travis
         items.all? do |item|
           item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
         end
+      end
+
+      private def jwt_decode!(encoded_jwt, job_id)
+        JWT.decode(
+          encoded_jwt,
+          rsa_public_key,
+          true,
+          algorithm: 'RS512',
+          verify_sub: true,
+          'sub' => job_id
+        )
+      rescue JWT::DecodeError
+        halt 403
       end
     end
   end

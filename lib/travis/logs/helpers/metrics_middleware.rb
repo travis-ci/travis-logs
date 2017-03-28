@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics'
 
 module Travis
@@ -6,7 +7,7 @@ module Travis
       class MetricsMiddleware
         include Travis::Logs::Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.app'.freeze
+        METRIKS_PREFIX = 'logs.app'
         KNOWN_TIMER_NAMES = %w(
           get.logs_id
           get.logs_id_id

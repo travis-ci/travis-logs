@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
 require 'travis/logs/sidekiq'
@@ -9,17 +10,20 @@ module Travis
       class PurgeLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.purge'.freeze
+        METRIKS_PREFIX = 'logs.purge'
 
         def self.metriks_prefix
           METRIKS_PREFIX
         end
 
-        def initialize(log_id, storage_service = nil, database = nil, archiver = nil)
+        def initialize(log_id, storage_service = nil, database = nil,
+                       archiver = nil)
           @log_id = log_id
           @storage_service = storage_service || Helpers::S3.new
           @database = database || Travis::Logs.database_connection
-          @archiver = archiver || -> { Travis::Logs::Sidekiq::Archive.perform_async(log_id) }
+          @archiver = archiver || proc do
+            Travis::Logs::Sidekiq::Archive.perform_async(log_id)
+          end
         end
 
         def run
@@ -33,7 +37,7 @@ module Travis
         private
 
         def db_content_length_empty?
-          content_length_from_db.nil? || content_length_from_db == 0
+          content_length_from_db.nil? || content_length_from_db.zero?
         end
 
         def process_empty_log_content

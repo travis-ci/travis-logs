@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'ostruct'
 require 'travis/logs'
 require 'travis/logs/app'
@@ -62,7 +63,7 @@ describe Travis::Logs::App do
                                  { 'name' => 'channel_vacated',  'channel' => 'bar' }
                                ])
       expect(pusher).to receive(:webhook) do |request|
-        request.path_info == '/pusher/existence'
+        expect(request.path_info).to eq('/pusher/existence')
         webhook
       end
 
@@ -77,7 +78,7 @@ describe Travis::Logs::App do
                                  { 'name' => 'channel_occupied', 'channel' => 'bar' }
                                ])
       expect(pusher).to receive(:webhook) do |request|
-        request.path_info == '/pusher/existence'
+        expect(request.path_info).to eq('/pusher/existence')
         webhook
       end
 
@@ -91,7 +92,7 @@ describe Travis::Logs::App do
     it 'responds with 401 with invalid webhook' do
       webhook = OpenStruct.new(valid?: false)
       expect(pusher).to receive(:webhook) do |request|
-        request.path_info == '/pusher/existence'
+        expect(request.path_info).to eq('/pusher/existence')
         webhook
       end
 
