@@ -18,9 +18,7 @@ module Travis
         end
 
         def pusher_channel_name(payload)
-          channel = ''
-          channel += 'private-' if secure?
-          channel + "job-#{payload['id']}"
+          "#{secure? ? 'private-' : ''}job-#{payload['id']}"
         end
 
         def webhook(request)

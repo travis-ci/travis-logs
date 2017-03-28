@@ -119,7 +119,7 @@ module Travis
         end
 
         private def log_empty?(log_id)
-          content = database.log_for_id(log_id)[:content]
+          content = (database.log_for_id(log_id) || {})[:content]
           return false unless content.nil? || content.empty?
           Travis.logger.warn(
             'aggregating',
