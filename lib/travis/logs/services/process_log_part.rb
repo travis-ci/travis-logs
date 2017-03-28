@@ -49,7 +49,10 @@ module Travis
         private :existence
 
         private def create_part(log_id, payload)
-          valid_log_id?(log_id, payload)
+          if log_id.zero?
+            mark_invalid_log_id(log_id, payload)
+            return
+          end
           database.create_log_part(
             log_id: log_id,
             content: chars(payload),
@@ -65,8 +68,7 @@ module Travis
           Travis.logger.warn(e.backtrace.join("\n"))
         end
 
-        private def valid_log_id?(log_id, payload)
-          return true unless log_id.zero?
+        private def mark_invalid_log_id(log_id, payload)
           Travis.logger.warn(
             'invalid log id',
             action: 'process', job_id: payload['id'],
