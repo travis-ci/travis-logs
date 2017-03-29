@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'coder'
 require 'json'
 require 'timeout'
@@ -6,9 +7,7 @@ module Travis
   module Logs
     class Receive
       class Queue
-        include Logging
-
-        METRIKS_PREFIX = 'logs.queue'.freeze
+        METRIKS_PREFIX = 'logs.queue'
 
         def self.subscribe(name, handler)
           new(name, handler).subscribe
@@ -49,7 +48,7 @@ module Travis
           log_exception(e, decoded_payload)
           message.reject(requeue: true)
           Metriks.meter("#{METRIKS_PREFIX}.receive.retry").mark
-          error '[queue:receive] message requeued'
+          Travis.logger.error('message requeued', stage: 'queue:receive')
         end
 
         def smart_retry(&block)
@@ -83,7 +82,10 @@ module Travis
           payload = Coder.clean(payload)
           ::JSON.parse(payload)
         rescue StandardError => e
-          error "[queue:decode] payload could not be decoded: #{e.inspect} #{payload.inspect}"
+          Travis.logger.error(
+            "payload could not be decoded: #{e.inspect} #{payload.inspect}",
+            stage: 'queue:decode'
+          )
           Metriks.meter("#{METRIKS_PREFIX}.payload.decode_error").mark
           nil
         end
@@ -96,7 +98,7 @@ module Travis
             payload: payload.inspect
           )
           Travis::Exceptions.handle(error)
-        rescue Exception => e
+        rescue StandardError => e
           Travis.logger.error("!!!FAILSAFE!!! #{e.message}")
           Travis.logger.error(e.backtrace.first)
         end

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'redis'
 require 'travis/redis_pool'
 

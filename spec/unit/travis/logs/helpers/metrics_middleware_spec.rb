@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics_middleware'
 
 describe Travis::Logs::Helpers::MetricsMiddleware do

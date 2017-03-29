@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Travis
   module Logs
     Investigator = Struct.new(:name, :matcher, :marking_tmpl, :label_tmpl) do
