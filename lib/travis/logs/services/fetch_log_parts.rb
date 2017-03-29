@@ -12,7 +12,7 @@ module Travis
 
         def run(log_id: nil, job_id: nil, after: nil, part_numbers: [])
           return [] if job_id && job_id < min_accepted_job_id
-          return [] if id && id < min_accepted_id
+          return [] if log_id && log_id < min_accepted_id
 
           log_id = database.log_id_for_job_id(job_id) if log_id.nil?
           return nil if log_id.nil?
