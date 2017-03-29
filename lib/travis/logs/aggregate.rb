@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs'
 require 'travis/logs/helpers/database'
 require 'travis/logs/helpers/lock'
@@ -40,7 +41,7 @@ module Travis
           begin
             cursor = aggregator.run_ranges(cursor, per_page)
             break if cursor.to_i > max_id
-          rescue Exception => e
+          rescue StandardError => e
             Travis.logger.error(
               e.message, backtrace: e.backtrace.join("\n")
             )
@@ -52,7 +53,7 @@ module Travis
         lock.exclusive do
           begin
             aggregator.run
-          rescue Exception => e
+          rescue StandardError => e
             Travis::Exceptions.handle(e)
           end
         end

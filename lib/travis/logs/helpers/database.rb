@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 def jruby?
   RUBY_PLATFORM =~ /^java/
 end
@@ -6,7 +7,7 @@ require 'logger'
 require 'sequel'
 require 'jdbc/postgres' if jruby?
 require 'pg' unless jruby?
-require 'delegate'
+require 'travis/logs/helpers/database_uri'
 
 module Travis
   module Logs
@@ -21,8 +22,14 @@ module Travis
           # creating the tables or debugging).
           def create_sequel
             config = Travis::Logs.config.logs_database.to_h
-            uri = jdbc_uri_from_config(config) if jruby?
-            uri = uri_from_config(config) unless jruby?
+
+            uri = if jruby?
+                    Travis::Logs::Helpers::DatabaseURI.jdbc_uri_from_config(
+                      config
+                    )
+                  else
+                    Travis::Logs::Helpers::DatabaseURI.uri_from_config(config)
+                  end
 
             Sequel.default_timezone = :utc
             conn = Sequel.connect(
@@ -32,41 +39,6 @@ module Travis
             )
             conn.loggers << Logger.new($stdout) if config[:sql_logging]
             conn
-          end
-
-          def uri_from_config(config)
-            host = config[:host] || 'localhost'
-            port = config[:port] || 5432
-            database = config[:database]
-            username = config[:username] || ENV['USER']
-
-            params = {
-              user: username,
-              password: config[:password]
-            }
-
-            enc_params = URI.encode_www_form(params)
-            "postgres://#{host}:#{port}/#{database}?#{enc_params}"
-          end
-
-          def jdbc_uri_from_config(config)
-            host = config[:host] || 'localhost'
-            port = config[:port] || 5432
-            database = config[:database]
-            username = config[:username] || ENV['USER']
-
-            params = {
-              user: username,
-              password: config[:password]
-            }
-
-            if config[:ssl]
-              params[:ssl] = true
-              params[:sslfactory] = 'org.postgresql.ssl.NonValidatingFactory'
-            end
-
-            enc_params = URI.encode_www_form(params)
-            "jdbc:postgresql://#{host}:#{port}/#{database}?#{enc_params}"
           end
 
           def connect
@@ -192,6 +164,14 @@ module Travis
           db.call(:delete_log_parts, log_id: log_id)
         end
 
+        def log_parts(log_id, after: nil, part_numbers: [])
+          query = db[:log_parts].select(:id, :number, :content, :final)
+                                .where(log_id: log_id)
+          query = query.where('number > ?', after) if after
+          query = query.where(number: part_numbers) unless part_numbers.empty?
+          query.order(:number).to_a
+        end
+
         def set_log_content(log_id, content, removed_by: nil)
           transaction do
             delete_log_parts(log_id)
@@ -277,6 +257,11 @@ module Travis
         end
 
         private def prepare_statements
+          prepare_logs_statements
+          prepare_log_parts_statements
+        end
+
+        private def prepare_logs_statements
           db[:logs]
             .where(id: :$log_id)
             .prepare(:first, :find_log)
@@ -306,7 +291,9 @@ module Travis
                      updated_at: :$updated_at,
                      removed_by: :$removed_by,
                      removed_at: :$removed_at)
+        end
 
+        private def prepare_log_parts_statements
           db[:log_parts]
             .prepare(:insert, :create_log_part,
                      log_id: :$log_id, content: :$content,

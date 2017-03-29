@@ -1,11 +1,16 @@
+# frozen_string_literal: true
 source 'https://rubygems.org'
 
 ruby '2.3.1', engine: 'jruby', engine_version: '9.1.5.0' if ENV.key?('DYNO')
 
+def gh(slug)
+  "https://github.com/#{slug}.git"
+end
+
 gem 'activesupport', '~> 3'
 gem 'aws-sdk'
 gem 'bunny', platform: :mri
-gem 'coder', git: 'https://github.com/rkh/coder.git'
+gem 'coder', git: gh('rkh/coder')
 gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'excon'
@@ -30,14 +35,15 @@ gem 'redis-namespace'
 gem 'redlock'
 gem 'rspec', group: :test
 gem 'rubocop', require: false, group: :test
-gem 'sentry-raven', git: 'https://github.com/getsentry/raven-ruby.git'
+gem 'sentry-raven', git: gh('getsentry/raven-ruby')
 gem 'sequel'
 gem 'sidekiq'
 gem 'simplecov', require: false, group: :test
 gem 'sinatra', '~> 1'
 gem 'sinatra-contrib'
-gem 'travis-amqp', git: 'https://github.com/travis-ci/travis-amqp.git'
+gem 'sinatra-param'
+gem 'travis-amqp', git: gh('travis-ci/travis-amqp')
 gem 'travis-config', '~> 1.0'
 gem 'travis-lock', git: 'https://github.com/travis-ci/travis-lock.git'
-gem 'travis-migrations', git: 'https://github.com/travis-ci/travis-migrations.git', group: :test
-gem 'travis-support', git: 'https://github.com/travis-ci/travis-support.git'
+gem 'travis-migrations', git: gh('travis-ci/travis-migrations'), group: :test
+gem 'travis-support', git: gh('travis-ci/travis-support')

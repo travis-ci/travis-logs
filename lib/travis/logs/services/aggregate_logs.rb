@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'concurrent'
 
 require 'travis/logs/helpers/metrics'
@@ -9,7 +10,7 @@ module Travis
       class AggregateLogs
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.aggregate_logs'.freeze
+        METRIKS_PREFIX = 'logs.aggregate_logs'
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -48,7 +49,7 @@ module Travis
           Travis.logger.info(
             'starting aggregation batch',
             size: ids.length, action: 'aggregate',
-            :'sample#aggregatable-logs' => ids.length
+            'sample#aggregatable-logs': ids.length
           )
 
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
@@ -79,7 +80,7 @@ module Travis
           )
           Travis.logger.info(
             'starting aggregation batch',
-            action: 'aggregate', :'sample#aggregatable-logs' => ids.length
+            action: 'aggregate', 'sample#aggregatable-logs': ids.length
           )
 
           pool = Concurrent::ThreadPoolExecutor.new(pool_config)
@@ -118,14 +119,13 @@ module Travis
         end
 
         private def log_empty?(log_id)
-          log = database.log_for_id(log_id)
-          if log[:content].nil? || log[:content].empty?
-            Travis.logger.warn(
-              'aggregating',
-              action: 'aggregate', log_id: log_id, result: 'empty'
-            )
-            true
-          end
+          content = (database.log_for_id(log_id) || {})[:content]
+          return false unless content.nil? || content.empty?
+          Travis.logger.warn(
+            'aggregating',
+            action: 'aggregate', log_id: log_id, result: 'empty'
+          )
+          true
         end
 
         private def vacuum(log_id)

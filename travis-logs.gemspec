@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Gem::Specification.new do |s|
   s.name = 'travis-logs'
   s.version = '0.1.0'

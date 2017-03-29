@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
 require 'travis/logs/investigator'
@@ -11,7 +12,7 @@ module Travis
       class ArchiveLog
         include Helpers::Metrics
 
-        METRIKS_PREFIX = 'logs.archive'.freeze
+        METRIKS_PREFIX = 'logs.archive'
 
         def self.metriks_prefix
           METRIKS_PREFIX
@@ -19,13 +20,18 @@ module Travis
 
         class VerificationFailed < StandardError
           def initialize(log_id, target_url, expected, actual)
-            super("Expected #{target_url} (from log id: #{log_id}) to have the content length #{expected.inspect}, but had #{actual.inspect}")
+            super(
+              "Expected #{target_url} (from log id: #{log_id}) " \
+              "to have the content length #{expected.inspect}, but " \
+              "had #{actual.inspect}"
+            )
           end
         end
 
         attr_reader :log_id
 
-        def initialize(log_id, storage_service = Helpers::S3.new, database = Travis::Logs.database_connection)
+        def initialize(log_id, storage_service = Helpers::S3.new,
+                       database = Travis::Logs.database_connection)
           @log_id = log_id
           @storage_service = storage_service
           @database = database
@@ -99,7 +105,9 @@ module Travis
                   action: 'archive', id: log_id, result: 'verification-failed',
                   expected: expected, actual: actual
                 )
-                raise VerificationFailed.new(log_id, target_url, expected, actual)
+                raise VerificationFailed.new(
+                  log_id, target_url, expected, actual
+                )
               end
             end
           end
@@ -110,10 +118,9 @@ module Travis
         end
 
         def queue_purge
-          if Travis::Logs.config.logs.purge
-            delay = Travis::Logs.config.logs.intervals.purge
-            Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
-          end
+          return unless Travis::Logs.config.logs.purge
+          delay = Travis::Logs.config.logs.intervals.purge
+          Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
         end
 
         def target_url
@@ -188,7 +195,7 @@ module Travis
         end
 
         def investigators
-          @investigators ||= Travis.config.investigation.investigators.to_h.map do |name, h|
+          @investigators ||= investigators_cfg.map do |name, h|
             ::Travis::Logs::Investigator.new(
               name,
               Regexp.new(h[:matcher]),
@@ -196,6 +203,10 @@ module Travis
               h[:label_tmpl]
             )
           end.sort_by(&:name)
+        end
+
+        private def investigators_cfg
+          @investigators_cfg ||= Travis.config.investigation.investigators.to_h
         end
       end
     end
