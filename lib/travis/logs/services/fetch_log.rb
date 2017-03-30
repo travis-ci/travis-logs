@@ -20,9 +20,7 @@ module Travis
             return spoofed_archived_log(job_id: job_id)
           end
 
-          if id && id < min_accepted_id
-            return spoofed_archived_log(id: id)
-          end
+          return spoofed_archived_log(id: id) if id && id < min_accepted_id
 
           result = nil
           result = database.log_for_job_id(job_id) if job_id
