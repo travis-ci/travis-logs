@@ -11,12 +11,7 @@ module Travis
         end
 
         def api_logging?
-          %w(1 yes on true).include?(
-            (
-              ENV['TRAVIS_LOGS_API_LOGGING'] ||
-              ENV['API_LOGGING']
-            ).to_s.downcase
-          )
+          %w(1 yes on true).include?(envvar('API_LOGGING').to_s.downcase)
         end
 
         def disable_ssl?
@@ -24,62 +19,59 @@ module Travis
         end
 
         def sql_logging?
-          %w(1 yes on true).include?(
-            ENV['TRAVIS_LOGS_SQL_LOGGING'] ||
-            ENV['SQL_LOGGING'] || 'off'
-          )
+          %w(1 yes on true).include?(envvar('SQL_LOGGING', 'off'))
         end
 
         def aggregate_pool_min_threads
-          Integer(
-            ENV['TRAVIS_LOGS_AGGREGATE_POOL_MIN_THREADS'] ||
-            ENV['AGGREGATE_POOL_MIN_THREADS'] || 20
-          )
+          Integer(envvar('AGGREGATE_POOL_MIN_THREADS', 20))
         end
 
         def aggregate_pool_max_threads
-          Integer(
-            ENV['TRAVIS_LOGS_AGGREGATE_POOL_MAX_THREADS'] ||
-            ENV['AGGREGATE_POOL_MAX_THREADS'] || 20
-          )
+          Integer(envvar('AGGREGATE_POOL_MAX_THREADS', 20))
         end
 
-        def intervals_vacuum
-          Integer(
-            ENV['TRAVIS_LOGS_INTERVALS_VACUUM'] ||
-            ENV['INTERVALS_VACUUM'] || 60
-          )
+        def intervals_aggregate
+          Integer(envvar('INTERVALS_AGGREGATE', 60))
         end
 
         def per_aggregate_limit
-          Integer(
-            ENV['TRAVIS_LOGS_PER_AGGREGATE_LIMIT'] ||
-            ENV['PER_AGGREGATE_LIMIT'] || 500
-          )
+          Integer(envvar('PER_AGGREGATE_LIMIT', 500))
         end
 
-        def vacuum_skip_empty?
-          %w(1 yes on true).include?(
-            ENV['TRAVIS_LOGS_VACUUM_SKIP_EMPTY'] ||
-            ENV['VACUUM_SKIP_EMPTY'] || 'on'
-          )
+        def aggregate_clean_skip_empty?
+          %w(1 yes on true).include?(envvar('AGGREGATE_CLEAN_SKIP_EMPTY', 'on'))
         end
 
         def aggregatable_order
-          ENV['TRAVIS_LOGS_AGGREGATABLE_ORDER'] ||
-            ENV['AGGREGATABLE_ORDER'] || nil
+          envvar('AGGREGATABLE_ORDER', nil)
         end
 
         def archive_spoofing_min_accepted_job_id
-          Integer(
-            ENV['TRAVIS_LOGS_ARCHIVE_SPOOFING_MIN_ACCEPTED_JOB_ID'] || 0
-          )
+          Integer(envvar('ARCHIVE_SPOOFING_MIN_ACCEPTED_JOB_ID', 0))
         end
 
         def archive_spoofing_min_accepted_id
-          Integer(
-            ENV['TRAVIS_LOGS_ARCHIVE_SPOOFING_MIN_ACCEPTED_ID'] || 0
-          )
+          Integer(envvar('ARCHIVE_SPOOFING_MIN_ACCEPTED_ID', 0))
+        end
+
+        def log_parts_autovacuum_vacuum_threshold
+          Integer(envvar('LOG_PARTS_AUTOVACUUM_VACUUM_THRESHOLD', 0))
+        end
+
+        def log_parts_autovacuum_vacuum_scale_factor
+          Float(envvar('LOG_PARTS_AUTOVACUUM_VACUUM_SCALE_FACTOR', 0.001))
+        end
+
+        def vacuum_cost_limit
+          Integer(envvar('VACUUM_COST_LIMIT', 10_000))
+        end
+
+        def vacuum_cost_delay
+          Integer(envvar('VACUUM_COST_DELAY', 20))
+        end
+
+        private def envvar(suffix, default = nil)
+          ENV["TRAVIS_LOGS_#{suffix}"] || ENV[suffix] || default
         end
       end
 
@@ -92,6 +84,7 @@ module Travis
           aggregatable_order: aggregatable_order,
           api_logging: api_logging?,
           archive: true,
+          aggregate_clean_skip_empty: aggregate_clean_skip_empty?,
           purge: false,
           threads: 10,
           per_aggregate_limit: per_aggregate_limit,
@@ -105,13 +98,12 @@ module Travis
             min_accepted_id: archive_spoofing_min_accepted_id
           },
           intervals: {
-            vacuum: intervals_vacuum,
+            aggregate: intervals_aggregate,
             sweeper: 10 * 60,
             regular: 3 * 60,
             force: 3 * 60 * 60,
             purge: 6
-          },
-          vacuum_skip_empty: vacuum_skip_empty?
+          }
         },
         log_level: :info,
         logger: { format_type: 'l2met', thread_id: true },
@@ -124,7 +116,13 @@ module Travis
           ssl: ssl?,
           encoding: 'unicode',
           min_messages: 'warning',
-          sql_logging: sql_logging?
+          sql_logging: sql_logging?,
+          log_parts_autovacuum_vacuum_threshold:
+            log_parts_autovacuum_vacuum_threshold,
+          log_parts_autovacuum_vacuum_scale_factor:
+            log_parts_autovacuum_vacuum_scale_factor,
+          vacuum_cost_limit: vacuum_cost_limit,
+          vacuum_cost_delay: vacuum_cost_delay
         },
         s3: {
           hostname: 'archive.travis-ci.org', access_key_id: '',

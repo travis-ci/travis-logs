@@ -59,7 +59,7 @@ module Travis
       end
 
       private def sleep_interval
-        Travis.config.logs.intervals.vacuum
+        Travis.config.logs.intervals.aggregate
       end
     end
   end

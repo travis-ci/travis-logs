@@ -171,7 +171,7 @@ module Travis
         end
 
         private def skip_empty?
-          Travis.config.logs.vacuum_skip_empty
+          Travis.config.logs.aggregate_clean_skip_empty
         end
 
         private def aggregatable_order
