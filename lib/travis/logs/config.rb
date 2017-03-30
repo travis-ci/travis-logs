@@ -69,6 +69,18 @@ module Travis
           ENV['TRAVIS_LOGS_AGGREGATABLE_ORDER'] ||
             ENV['AGGREGATABLE_ORDER'] || nil
         end
+
+        def archive_spoofing_min_accepted_job_id
+          Integer(
+            ENV['TRAVIS_LOGS_ARCHIVE_SPOOFING_MIN_ACCEPTED_JOB_ID'] || 0
+          )
+        end
+
+        def archive_spoofing_min_accepted_id
+          Integer(
+            ENV['TRAVIS_LOGS_ARCHIVE_SPOOFING_MIN_ACCEPTED_ID'] || 0
+          )
+        end
       end
 
       def env
@@ -87,6 +99,10 @@ module Travis
             min_threads: aggregate_pool_min_threads,
             max_threads: aggregate_pool_max_threads,
             max_queue: 0
+          },
+          archive_spoofing: {
+            min_accepted_job_id: archive_spoofing_min_accepted_job_id,
+            min_accepted_id: archive_spoofing_min_accepted_id
           },
           intervals: {
             vacuum: intervals_vacuum,
