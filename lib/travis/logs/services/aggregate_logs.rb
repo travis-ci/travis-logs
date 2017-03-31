@@ -31,7 +31,7 @@ module Travis
 
           if aggregate_async?
             Travis.logger.info 'action=aggregate async=true ' \
-                               "sample#aggregateable-logs=#{ids.length}"
+                               "sample#aggregateable-logs=#{ids.length}" unless ids.length == 0
 
             ids.each do |log_id|
               Travis::Logs::Sidekiq::Aggregate.perform_async(log_id)
@@ -41,7 +41,7 @@ module Travis
           end
 
           Travis.logger.info 'action=aggregate async=false ' \
-                             "sample#aggregateable-logs=#{ids.length}"
+                             "sample#aggregateable-logs=#{ids.length}" unless ids.length == 0
           ids.each { |log_id| aggregate_log(log_id) }
         end
 
