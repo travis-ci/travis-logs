@@ -18,7 +18,6 @@ module Travis
         Travis::Exceptions::Reporter.start
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
-        declare_exchanges
       end
 
       def run
@@ -27,16 +26,6 @@ module Travis
             'logs', Travis::Logs::Services::ProcessLogPart.new
           )
         end
-      end
-
-      def declare_exchanges
-        channel = Travis::Amqp.connection.create_channel
-        channel.exchange(
-          'reporting',
-          durable: true,
-          auto_delete: false,
-          type: :topic
-        )
       end
     end
   end
