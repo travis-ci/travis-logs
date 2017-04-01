@@ -14,18 +14,23 @@ module Travis
   module Logs
     class Receive
       def setup
-        Travis.logger.info('Starting Log Parts Processor')
         Travis::Exceptions::Reporter.start
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
       end
 
       def run
-        1.upto(Travis::Logs.config.logs.threads) do
+        1.upto(Travis::Logs.config.logs.threads) do |n|
+          Travis.logger.debug('spawning receiver thread', n: n)
           Travis::Logs::Receive::Queue.subscribe(
             'logs', Travis::Logs::Services::ProcessLogPart.new
           )
         end
+        Travis.logger.info(
+          'consumer threads spawned',
+          n: Travis::Logs.config.logs.threads
+        )
+        sleep
       end
     end
   end

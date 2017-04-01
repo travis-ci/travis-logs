@@ -9,5 +9,7 @@ require 'travis/logs/receive'
 $stdout.sync = true
 
 app = Travis::Logs::Receive.new
+Travis.logger.info('setting up log parts processor')
 app.setup
+Travis.logger.info('running log parts processor')
 app.run
