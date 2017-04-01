@@ -1,12 +1,8 @@
 # frozen_string_literal: true
-def jruby?
-  RUBY_PLATFORM =~ /^java/
-end
 
 require 'logger'
 require 'sequel'
-require 'jdbc/postgres' if jruby?
-require 'pg' unless jruby?
+require 'pg'
 require 'travis/logs/helpers/database_uri'
 require 'travis/logs/helpers/database_vacuum_settings'
 
@@ -23,14 +19,7 @@ module Travis
           # creating the tables or debugging).
           def create_sequel
             config = Travis::Logs.config.logs_database.to_h
-
-            uri = if jruby?
-                    Travis::Logs::Helpers::DatabaseURI.jdbc_uri_from_config(
-                      config
-                    )
-                  else
-                    Travis::Logs::Helpers::DatabaseURI.uri_from_config(config)
-                  end
+            uri = Travis::Logs::Helpers::DatabaseURI.uri_from_config(config)
 
             Sequel.default_timezone = :utc
             conn = Sequel.connect(
@@ -179,7 +168,7 @@ module Travis
         def log_parts(log_id, after: nil, part_numbers: [])
           query = db[:log_parts].select(:id, :number, :content, :final)
                                 .where(log_id: log_id)
-          query = query.where('number > ?', after) if after
+          query = query.where { number > after } if after
           query = query.where(number: part_numbers) unless part_numbers.empty?
           query.order(:number).to_a
         end
@@ -205,14 +194,9 @@ module Travis
                               order: :created_at)
           query = db[:log_parts]
                   .select(:log_id)
-                  .where(
-                    "created_at <= NOW() - interval '? seconds' AND final = ?",
-                    regular_interval, true
-                  )
-                  .or(
-                    "created_at <= NOW() - interval '? seconds'",
-                    force_interval
-                  )
+                  .where { created_at <= (Time.now.utc - regular_interval) }
+                  .and(final: true)
+                  .or { created_at <= (Time.now.utc - force_interval) }
                   .limit(limit)
           query = query.order(order.to_sym) unless order.nil?
           query.map(:log_id).uniq

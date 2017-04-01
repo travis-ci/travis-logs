@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
 require 'travis/logs/sidekiq'

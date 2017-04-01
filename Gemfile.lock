@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/getsentry/raven-ruby.git
-  revision: d75133cf8f0dfad924bb52f567141ca6bcd9edb8
+  revision: c98168ad5cefacc7e8a998afc0304a457d375b6f
   specs:
-    sentry-raven (2.2.0)
+    sentry-raven (2.4.0)
       faraday (>= 0.7.6, < 1.0)
 
 GIT
@@ -12,20 +12,14 @@ GIT
     coder (0.4.0)
 
 GIT
-  remote: https://github.com/travis-ci/travis-amqp.git
-  revision: 3966b3651adfd1c544f53d49d5986ac16cd9c4bc
-  specs:
-    travis-amqp (0.0.1)
-
-GIT
   remote: https://github.com/travis-ci/travis-migrations.git
-  revision: 90d0a854cf9060ac21bb74217a4207a4c27c05a3
+  revision: 21a258b568f35af5dd3cdabd43e5a6bd9354904b
   specs:
     travis-migrations (0.0.3)
 
 GIT
   remote: https://github.com/travis-ci/travis-support.git
-  revision: 2cd02d2a06fdd1e2fc2f129148c168b56f7c190f
+  revision: 113cff17fe383bb72fcfae3a97a8ce98c228342f
   specs:
     travis-support (0.0.1)
 
@@ -35,46 +29,37 @@ GEM
     activesupport (3.2.22.5)
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
-    amq-protocol (2.0.1)
+    amq-protocol (2.1.0)
     ast (2.3.0)
     atomic (1.1.99)
-    atomic (1.1.99-java)
     avl_tree (1.2.1)
       atomic (~> 1.1)
-    aws-sdk (2.6.35)
-      aws-sdk-resources (= 2.6.35)
-    aws-sdk-core (2.6.35)
+    aws-sdk (2.9.0)
+      aws-sdk-resources (= 2.9.0)
+    aws-sdk-core (2.9.0)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.6.35)
-      aws-sdk-core (= 2.6.35)
+    aws-sdk-resources (2.9.0)
+      aws-sdk-core (= 2.9.0)
     aws-sigv4 (1.0.0)
-    backports (3.6.8)
-    bunny (2.6.1)
+    backports (3.7.0)
+    bunny (2.6.4)
       amq-protocol (>= 2.0.1)
     coderay (1.1.1)
-    concurrent-ruby (1.0.2)
-    concurrent-ruby (1.0.2-java)
+    concurrent-ruby (1.0.5)
     connection_pool (2.2.1)
-    diff-lcs (1.2.5)
+    diff-lcs (1.3)
     docile (1.1.5)
-    excon (0.54.0)
-    faraday (0.10.0)
+    excon (0.55.0)
+    faraday (0.11.0)
       multipart-post (>= 1.2, < 3)
-    ffi (1.9.14-java)
     hashr (2.0.0)
     hitimes (1.2.4)
-    hitimes (1.2.4-java)
     httpclient (2.8.3)
-    i18n (0.7.0)
-    jdbc-postgres (9.4.1206)
+    i18n (0.8.1)
     jmespath (1.3.1)
-    jrjackson (0.4.2-java)
-    jruby-openssl (0.9.19-java)
-    json (2.0.2)
-    json (2.0.2-java)
+    json (2.0.3)
     jwt (1.5.6)
-    march_hare (2.21.0-java)
     method_source (0.8.2)
     metriks (0.9.9.7)
       atomic (~> 1.0)
@@ -84,24 +69,18 @@ GEM
       metriks (>= 0.9.9.6)
     multi_json (1.12.1)
     multipart-post (2.0.0)
-    oj (2.18.0)
-    parser (2.3.3.1)
+    oj (2.18.5)
+    parser (2.4.0.0)
       ast (~> 2.2)
-    pg (0.19.0)
+    pg (0.20.0)
     powerpack (0.1.1)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    pry (0.10.4-java)
-      coderay (~> 1.1.0)
-      method_source (~> 0.8.1)
-      slop (~> 3.4)
-      spoon (~> 0.0)
-    puma (3.6.2)
-    puma (3.6.2-java)
-    pusher (0.14.6)
-      httpclient (~> 2.5)
+    puma (3.8.2)
+    pusher (0.18.0)
+      httpclient (~> 2.7)
       multi_json (~> 1.0)
       pusher-signature (~> 0.1.8)
     pusher-signature (0.1.8)
@@ -114,8 +93,8 @@ GEM
       rack (>= 1.0)
     rainbow (2.2.1)
     rake (12.0.0)
-    redis (3.3.2)
-    redis-namespace (1.5.2)
+    redis (3.3.3)
+    redis-namespace (1.5.3)
       redis (~> 3.0, >= 3.0.4)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
@@ -130,25 +109,25 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.5.0)
     rspec-support (3.5.0)
-    rubocop (0.46.0)
-      parser (>= 2.3.1.1, < 3.0)
+    rubocop (0.48.0)
+      parser (>= 2.3.3.1, < 3.0)
       powerpack (~> 0.1)
       rainbow (>= 1.99.1, < 3.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.8.1)
-    sequel (4.41.0)
-    sidekiq (4.2.7)
+    sequel (4.44.0)
+    sidekiq (4.2.10)
       concurrent-ruby (~> 1.0)
       connection_pool (~> 2.2, >= 2.2.0)
       rack-protection (>= 1.5.0)
       redis (~> 3.2, >= 3.2.1)
-    simplecov (0.12.0)
+    simplecov (0.14.1)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.0)
-    sinatra (1.4.7)
+    sinatra (1.4.8)
       rack (~> 1.5)
       rack-protection (~> 1.4)
       tilt (>= 1.3, < 3)
@@ -162,15 +141,12 @@ GEM
     sinatra-param (1.4.0)
       sinatra (~> 1.3)
     slop (3.6.0)
-    spoon (0.0.6)
-      ffi
-    tilt (2.0.5)
+    tilt (2.0.7)
     travis-config (1.0.13)
       hashr (~> 2.0.0)
-    unicode-display_width (1.1.2)
+    unicode-display_width (1.1.3)
 
 PLATFORMS
-  java
   ruby
 
 DEPENDENCIES
@@ -182,14 +158,10 @@ DEPENDENCIES
   connection_pool
   excon
   faraday
-  jdbc-postgres
-  jrjackson
-  jruby-openssl
-  json
   jwt
-  march_hare (~> 2)
   metriks
   metriks-librato_metrics
+  multi_json
   oj
   pg
   pry
@@ -208,7 +180,6 @@ DEPENDENCIES
   sinatra (~> 1)
   sinatra-contrib
   sinatra-param
-  travis-amqp!
   travis-config (~> 1.0)
   travis-migrations!
   travis-support!

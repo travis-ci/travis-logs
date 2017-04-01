@@ -1,6 +1,8 @@
 # frozen_string_literal: true
+
+require 'bunny'
 require 'coder'
-require 'json'
+require 'multi_json'
 require 'timeout'
 
 module Travis
@@ -21,20 +23,28 @@ module Travis
         end
 
         def subscribe
-          consumer.subscribe(ack: true, declare: true, &method(:receive))
+          jobs_queue.subscribe(manual_ack: true, &method(:receive))
         end
 
-        private
-
-        def consumer
-          Travis::Amqp::Consumer.jobs(name, channel: { prefetch: prefetch })
+        private def jobs_queue
+          @jobs_queue ||= jobs_channel.queue(
+            "reporting.jobs.#{name}", durable: true, exclusive: false
+          )
         end
 
-        def prefetch
-          Travis::Logs.config.amqp.prefetch
+        private def jobs_channel
+          @jobs_channel ||= amqp_conn.create_channel
         end
 
-        def receive(message, payload)
+        private def amqp_conn
+          @amqp_conn ||= Bunny.new(amqp_config).tap(&:start)
+        end
+
+        private def amqp_config
+          Travis::Logs.config.amqp.to_h
+        end
+
+        private def receive(delivery_info, _properties, payload)
           decoded_payload = nil
           smart_retry do
             decoded_payload = decode(payload)
@@ -43,15 +53,15 @@ module Travis
               handler.run(decoded_payload)
             end
           end
-          message.ack
+          jobs_channel.ack(delivery_info.delivery_tag, true)
         rescue => e
           log_exception(e, decoded_payload)
-          message.reject(requeue: true)
+          jobs_channel.reject(delivery_info.delivery_tag, true)
           Metriks.meter("#{METRIKS_PREFIX}.receive.retry").mark
           Travis.logger.error('message requeued', stage: 'queue:receive')
         end
 
-        def smart_retry(&block)
+        private def smart_retry(&block)
           retry_count = 0
           begin
             Timeout.timeout(3, &block)
@@ -77,10 +87,10 @@ module Travis
           end
         end
 
-        def decode(payload)
+        private def decode(payload)
           return payload if payload.is_a?(Hash)
           payload = Coder.clean(payload)
-          ::JSON.parse(payload)
+          MultiJson.load(payload)
         rescue StandardError => e
           Travis.logger.error(
             "payload could not be decoded: #{e.inspect} #{payload.inspect}",
@@ -90,7 +100,7 @@ module Travis
           nil
         end
 
-        def log_exception(error, payload)
+        private def log_exception(error, payload)
           Travis.logger.error(
             'Exception caught in queue while processing payload',
             action: 'receive',

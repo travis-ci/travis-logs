@@ -1,6 +1,7 @@
 # frozen_string_literal: true
-require 'json'
+
 require 'jwt'
+require 'multi_json'
 require 'pusher'
 require 'rack/ssl'
 require 'raven'
@@ -113,7 +114,7 @@ module Travis
 
         request.body.rewind
 
-        items = Array(JSON.parse(request.body.read))
+        items = Array(MultiJson.load(request.body.read))
         halt 400 unless all_items_valid?(items)
 
         database.transaction do
@@ -167,13 +168,13 @@ module Travis
           halt 403
         end
 
-        data = JSON.parse(request.body.read)
+        data = MultiJson.load(request.body.read)
         if data['@type'] != 'log_part'
-          halt 400, JSON.dump('error' => '@type should be log_part')
+          halt 400, MultiJson.dump(error: '@type should be log_part')
         end
 
         if data['encoding'] != 'base64'
-          halt 400, JSON.dump(error: 'invalid encoding, only base64 supported')
+          halt 400, MultiJson.dump(error: 'invalid encoding')
         end
 
         process_log_part_service.run(

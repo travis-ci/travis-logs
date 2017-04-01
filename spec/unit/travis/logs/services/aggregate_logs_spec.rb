@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'travis/logs'
 require 'travis/support'
 require 'travis/logs/sidekiq'
@@ -6,7 +7,7 @@ require 'travis/logs/services/aggregate_logs'
 require 'travis/logs/helpers/database'
 
 describe Travis::Logs::Services::AggregateLogs do
-  let(:database) { double('database') }
+  let(:database) { double(Travis::Logs::Helpers::Database) }
   let(:archiver) { Travis::Logs::Sidekiq::Archive }
   let(:log_id) { rand(10_000..19_999) }
 

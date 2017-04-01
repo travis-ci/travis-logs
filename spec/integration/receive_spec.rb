@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'travis/logs'
 require 'travis/support'
 require 'travis/support/amqp'
@@ -31,18 +32,19 @@ describe 'receive_logs' do
   end
 
   it 'stores the log part in the database' do
-    allow(Travis::Amqp::Consumer).to receive(:jobs) { queue }
+    allow_any_instance_of(Travis::Logs::Receive::Queue)
+      .to receive(:jobs_queue) { queue }
     database = Travis::Logs::Helpers::Database.new
     database.connect
-    db = database.instance_variable_get(:@db)
+    db = database.send(:db)
     db[:logs].delete
     db[:log_parts].delete
     Travis::Logs.database_connection = database
     Travis::Logs::Receive::Queue.subscribe(
       'logs', Travis::Logs::Services::ProcessLogPart.new
     )
-    message = double('message', ack: nil)
-    queue.call(message, '{"id":123,"log":"hello, world","number":1}')
+    delivery_info = double('delivery_info', delivery_tag: 'yey')
+    queue.call(delivery_info, nil, '{"id":123,"log":"hello, world","number":1}')
     log = db[:logs].first
     log_part = db[:log_parts].first
 
@@ -51,23 +53,5 @@ describe 'receive_logs' do
     expect(log_part[:number]).to eq(1)
     expect(log_part[:final]).to be false
     expect(log_part[:log_id]).to eq(log[:id])
-  end
-
-  it 'uses the default prefetch' do
-    expect(Travis::Amqp::Consumer).to receive(:jobs)
-      .with('logs', channel: { prefetch: 1 }) { queue }
-    Travis::Logs::Receive::Queue.subscribe(
-      'logs', Travis::Logs::Services::ProcessLogPart.new
-    )
-  end
-
-  it 'uses a custom prefetch given in the config' do
-    allow_any_instance_of(Travis::Logs::Receive::Queue)
-      .to receive(:prefetch).and_return(2)
-    expect(Travis::Amqp::Consumer).to receive(:jobs)
-      .with('logs', channel: { prefetch: 2 }) { queue }
-    Travis::Logs::Receive::Queue.subscribe(
-      'logs', Travis::Logs::Services::ProcessLogPart.new
-    )
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
+
 require 'travis/logs'
 require 'travis/support'
-require 'travis/amqp'
 require 'travis/support/exceptions/reporter'
 require 'travis/support/metrics'
 require 'travis/logs/receive/queue'
@@ -15,7 +15,6 @@ module Travis
     class Receive
       def setup
         Travis.logger.info('Starting Log Parts Processor')
-        Travis::Amqp.setup(amqp_config)
         Travis::Exceptions::Reporter.start
         Travis::Metrics.setup
         Travis::Logs::Sidekiq.setup
@@ -28,12 +27,6 @@ module Travis
             'logs', Travis::Logs::Services::ProcessLogPart.new
           )
         end
-      end
-
-      def amqp_config
-        Travis::Logs.config.amqp.to_h.merge(
-          thread_pool_size: (Travis::Logs.config.logs.threads * 2 + 3)
-        )
       end
 
       def declare_exchanges
