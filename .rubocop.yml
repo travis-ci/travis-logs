@@ -10,6 +10,7 @@ Metrics/LineLength:
   Max: 80
   Exclude:
   - 'spec/**/*'
+  - Gemfile
 
 Metrics/MethodLength:
   Max: 30

@@ -26,7 +26,8 @@ GIT
 
 GIT
   remote: https://github.com/travis-ci/travis-logger.git
-  revision: 765046a4746617a70395fe2200e8a91dc416f1b3
+  revision: 1518ce2d056d0f5c6a0a4f15040aeaef673a53de
+  ref: 1518ce2d056d0f5c6a0a4f15040aeaef673a53de
   specs:
     travis-logger (0.0.1)
 
