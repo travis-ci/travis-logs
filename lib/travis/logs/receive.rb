@@ -15,7 +15,9 @@ module Travis
   module Logs
     class Receive
       def setup
-        Travis::Exceptions::Reporter.start
+        Travis::Exceptions.setup(
+          Travis.config, Travis.config.env, Travis.logger
+        )
         Travis::Metrics.setup(Travis.config, Travis.logger)
         Travis::Logs::Sidekiq.setup
       end

@@ -17,7 +17,7 @@ $stdout.sync = true
 Travis.logger.info('Setting up Sidekiq')
 
 Travis::Logs::Helpers::S3.setup
-Travis::Exceptions::Reporter.start
+Travis::Exceptions.setup(Travis.config, Travis.config.env, Travis.logger)
 Travis::Metrics.setup(Travis.config, Travis.logger)
 Travis::Logs::Sidekiq.setup
 
