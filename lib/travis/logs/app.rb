@@ -15,9 +15,9 @@ require 'travis/logs/helpers/metrics_middleware'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/services/fetch_log'
 require 'travis/logs/services/fetch_log_parts'
-require 'travis/logs/services/process_log_part'
 require 'travis/logs/services/upsert_log'
 require 'travis/logs/sidekiq'
+require 'travis/logs/sidekiq/log_parts'
 
 module Travis
   module Logs
@@ -177,7 +177,7 @@ module Travis
           halt 400, MultiJson.dump(error: 'invalid encoding')
         end
 
-        process_log_part_service.run(
+        Travis::Logs::Sidekiq::LogParts.perform_async(
           'id' => Integer(params[:job_id]),
           'log' => Base64.decode64(data['content']),
           'number' => params[:log_part_id], # NOTE: `log_part_id` may be "last"
@@ -241,15 +241,6 @@ module Travis
         @upsert_log_service ||= Travis::Logs::Services::UpsertLog.new(
           database: database
         )
-      end
-
-      private def process_log_part_service
-        @process_log_part_service ||=
-          Travis::Logs::Services::ProcessLogPart.new(
-            database: database,
-            pusher_client: pusher,
-            existence: existence
-          )
       end
 
       private def existence

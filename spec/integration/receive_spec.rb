@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 require 'travis/logs'
-require 'travis/support'
-require 'travis/support/amqp'
 require 'travis/logs/receive/queue'
-require 'travis/logs/services/process_log_part'
 require 'travis/logs/helpers/database'
 
 class FakeAmqpQueue

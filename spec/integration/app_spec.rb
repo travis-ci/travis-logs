@@ -30,8 +30,6 @@ describe Travis::Logs::App do
       .to receive(:pusher).and_return(pusher)
     allow_any_instance_of(described_class)
       .to receive(:database).and_return(database)
-    allow_any_instance_of(described_class)
-      .to receive(:process_log_part_service).and_return(log_part_service)
   end
 
   describe 'GET /uptime' do
