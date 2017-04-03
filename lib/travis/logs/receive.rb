@@ -23,7 +23,8 @@ module Travis
         1.upto(Travis::Logs.config.logs.threads) do |n|
           Travis.logger.debug('spawning receiver thread', n: n)
           Travis::Logs::Receive::Queue.subscribe(
-            'logs', Travis::Logs::Services::ProcessLogPart.new
+            'logs',
+            ->(p) { Travis::Logs::Sidekiq::LogParts.perform_async(p) }
           )
         end
         Travis.logger.info(

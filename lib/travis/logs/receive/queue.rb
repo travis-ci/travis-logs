@@ -50,7 +50,7 @@ module Travis
             decoded_payload = decode(payload)
             if decoded_payload
               Travis.uuid = decoded_payload.delete('uuid')
-              handler.run(decoded_payload)
+              handler.call(decoded_payload)
             end
           end
           jobs_channel.ack(delivery_info.delivery_tag, true)
