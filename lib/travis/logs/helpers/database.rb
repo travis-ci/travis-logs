@@ -58,7 +58,7 @@ module Travis
 
           private def application_name
             @application_name ||= [
-              'logs', Travis.env, ENV['DYNO']
+              'logs', Travis.config.env, ENV['DYNO']
             ].compact.join('.')
           end
 

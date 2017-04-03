@@ -49,7 +49,7 @@ module Travis
           smart_retry do
             decoded_payload = decode(payload)
             if decoded_payload
-              Travis.uuid = decoded_payload.delete('uuid')
+              Thread.current[:uuid] = decoded_payload.delete('uuid')
               handler_callable.call(decoded_payload)
             end
           end

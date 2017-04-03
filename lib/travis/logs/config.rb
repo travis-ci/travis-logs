@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'travis/config'
-require 'travis/support'
 
 module Travis
   module Logs
@@ -76,10 +75,6 @@ module Travis
         end
       end
 
-      def env
-        Travis.env
-      end
-
       define(
         logs: {
           aggregatable_order: aggregatable_order,
@@ -113,7 +108,7 @@ module Travis
         },
         logs_database: {
           adapter: 'postgresql',
-          database: "travis_logs_#{Travis.env}",
+          database: "travis_logs_#{Travis::Config.env}",
           ssl: ssl?,
           encoding: 'unicode',
           min_messages: 'warning',

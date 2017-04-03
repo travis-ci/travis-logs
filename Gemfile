@@ -40,5 +40,7 @@ gem 'sinatra', '~> 1'
 gem 'sinatra-contrib'
 gem 'sinatra-param'
 gem 'travis-config', '~> 1.0'
+gem 'travis-exceptions', git: gh('travis-ci/travis-exceptions')
+gem 'travis-logger', git: gh('travis-ci/travis-logger')
+gem 'travis-metrics', git: gh('travis-ci/travis-metrics')
 gem 'travis-migrations', git: gh('travis-ci/travis-migrations'), group: :test
-gem 'travis-support', git: gh('travis-ci/travis-support')

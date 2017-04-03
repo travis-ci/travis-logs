@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'travis/logs'
-require 'travis/support'
 require 'travis/logs/sidekiq'
 require 'travis/logs/services/aggregate_logs'
 require 'travis/logs/helpers/database'

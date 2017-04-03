@@ -159,7 +159,7 @@ module Travis
 
         if auth_header.start_with?('Bearer ')
           halt 500, 'key is not set' if rsa_public_key.nil?
-          Travis.uuid = request.env['HTTP_X_REQUEST_ID']
+          Thread.current[:uuid] = request.env['HTTP_X_REQUEST_ID']
           jwt_decode!(auth_header[7..-1], params[:job_id])
         elsif auth_header.start_with?('token ')
           halt 500, 'authentication token is not set' if auth_token.empty?
@@ -256,7 +256,7 @@ module Travis
       end
 
       private def setup
-        Travis::Metrics.setup
+        Travis::Metrics.setup(Travis.config, Travis.logger)
         Travis::Logs::Sidekiq.setup
       end
 

@@ -2,22 +2,21 @@
 
 require 'active_support/core_ext/logger'
 
+require 'travis/exceptions'
 require 'travis/logs'
 require 'travis/logs/helpers/database'
 require 'travis/logs/receive/queue'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/sidekiq'
 require 'travis/logs/sidekiq/log_parts'
-require 'travis/support'
-require 'travis/support/exceptions/reporter'
-require 'travis/support/metrics'
+require 'travis/metrics'
 
 module Travis
   module Logs
     class Receive
       def setup
         Travis::Exceptions::Reporter.start
-        Travis::Metrics.setup
+        Travis::Metrics.setup(Travis.config, Travis.logger)
         Travis::Logs::Sidekiq.setup
       end
 

@@ -18,16 +18,30 @@ GIT
     coder (0.4.0)
 
 GIT
+  remote: https://github.com/travis-ci/travis-exceptions.git
+  revision: 71b11939f1f3b86d1e2fd94f3b9b8f78af290e12
+  specs:
+    travis-exceptions (0.0.2)
+      sentry-raven
+
+GIT
+  remote: https://github.com/travis-ci/travis-logger.git
+  revision: 765046a4746617a70395fe2200e8a91dc416f1b3
+  specs:
+    travis-logger (0.0.1)
+
+GIT
+  remote: https://github.com/travis-ci/travis-metrics.git
+  revision: 37eac93bd1e9bd949a9842f28154c335ebeda42a
+  specs:
+    travis-metrics (0.0.1)
+      metriks-librato_metrics (~> 1.0)
+
+GIT
   remote: https://github.com/travis-ci/travis-migrations.git
   revision: 21a258b568f35af5dd3cdabd43e5a6bd9354904b
   specs:
     travis-migrations (0.0.3)
-
-GIT
-  remote: https://github.com/travis-ci/travis-support.git
-  revision: 113cff17fe383bb72fcfae3a97a8ce98c228342f
-  specs:
-    travis-support (0.0.1)
 
 GEM
   remote: https://rubygems.org/
@@ -188,8 +202,10 @@ DEPENDENCIES
   sinatra-contrib
   sinatra-param
   travis-config (~> 1.0)
+  travis-exceptions!
+  travis-logger!
+  travis-metrics!
   travis-migrations!
-  travis-support!
 
 BUNDLED WITH
    1.14.6
