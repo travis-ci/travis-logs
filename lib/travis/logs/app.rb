@@ -18,6 +18,7 @@ require 'travis/logs/services/fetch_log_parts'
 require 'travis/logs/services/upsert_log'
 require 'travis/logs/sidekiq'
 require 'travis/logs/sidekiq/log_parts'
+require 'travis/metrics'
 
 module Travis
   module Logs
