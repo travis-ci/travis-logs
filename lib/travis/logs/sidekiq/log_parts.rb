@@ -12,6 +12,7 @@ module Travis
         sidekiq_options queue: 'log_parts', retry: 3
 
         def perform(payload)
+          Travis.logger.debug('running with payload')
           log_part_processor.run(payload)
         end
 
