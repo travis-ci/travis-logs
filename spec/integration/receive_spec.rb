@@ -24,9 +24,7 @@ describe 'receive_logs' do
 
   it 'passes logs queue messages to callable' do
     performed = []
-    Travis::Logs::Receive::Queue.subscribe(
-      'logs', ->(p) { performed << p }
-    )
+    Travis::Logs::Receive::Queue.subscribe('logs') { |p| performed << p }
 
     delivery_info = double('delivery_info', delivery_tag: 'yey')
     queue.call(delivery_info, nil, '{"id":123,"log":"hello, world","number":1}')

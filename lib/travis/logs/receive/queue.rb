@@ -11,15 +11,15 @@ module Travis
       class Queue
         METRIKS_PREFIX = 'logs.queue'
 
-        def self.subscribe(name, handler)
-          new(name, handler).subscribe
+        def self.subscribe(name, &handler_callable)
+          new(name, &handler_callable).subscribe
         end
 
-        attr_reader :name, :handler
+        attr_reader :name, :handler_callable
 
-        def initialize(name, handler)
+        def initialize(name, &handler_callable)
           @name = name
-          @handler = handler
+          @handler_callable = handler_callable
         end
 
         def subscribe
@@ -50,7 +50,7 @@ module Travis
             decoded_payload = decode(payload)
             if decoded_payload
               Travis.uuid = decoded_payload.delete('uuid')
-              handler.call(decoded_payload)
+              handler_callable.call(decoded_payload)
             end
           end
           jobs_channel.ack(delivery_info.delivery_tag, true)

@@ -24,9 +24,9 @@ module Travis
       def run
         1.upto(Travis::Logs.config.logs.threads) do |n|
           Travis.logger.debug('spawning receiver thread', n: n)
-          Travis::Logs::Receive::Queue.subscribe(
-            'logs', &method(:receive)
-          )
+          Travis::Logs::Receive::Queue.subscribe('logs') do |payload|
+            receive(payload)
+          end
         end
         Travis.logger.info(
           'consumer threads spawned',
