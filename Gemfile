@@ -16,7 +16,7 @@ gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'excon'
 gem 'faraday'
-gem 'jemalloc'
+gem 'jemalloc', git: gh('joshk/jemalloc-rb')
 gem 'jwt'
 gem 'metriks'
 gem 'metriks-librato_metrics'
