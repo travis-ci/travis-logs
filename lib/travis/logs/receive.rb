@@ -25,8 +25,7 @@ module Travis
         1.upto(Travis::Logs.config.logs.threads) do |n|
           Travis.logger.debug('spawning receiver thread', n: n)
           Travis::Logs::Receive::Queue.subscribe(
-            'logs',
-            ->(p) { Travis::Logs::Sidekiq::LogParts.perform_async(p) }
+            'logs', &method(:receive)
           )
         end
         Travis.logger.info(
@@ -34,6 +33,11 @@ module Travis
           n: Travis::Logs.config.logs.threads
         )
         sleep
+      end
+
+      private def receive(payload)
+        Travis.logger.debug('received payload')
+        Travis::Logs::Sidekiq::LogParts.perform_async(payload)
       end
     end
   end
