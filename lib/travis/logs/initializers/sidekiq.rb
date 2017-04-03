@@ -3,8 +3,8 @@
 libdir = File.expand_path('../../../../', __FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
+require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/logger'
-require 'core_ext/hash/deep_symbolize_keys'
 
 require 'travis/exceptions'
 require 'travis/logs'
