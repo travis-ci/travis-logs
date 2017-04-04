@@ -13,7 +13,7 @@ similar process _should_ work for travis-ci.com.
 - Get PostgreSQL 9.6 upgrade timing from a forked version
 - Announce maintenance window at least 2d ahead of time
 
-### create gap in `log_parts`
+### create gap in `log_parts` table
 
 - `heroku ps:scale scheduler=0 -a travis-scheduler-production`
 - Disable termination on all ASGs
@@ -22,31 +22,13 @@ similar process _should_ work for travis-ci.com.
 - `heroku ps:scale scheduler=2 -a travis-scheduler-production`
 - Wait for log parts aggregation to complete
 
-### prepare for partitioning
+### upgrade and set up partitioning
 
 - `heroku pg:upgrade LOGS_DATABASE -a travis-logs-production`
 - `TRUNCATE TABLE log_parts`
 - `sqitch deploy "db:pg:$(heroku config:get LOGS_DATABASE_URL -a travis-logs-production)"`
 
-### enable `pg_partman` and create partitions
-
-- Run this:
-
-``` sql
-CREATE SCHEMA partman;
-
-CREATE EXTENSION pg_partman SCHEMA partman;
-
-SELECT partman.create_parent(
-  'public.log_parts',
-  'created_at',
-  'time',
-  'daily',
-  p_constraint_cols := '{"log_id"}'::text[],
-  p_premake := 2,
-  p_upsert := 'ON CONFLICT(id) DO UPDATE SET val=EXCLUDED.val'
-);
-```
+### set up maintenance task
 
 - `heroku addons:create scheduler:standard -a travis-logs-production`
 - Configure the scheduler addon to run daily:

@@ -15,8 +15,7 @@ BEGIN;
     'time',
     'daily',
     p_constraint_cols := '{"log_id"}'::text[],
-    p_premake := 2,
-    p_upsert := 'ON CONFLICT(id) DO UPDATE SET val=EXCLUDED.val'
+    p_premake := 2
   );
 
   UPDATE partman.part_config
