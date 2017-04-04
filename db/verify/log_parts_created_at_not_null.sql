@@ -2,6 +2,8 @@
 
 BEGIN;
 
+  SET client_min_messages = WARNING;
+
   INSERT INTO log_parts (log_id, content)
   VALUES (-1, 'flah');
 

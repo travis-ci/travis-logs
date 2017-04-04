@@ -2,6 +2,8 @@
 
 BEGIN;
 
+  SET client_min_messages = WARNING;
+
   SELECT id, log_id, content, number, final, created_at
   FROM log_parts
   WHERE false;

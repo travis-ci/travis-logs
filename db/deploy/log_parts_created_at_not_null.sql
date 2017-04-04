@@ -3,6 +3,8 @@
 
 BEGIN;
 
+  SET client_min_messages = WARNING;
+
   ALTER TABLE log_parts
   ALTER COLUMN created_at
   SET DEFAULT '2000-01-01'::timestamptz;

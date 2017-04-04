@@ -3,6 +3,8 @@
 
 BEGIN;
 
+  SET client_min_messages = WARNING;
+
   ALTER TABLE log_parts
   SET (autovacuum_vacuum_threshold = 0);
 

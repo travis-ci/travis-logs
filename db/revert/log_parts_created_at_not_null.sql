@@ -2,6 +2,8 @@
 
 BEGIN;
 
+  SET client_min_messages = WARNING;
+
   ALTER TABLE log_parts
   ALTER COLUMN created_at
   DROP NOT NULL;

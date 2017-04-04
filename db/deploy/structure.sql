@@ -2,6 +2,8 @@
 
 BEGIN;
 
+  SET client_min_messages = WARNING;
+
   CREATE TABLE log_parts (
     id bigint NOT NULL,
     log_id integer NOT NULL,

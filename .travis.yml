@@ -13,12 +13,13 @@ services:
 - redis
 - rabbitmq
 addons:
-  postgresql: 9.3
+  postgresql: 9.6
 env:
   global:
   - PG_DISABLE_SSL='1'
 before_install:
 - script/install-sqitch
+- script/install-partman
 - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
 - gem update bundler
 before_script:
