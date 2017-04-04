@@ -54,22 +54,6 @@ module Travis
           Integer(envvar('ARCHIVE_SPOOFING_MIN_ACCEPTED_ID', 0))
         end
 
-        def log_parts_autovacuum_vacuum_threshold
-          Integer(envvar('LOG_PARTS_AUTOVACUUM_VACUUM_THRESHOLD', 0))
-        end
-
-        def log_parts_autovacuum_vacuum_scale_factor
-          Float(envvar('LOG_PARTS_AUTOVACUUM_VACUUM_SCALE_FACTOR', 0.001))
-        end
-
-        def vacuum_cost_limit
-          Integer(envvar('VACUUM_COST_LIMIT', 10_000))
-        end
-
-        def vacuum_cost_delay
-          Integer(envvar('VACUUM_COST_DELAY', 20))
-        end
-
         private def envvar(suffix, default = nil)
           ENV["TRAVIS_LOGS_#{suffix}"] || ENV[suffix] || default
         end
@@ -112,13 +96,7 @@ module Travis
           ssl: ssl?,
           encoding: 'unicode',
           min_messages: 'warning',
-          sql_logging: sql_logging?,
-          log_parts_autovacuum_vacuum_threshold:
-            log_parts_autovacuum_vacuum_threshold,
-          log_parts_autovacuum_vacuum_scale_factor:
-            log_parts_autovacuum_vacuum_scale_factor,
-          vacuum_cost_limit: vacuum_cost_limit,
-          vacuum_cost_delay: vacuum_cost_delay
+          sql_logging: sql_logging?
         },
         s3: {
           hostname: 'archive.travis-ci.org', access_key_id: '',
