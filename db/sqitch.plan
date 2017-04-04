@@ -1,3 +1,4 @@
 %syntax-version=1.0.0
 %project=travis-logs
 
+structure 2017-04-04T19:12:07Z Dan Buch <dan@travis-ci.org> # Import initial structure for logs tables

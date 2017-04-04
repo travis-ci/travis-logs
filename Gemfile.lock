@@ -38,12 +38,6 @@ GIT
     travis-metrics (0.0.1)
       metriks-librato_metrics (~> 1.0)
 
-GIT
-  remote: https://github.com/travis-ci/travis-migrations.git
-  revision: 21a258b568f35af5dd3cdabd43e5a6bd9354904b
-  specs:
-    travis-migrations (0.0.3)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -55,13 +49,13 @@ GEM
     atomic (1.1.99)
     avl_tree (1.2.1)
       atomic (~> 1.1)
-    aws-sdk (2.9.0)
-      aws-sdk-resources (= 2.9.0)
-    aws-sdk-core (2.9.0)
+    aws-sdk (2.9.3)
+      aws-sdk-resources (= 2.9.3)
+    aws-sdk-core (2.9.3)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.9.0)
-      aws-sdk-core (= 2.9.0)
+    aws-sdk-resources (2.9.3)
+      aws-sdk-core (= 2.9.3)
     aws-sigv4 (1.0.0)
     backports (3.7.0)
     bunny (2.6.4)
@@ -72,7 +66,7 @@ GEM
     diff-lcs (1.3)
     docile (1.1.5)
     excon (0.55.0)
-    faraday (0.11.0)
+    faraday (0.12.0.1)
       multipart-post (>= 1.2, < 3)
     hashr (2.0.0)
     hitimes (1.2.4)
@@ -130,14 +124,14 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.5.0)
     rspec-support (3.5.0)
-    rubocop (0.48.0)
+    rubocop (0.48.1)
       parser (>= 2.3.3.1, < 3.0)
       powerpack (~> 0.1)
       rainbow (>= 1.99.1, < 3.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.8.1)
-    sequel (4.44.0)
+    sequel (4.45.0)
     sidekiq (4.2.10)
       concurrent-ruby (~> 1.0)
       connection_pool (~> 2.2, >= 2.2.0)
@@ -206,7 +200,6 @@ DEPENDENCIES
   travis-exceptions!
   travis-logger!
   travis-metrics!
-  travis-migrations!
 
 BUNDLED WITH
    1.14.6

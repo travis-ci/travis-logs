@@ -43,4 +43,3 @@ gem 'travis-config', '~> 1.0'
 gem 'travis-exceptions', git: gh('travis-ci/travis-exceptions')
 gem 'travis-logger', git: gh('travis-ci/travis-logger'), ref: '1518ce2d056d0f5c6a0a4f15040aeaef673a53de'
 gem 'travis-metrics', git: gh('travis-ci/travis-metrics')
-gem 'travis-migrations', git: gh('travis-ci/travis-migrations'), group: :test
