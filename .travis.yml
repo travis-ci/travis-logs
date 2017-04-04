@@ -1,8 +1,7 @@
 language: ruby
 rvm:
 - 2.4.1
-jdk: openjdk8
-sudo: false
+sudo: required
 dist: trusty
 cache:
   bundler: true
