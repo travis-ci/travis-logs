@@ -13,6 +13,10 @@ services:
 - rabbitmq
 addons:
   postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-server-dev-all
+    - postgresql-9.6-common
 env:
   global:
   - PG_DISABLE_SSL='1'
