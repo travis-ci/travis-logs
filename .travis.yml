@@ -4,7 +4,11 @@ rvm:
 jdk: openjdk8
 sudo: false
 dist: trusty
-cache: bundler
+cache:
+  bundler: true
+  directories:
+  - ${HOME}/perl5
+  - ${HOME}/.cache
 services:
 - redis
 - rabbitmq
@@ -14,6 +18,8 @@ env:
   global:
   - PG_DISABLE_SSL='1'
 before_install:
+- script/install-sqitch
+- eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
 - gem update bundler
 before_script:
 - bundle exec rake setup

@@ -13,7 +13,8 @@ RuboCop::RakeTask.new if defined?(RuboCop)
 namespace :db do
   task :'test-setup' do
     sh 'createdb travis_logs_test'
-    sh './script/cat-structure-sql | psql -q travis_logs_test'
+    sh 'sqitch deploy'
+    sh 'sqitch verify'
   end
 
   desc 'Set table-level autovacuum and database-level vacuum settings'

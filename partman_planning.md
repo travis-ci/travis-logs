@@ -25,8 +25,8 @@ similar process _should_ work for travis-ci.com.
 ### prepare for partitioning
 
 - `heroku pg:upgrade LOGS_DATABASE -a travis-logs-production`
-- Truncate the `log_parts` table, then run migration to alter the
-  `created_at` column to be `NOT NULL` with `DEFAULT '2000-01-01'::timestamptz`.
+- `TRUNCATE TABLE log_parts`
+- `sqitch deploy "db:pg:$(heroku config:get LOGS_DATABASE_URL -a travis-logs-production)"`
 
 ### enable `pg_partman` and create partitions
 
