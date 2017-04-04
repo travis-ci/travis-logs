@@ -7,7 +7,7 @@ BEGIN;
 
   ALTER TABLE log_parts
   ALTER COLUMN created_at
-  SET DEFAULT '2000-01-01'::timestamptz;
+  SET DEFAULT '2000-01-01'::timestamp;
 
   ALTER TABLE log_parts
   ALTER COLUMN created_at
