@@ -20,6 +20,8 @@ BEGIN;
 
   UPDATE partman.part_config
   SET retention = '3 days',
+      retention_keep_table = false,
+      retention_keep_index = false,
       optimize_constraint = 2
   WHERE parent_table = 'public.log_parts';
 
