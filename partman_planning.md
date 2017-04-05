@@ -12,7 +12,7 @@ similar process _should_ work for travis-ci.com.
 
 - [ ] Get PostgreSQL 9.6 upgrade timing from a forked version
   - upgrade on travis-logs-staging: 7m20s
-  - upgrade on travis-logs-production: *TODO*
+  - upgrade on travis-logs-production: 9h41m50s
 - [ ] Announce maintenance window at least 2d ahead of time
 
 ### create gap in `log_parts` table
