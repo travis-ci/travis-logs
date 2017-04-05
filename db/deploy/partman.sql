@@ -14,12 +14,13 @@ BEGIN;
     'created_at',
     'time',
     'daily',
-    p_constraint_cols := '{"log_id"}'::text[],
+    p_constraint_cols := '{"log_id"}',
     p_premake := 2
   );
 
   UPDATE partman.part_config
-  SET retention = '2 days'
+  SET retention = '3 days',
+      optimize_constraint = 2
   WHERE parent_table = 'public.log_parts';
 
 COMMIT;

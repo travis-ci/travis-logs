@@ -41,6 +41,7 @@ module Travis
             execute_compat(
               conn, "SET statement_timeout = #{statement_timeout_ms}"
             )
+            execute_compat(conn, 'SET constraint_exclusion = partition')
           end
 
           private def application_name
