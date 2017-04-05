@@ -10,15 +10,16 @@ end
 RSpec::Core::RakeTask.new if defined?(RSpec)
 RuboCop::RakeTask.new if defined?(RuboCop)
 
-namespace :db do
-  task :'test-setup' do
-    sh 'createdb travis_logs_test'
-    sh 'sqitch deploy'
-    sh 'sqitch verify'
-  end
+task :'db:create' do
+  sh 'createdb travis_logs_test'
+end
+
+task :'db:migrate' do
+  sh 'sqitch deploy'
+  sh 'sqitch verify'
 end
 
 desc 'Set up test bits'
-task setup: :'db:test-setup'
+task setup: %i[db:create db:migrate]
 
 task default: %i[rubocop spec]
