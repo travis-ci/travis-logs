@@ -13,6 +13,8 @@ similar process _should_ work for travis-ci.com.
 - [x] Get PostgreSQL 9.6 upgrade timing from a forked version
   - upgrade on travis-logs-staging: 7m20s
   - upgrade on travis-logs-production: 9h41m50s
+    - ~9h37m waiting for WAL catch-up
+    - ~4m for upgrade
 - [ ] Announce maintenance window at least 2d ahead of time
 
 ### create gap in `log_parts` table
@@ -57,4 +59,21 @@ heroku ps:scale \
   web=2:Standard-2X \
   receiver=2:Standard-2X \
   -a travis-logs-production`
+```
+
+## misc notes
+
+Example sqitch deploy of migrations after `structure`, from a copy of the
+production logs database:
+
+```
+$ time sqitch deploy db:pg://localhost/logs
+Deploying changes to db:pg://localhost/logs
+  + vacuum_settings ................ ok
+  + log_parts_created_at_not_null .. ok
+  + partman ........................ ok
+
+real    0m1.203s
+user    0m0.646s
+sys     0m0.134s
 ```
