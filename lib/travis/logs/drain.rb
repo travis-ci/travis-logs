@@ -3,7 +3,7 @@
 require 'travis/exceptions'
 require 'travis/logs'
 require 'travis/logs/helpers/database'
-require 'travis/logs/receive/queue'
+require 'travis/logs/drain_queue'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/sidekiq'
 require 'travis/logs/sidekiq/log_parts'
@@ -11,7 +11,7 @@ require 'travis/metrics'
 
 module Travis
   module Logs
-    class Receive
+    class Drain
       def setup
         Travis::Exceptions.setup(
           Travis.config, Travis.config.env, Travis.logger
@@ -23,7 +23,7 @@ module Travis
       def run
         1.upto(Travis::Logs.config.logs.threads) do |n|
           Travis.logger.debug('spawning receiver thread', n: n)
-          Travis::Logs::Receive::Queue.subscribe('logs') do |payload|
+          Travis::Logs::DrainQueue.subscribe('logs') do |payload|
             receive(payload)
           end
         end

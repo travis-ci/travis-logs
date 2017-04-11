@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'travis/logs'
-require 'travis/logs/receive/queue'
+require 'travis/logs/drain_queue'
 require 'travis/logs/helpers/database'
 
 class FakeAmqpQueue
@@ -18,13 +18,13 @@ describe 'receive_logs' do
   let(:queue) { FakeAmqpQueue.new }
 
   before do
-    allow_any_instance_of(Travis::Logs::Receive::Queue)
+    allow_any_instance_of(Travis::Logs::DrainQueue)
       .to receive(:jobs_queue) { queue }
   end
 
   it 'passes logs queue messages to callable' do
     performed = []
-    Travis::Logs::Receive::Queue.subscribe('logs') { |p| performed << p }
+    Travis::Logs::DrainQueue.subscribe('logs') { |p| performed << p }
 
     delivery_info = double('delivery_info', delivery_tag: 'yey')
     queue.call(delivery_info, nil, '{"id":123,"log":"hello, world","number":1}')
