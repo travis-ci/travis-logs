@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/core_ext/logger'
-
 require 'travis/exceptions'
 require 'travis/logs'
 require 'travis/logs/helpers/database'

@@ -45,7 +45,7 @@ describe Travis::Logs::App do
     it 'contains uptime, greeting, now, pong, and version' do
       response = get '/uptime'
       body = MultiJson.load(response.body)
-      %w(uptime greeting now pong version).each do |key|
+      %w[uptime greeting now pong version].each do |key|
         expect(body).to include(key)
         expect(body[key]).to_not be_nil
       end

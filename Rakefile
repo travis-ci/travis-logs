@@ -30,4 +30,4 @@ end
 desc 'Set up test bits'
 task setup: :'db:test-setup'
 
-task default: %i(rubocop spec)
+task default: %i[rubocop spec]

@@ -11,15 +11,15 @@ module Travis
         end
 
         def api_logging?
-          %w(1 yes on true).include?(envvar('API_LOGGING').to_s.downcase)
+          %w[1 yes on true].include?(envvar('API_LOGGING').to_s.downcase)
         end
 
         def disable_ssl?
-          %w(1 yes on true).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+          %w[1 yes on true].include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
         end
 
         def sql_logging?
-          %w(1 yes on true).include?(envvar('SQL_LOGGING', 'off'))
+          %w[1 yes on true].include?(envvar('SQL_LOGGING', 'off'))
         end
 
         def aggregate_pool_min_threads
@@ -39,7 +39,7 @@ module Travis
         end
 
         def aggregate_clean_skip_empty?
-          %w(1 yes on true).include?(envvar('AGGREGATE_CLEAN_SKIP_EMPTY', 'on'))
+          %w[1 yes on true].include?(envvar('AGGREGATE_CLEAN_SKIP_EMPTY', 'on'))
         end
 
         def aggregatable_order
