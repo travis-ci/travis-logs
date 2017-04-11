@@ -1,10 +1,14 @@
 # frozen_string_literal: true
+
+require 'uri'
+
+require 'active_support/core_ext/object/try'
+require 'active_support/core_ext/numeric/time'
+require 'multi_json'
+
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
 require 'travis/logs/investigator'
-require 'active_support/core_ext/object/try'
-require 'active_support/core_ext/numeric/time'
-require 'uri'
 
 module Travis
   module Logs
@@ -171,7 +175,7 @@ module Travis
             Travis.logger.debug(
               'error while archiving',
               action: 'archive', retrying: header,
-              error: JSON.dump(e.backtrace), type: e.class.name
+              error: MultiJson.dump(e.backtrace), type: e.class.name
             )
             Travis.logger.warn(
               'error while archiving',

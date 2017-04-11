@@ -1,18 +1,18 @@
 # frozen_string_literal: true
+
+require 'travis/exceptions'
 require 'travis/logs'
 require 'travis/logs/helpers/database'
-require 'travis/logs/sidekiq'
-require 'travis/support/exceptions/reporter'
-require 'travis/support/metrics'
 require 'travis/logs/services/aggregate_logs'
-require 'active_support/core_ext/logger'
+require 'travis/logs/sidekiq'
+require 'travis/metrics'
 
 module Travis
   module Logs
     class Aggregate
       def setup
         Travis.logger.info('Starting Logs Aggregation')
-        Travis::Metrics.setup
+        Travis::Metrics.setup(Travis.config, Travis.logger)
         Travis::Logs::Sidekiq.setup
       end
 

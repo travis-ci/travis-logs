@@ -1,9 +1,8 @@
 # frozen_string_literal: true
+
 require 'travis/logs'
-require 'travis/support'
 require 'travis/logs/services/archive_log'
 require 'travis/logs/helpers/database'
-require 'faraday'
 
 class FakeStorageService
   attr_reader :objects

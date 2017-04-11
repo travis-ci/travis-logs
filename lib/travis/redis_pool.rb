@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'connection_pool'
 require 'redis'
 require 'metriks'

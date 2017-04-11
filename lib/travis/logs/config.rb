@@ -1,6 +1,6 @@
 # frozen_string_literal: true
+
 require 'travis/config'
-require 'travis/support'
 
 module Travis
   module Logs
@@ -11,15 +11,15 @@ module Travis
         end
 
         def api_logging?
-          %w(1 yes on true).include?(envvar('API_LOGGING').to_s.downcase)
+          %w[1 yes on true].include?(envvar('API_LOGGING').to_s.downcase)
         end
 
         def disable_ssl?
-          %w(1 yes on true).include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
+          %w[1 yes on true].include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
         end
 
         def sql_logging?
-          %w(1 yes on true).include?(envvar('SQL_LOGGING', 'off'))
+          %w[1 yes on true].include?(envvar('SQL_LOGGING', 'off'))
         end
 
         def aggregate_pool_min_threads
@@ -39,7 +39,7 @@ module Travis
         end
 
         def aggregate_clean_skip_empty?
-          %w(1 yes on true).include?(envvar('AGGREGATE_CLEAN_SKIP_EMPTY', 'on'))
+          %w[1 yes on true].include?(envvar('AGGREGATE_CLEAN_SKIP_EMPTY', 'on'))
         end
 
         def aggregatable_order
@@ -70,13 +70,16 @@ module Travis
           Integer(envvar('VACUUM_COST_DELAY', 20))
         end
 
+        def logs_database_url
+          ENV.fetch(
+            'LOGS_DATABASE_URL',
+            "postgres://localhost/travis_logs_#{env}"
+          )
+        end
+
         private def envvar(suffix, default = nil)
           ENV["TRAVIS_LOGS_#{suffix}"] || ENV[suffix] || default
         end
-      end
-
-      def env
-        Travis.env
       end
 
       define(
@@ -111,8 +114,9 @@ module Travis
           username: 'guest', password: 'guest', host: 'localhost', prefetch: 1
         },
         logs_database: {
+          url: logs_database_url,
           adapter: 'postgresql',
-          database: "travis_logs_#{Travis.env}",
+          database: "travis_logs_#{env}",
           ssl: ssl?,
           encoding: 'unicode',
           min_messages: 'warning',

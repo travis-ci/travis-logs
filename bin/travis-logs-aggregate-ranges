@@ -1,13 +1,14 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 libdir = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
-require 'bundler/setup'
-require 'travis/logs/receive'
+require 'travis/logs/aggregate'
 
 $stdout.sync = true
+$stderr.sync = true
 
-app = Travis::Logs::Receive.new
+app = Travis::Logs::Aggregate.new
 app.setup
-app.run
+app.run_ranges

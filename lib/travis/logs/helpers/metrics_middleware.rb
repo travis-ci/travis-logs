@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'travis/logs/helpers/metrics'
 
 module Travis
@@ -8,7 +9,7 @@ module Travis
         include Travis::Logs::Helpers::Metrics
 
         METRIKS_PREFIX = 'logs.app'
-        KNOWN_TIMER_NAMES = %w(
+        KNOWN_TIMER_NAMES = %w[
           get.logs_id
           get.logs_id_id
           get.uptime
@@ -17,7 +18,7 @@ module Travis
           put.log_parts_id_id
           put.logs_id
           put.logs_id_archived
-        ).freeze
+        ].freeze
 
         def self.metriks_prefix
           METRIKS_PREFIX

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/pusher'
 require 'travis/logs/existence'
@@ -99,12 +100,13 @@ module Travis
         end
 
         private def aggregate_async(log_id, payload)
-          Travis.logger.info(
-            'scheduling async aggregation',
-            job_id: payload['id'], log_id: log_id
-          )
           Travis::Logs::Sidekiq::Aggregate.perform_in(
             intervals[:regular], log_id
+          )
+          Travis.logger.info(
+            'scheduled async aggregation',
+            job_id: payload['id'], log_id: log_id,
+            in_seconds: intervals[:regular]
           )
         end
 

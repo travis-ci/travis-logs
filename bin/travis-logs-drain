@@ -1,14 +1,15 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 libdir = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
-require 'bundler/setup'
-require 'travis/logs/aggregate'
+require 'travis/logs/drain'
 
 $stdout.sync = true
-$stderr.sync = true
 
-app = Travis::Logs::Aggregate.new
+app = Travis::Logs::Drain.new
+Travis.logger.info('setting up log parts drain')
 app.setup
-app.run_ranges
+Travis.logger.info('running log parts drain')
+app.run

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'travis/logs'
 require 'travis/logs/helpers/pusher'
 

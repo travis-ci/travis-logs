@@ -1,18 +1,22 @@
 # frozen_string_literal: true
+
 require 'sidekiq/redis_connection'
+
+require 'travis/logger'
+
 require 'travis/logs/config'
 require 'travis/logs/helpers/database'
 
-if RUBY_PLATFORM =~ /^java/
-  require 'jrjackson'
-else
-  require 'oj'
-end
-
 module Travis
-  def self.config
+  def config
     Travis::Logs.config
   end
+
+  def logger
+    Travis::Logs.logger
+  end
+
+  module_function :config, :logger
 
   module Logs
     class << self
@@ -20,6 +24,13 @@ module Travis
 
       def config
         @config ||= Travis::Logs::Config.load
+      end
+
+      def logger
+        @logger ||= Travis::Logger.configure(
+          Travis::Logger.new($stdout),
+          config
+        )
       end
 
       def database_connection

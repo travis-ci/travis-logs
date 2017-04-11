@@ -1,6 +1,6 @@
 # frozen_string_literal: true
+
 require 'travis/logs'
-require 'travis/support'
 require 'travis/logs/services/process_log_part'
 require 'travis/logs/helpers/database'
 
