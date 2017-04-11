@@ -257,7 +257,7 @@ module Travis
       end
 
       private def setup
-        Travis::Metrics.setup(Travis.config, Travis.logger)
+        Travis::Metrics.setup(Travis.config.metrics, Travis.logger)
         Travis::Logs::Sidekiq.setup
       end
 
