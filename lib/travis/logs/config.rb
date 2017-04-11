@@ -70,6 +70,13 @@ module Travis
           Integer(envvar('VACUUM_COST_DELAY', 20))
         end
 
+        def logs_database_url
+          ENV.fetch(
+            'LOGS_DATABASE_URL',
+            "postgres://localhost/travis_logs_#{env}"
+          )
+        end
+
         private def envvar(suffix, default = nil)
           ENV["TRAVIS_LOGS_#{suffix}"] || ENV[suffix] || default
         end
@@ -107,8 +114,9 @@ module Travis
           username: 'guest', password: 'guest', host: 'localhost', prefetch: 1
         },
         logs_database: {
+          url: logs_database_url,
           adapter: 'postgresql',
-          database: "travis_logs_#{Travis::Config.env}",
+          database: "travis_logs_#{env}",
           ssl: ssl?,
           encoding: 'unicode',
           min_messages: 'warning',
