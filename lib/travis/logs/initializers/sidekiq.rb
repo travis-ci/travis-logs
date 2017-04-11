@@ -17,7 +17,7 @@ Travis.logger.info('Setting up Sidekiq')
 
 Travis::Logs::Helpers::S3.setup
 Travis::Exceptions.setup(Travis.config, Travis.config.env, Travis.logger)
-Travis::Metrics.setup(Travis.config, Travis.logger)
+Travis::Metrics.setup(Travis.config.metrics, Travis.logger)
 Travis::Logs::Sidekiq.setup
 
 require 'travis/logs/sidekiq/aggregate'

@@ -122,6 +122,14 @@ module Travis
       )
 
       default(_access: [:key])
+
+      def metrics
+        super.to_h.merge(librato: librato.to_h.merge(source: librato_source))
+      end
+
+      def librato_source
+        ENV['LIBRATO_SOURCE'] || super
+      end
     end
   end
 end
