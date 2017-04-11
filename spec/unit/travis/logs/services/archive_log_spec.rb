@@ -3,7 +3,6 @@
 require 'travis/logs'
 require 'travis/logs/services/archive_log'
 require 'travis/logs/helpers/database'
-require 'faraday'
 
 class FakeStorageService
   attr_reader :objects

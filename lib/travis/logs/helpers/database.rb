@@ -3,7 +3,6 @@
 require 'logger'
 require 'sequel'
 require 'pg'
-require 'travis/logs/helpers/database_uri'
 
 module Travis
   module Logs
@@ -18,11 +17,10 @@ module Travis
           # creating the tables or debugging).
           def create_sequel
             config = Travis::Logs.config.logs_database.to_h
-            uri = Travis::Logs::Helpers::DatabaseURI.uri_from_config(config)
 
             Sequel.default_timezone = :utc
             conn = Sequel.connect(
-              uri,
+              config[:url],
               max_connections: config[:pool],
               after_connect: ->(c) { after_connect(c) }
             )

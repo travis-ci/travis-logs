@@ -4,12 +4,12 @@
 libdir = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
-require 'travis/logs/receive'
+require 'travis/logs/drain'
 
 $stdout.sync = true
 
-app = Travis::Logs::Receive.new
-Travis.logger.info('setting up log parts processor')
+app = Travis::Logs::Drain.new
+Travis.logger.info('setting up log parts drain')
 app.setup
-Travis.logger.info('running log parts processor')
+Travis.logger.info('running log parts drain')
 app.run
