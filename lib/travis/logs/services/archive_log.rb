@@ -8,7 +8,6 @@ require 'multi_json'
 
 require 'travis/logs/helpers/metrics'
 require 'travis/logs/helpers/s3'
-require 'travis/logs/investigator'
 
 module Travis
   module Logs
@@ -53,7 +52,6 @@ module Travis
             action: 'archive', id: log_id, job_id: job_id, result: 'successful'
           )
           queue_purge
-          investigate if investigation_enabled?
         ensure
           mark_as_archiving(false)
         end
@@ -122,27 +120,13 @@ module Travis
         end
 
         def queue_purge
-          return unless Travis::Logs.config.logs.purge
+          return unless Travis::Logs.config.logs.purge?
           delay = Travis::Logs.config.logs.intervals.purge
           Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
         end
 
         def target_url
           "http://#{hostname}/jobs/#{job_id}/log.txt"
-        end
-
-        def investigate
-          investigators.each do |investigator|
-            result = investigator.investigate(content)
-            next if result.nil?
-
-            mark(result.marking) unless result.marking.empty?
-            Travis.logger.warn(
-              'investigator matched',
-              action: 'investigate', investigator: investigator.name,
-              result: result.label, id: log_id, job_id: job_id
-            )
-          end
         end
 
         private
@@ -192,25 +176,6 @@ module Travis
             )
             raise
           end
-        end
-
-        def investigation_enabled?
-          Travis.config.investigation.enabled?
-        end
-
-        def investigators
-          @investigators ||= investigators_cfg.map do |name, h|
-            ::Travis::Logs::Investigator.new(
-              name,
-              Regexp.new(h[:matcher]),
-              h[:marking_tmpl],
-              h[:label_tmpl]
-            )
-          end.sort_by(&:name)
-        end
-
-        private def investigators_cfg
-          @investigators_cfg ||= Travis.config.investigation.investigators.to_h
         end
       end
     end

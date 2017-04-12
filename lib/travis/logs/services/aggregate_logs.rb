@@ -160,7 +160,7 @@ module Travis
         end
 
         private def intervals
-          Travis.config.logs.intervals
+          Travis.config.logs.intervals.to_h
         end
 
         private def per_aggregate_limit
@@ -168,7 +168,7 @@ module Travis
         end
 
         private def archive?
-          Travis.config.logs.archive
+          Travis.config.logs.archive?
         end
 
         private def skip_empty?
@@ -176,7 +176,8 @@ module Travis
         end
 
         private def aggregatable_order
-          Travis.config.logs.aggregatable_order
+          value = Travis.config.logs.aggregatable_order.to_s.strip
+          value.empty? ? nil : value
         end
       end
     end
