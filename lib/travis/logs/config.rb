@@ -5,103 +5,30 @@ require 'travis/config'
 module Travis
   module Logs
     class Config < Travis::Config
-      class << self
-        def ssl?
-          (env == 'production') && !disable_ssl?
-        end
+      extend Hashr::Env
 
-        def api_logging?
-          %w[1 yes on true].include?(envvar('API_LOGGING').to_s.downcase)
-        end
-
-        def disable_ssl?
-          %w[1 yes on true].include?(ENV['PG_DISABLE_SSL'].to_s.downcase)
-        end
-
-        def sql_logging?
-          %w[1 yes on true].include?(envvar('SQL_LOGGING', 'off'))
-        end
-
-        def aggregate_pool_min_threads
-          Integer(envvar('AGGREGATE_POOL_MIN_THREADS', 20))
-        end
-
-        def aggregate_pool_max_threads
-          Integer(envvar('AGGREGATE_POOL_MAX_THREADS', 20))
-        end
-
-        def intervals_aggregate
-          Integer(envvar('INTERVALS_AGGREGATE', 60))
-        end
-
-        def per_aggregate_limit
-          Integer(envvar('PER_AGGREGATE_LIMIT', 500))
-        end
-
-        def aggregate_clean_skip_empty?
-          %w[1 yes on true].include?(envvar('AGGREGATE_CLEAN_SKIP_EMPTY', 'on'))
-        end
-
-        def aggregatable_order
-          envvar('AGGREGATABLE_ORDER', nil)
-        end
-
-        def archive_spoofing_min_accepted_job_id
-          Integer(envvar('ARCHIVE_SPOOFING_MIN_ACCEPTED_JOB_ID', 0))
-        end
-
-        def archive_spoofing_min_accepted_id
-          Integer(envvar('ARCHIVE_SPOOFING_MIN_ACCEPTED_ID', 0))
-        end
-
-        def log_parts_autovacuum_vacuum_threshold
-          Integer(envvar('LOG_PARTS_AUTOVACUUM_VACUUM_THRESHOLD', 0))
-        end
-
-        def log_parts_autovacuum_vacuum_scale_factor
-          Float(envvar('LOG_PARTS_AUTOVACUUM_VACUUM_SCALE_FACTOR', 0.001))
-        end
-
-        def vacuum_cost_limit
-          Integer(envvar('VACUUM_COST_LIMIT', 10_000))
-        end
-
-        def vacuum_cost_delay
-          Integer(envvar('VACUUM_COST_DELAY', 20))
-        end
-
-        def logs_database_url
-          ENV.fetch(
-            'LOGS_DATABASE_URL',
-            "postgres://localhost/travis_logs_#{env}"
-          )
-        end
-
-        private def envvar(suffix, default = nil)
-          ENV["TRAVIS_LOGS_#{suffix}"] || ENV[suffix] || default
-        end
-      end
+      self.env_namespace = 'TRAVIS'
 
       define(
         logs: {
-          aggregatable_order: aggregatable_order,
-          api_logging: api_logging?,
+          aggregatable_order: nil,
+          api_logging: false,
           archive: true,
-          aggregate_clean_skip_empty: aggregate_clean_skip_empty?,
+          aggregate_clean_skip_empty: true,
           purge: false,
           threads: 10,
-          per_aggregate_limit: per_aggregate_limit,
+          per_aggregate_limit: 500,
           aggregate_pool: {
-            min_threads: aggregate_pool_min_threads,
-            max_threads: aggregate_pool_max_threads,
+            min_threads: 20,
+            max_threads: 20,
             max_queue: 0
           },
           archive_spoofing: {
-            min_accepted_job_id: archive_spoofing_min_accepted_job_id,
-            min_accepted_id: archive_spoofing_min_accepted_id
+            min_accepted_job_id: 0,
+            min_accepted_id: 0
           },
           intervals: {
-            aggregate: intervals_aggregate,
+            aggregate: 60,
             sweeper: 10 * 60,
             regular: 3 * 60,
             force: 3 * 60 * 60,
@@ -114,19 +41,19 @@ module Travis
           username: 'guest', password: 'guest', host: 'localhost', prefetch: 1
         },
         logs_database: {
-          url: logs_database_url,
+          url: ENV.fetch(
+            'LOGS_DATABASE_URL',
+            "postgres://localhost/travis_logs_#{env}"
+          ),
           adapter: 'postgresql',
           database: "travis_logs_#{env}",
-          ssl: ssl?,
           encoding: 'unicode',
           min_messages: 'warning',
-          sql_logging: sql_logging?,
-          log_parts_autovacuum_vacuum_threshold:
-            log_parts_autovacuum_vacuum_threshold,
-          log_parts_autovacuum_vacuum_scale_factor:
-            log_parts_autovacuum_vacuum_scale_factor,
-          vacuum_cost_limit: vacuum_cost_limit,
-          vacuum_cost_delay: vacuum_cost_delay
+          sql_logging: false,
+          log_parts_autovacuum_vacuum_threshold: 0,
+          log_parts_autovacuum_vacuum_scale_factor: 0.001,
+          vacuum_cost_limit: 10_000,
+          vacuum_cost_delay: 20
         },
         s3: {
           hostname: 'archive.travis-ci.org', access_key_id: '',
@@ -138,7 +65,6 @@ module Travis
         sidekiq: { namespace: 'sidekiq', pool_size: 22 },
         redis: { url: 'redis://localhost:6379' },
         metrics: { reporter: 'librato' },
-        ssl: {},
         sentry: {},
         investigation: { enabled: false, investigators: {} }
       )

@@ -5,6 +5,12 @@ GIT
     jemalloc (1.4.5)
 
 GIT
+  remote: https://github.com/meatballhat/json-to-env.git
+  revision: ef2cf0f773130540e34ddba46da03ca85f721df4
+  specs:
+    json-to-env (0.1.0)
+
+GIT
   remote: https://github.com/rkh/coder.git
   revision: 44b0cf89b98caecc654dd1a724a448e17ef7aa6c
   specs:
@@ -50,13 +56,13 @@ GEM
     atomic (1.1.99)
     avl_tree (1.2.1)
       atomic (~> 1.1)
-    aws-sdk (2.9.6)
-      aws-sdk-resources (= 2.9.6)
-    aws-sdk-core (2.9.6)
+    aws-sdk (2.9.7)
+      aws-sdk-resources (= 2.9.7)
+    aws-sdk-core (2.9.7)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.9.6)
-      aws-sdk-core (= 2.9.6)
+    aws-sdk-resources (2.9.7)
+      aws-sdk-core (= 2.9.7)
     aws-sigv4 (1.0.0)
     backports (3.7.0)
     bunny (2.6.4)
@@ -68,12 +74,12 @@ GEM
     docile (1.1.5)
     faraday (0.12.0.1)
       multipart-post (>= 1.2, < 3)
-    hashr (2.0.0)
+    hashr (2.0.1)
     hitimes (1.2.4)
     httpclient (2.8.3)
     i18n (0.8.1)
     jmespath (1.3.1)
-    json (2.0.3)
+    json (2.0.4)
     jwt (1.5.6)
     method_source (0.8.2)
     metriks (0.9.9.7)
@@ -178,6 +184,7 @@ DEPENDENCIES
   concurrent-ruby
   connection_pool
   jemalloc!
+  json-to-env!
   jwt
   metriks
   metriks-librato_metrics

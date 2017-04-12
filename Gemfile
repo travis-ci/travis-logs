@@ -15,6 +15,7 @@ gem 'coder', git: gh('rkh/coder')
 gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'jemalloc', git: gh('joshk/jemalloc-rb')
+gem 'json-to-env', git: gh('meatballhat/json-to-env')
 gem 'jwt'
 gem 'metriks'
 gem 'metriks-librato_metrics'
