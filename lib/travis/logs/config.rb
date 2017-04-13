@@ -16,6 +16,7 @@ module Travis
           prefetch: 1,
           username: 'guest'
         },
+        channels_existence_check: true,
         log_level: :info,
         logger: { format_type: 'l2met', thread_id: true },
         logs: {
