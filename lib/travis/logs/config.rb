@@ -54,7 +54,7 @@ module Travis
           url: ENV.fetch(
             'LOGS_DATABASE_URL',
             "postgres://localhost/travis_logs_#{env}"
-          ),
+          )
         },
         metrics: { reporter: 'librato' },
         pusher: {
