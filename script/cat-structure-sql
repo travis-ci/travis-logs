@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -o errexit
-
-main() {
-  local gemname="${1:-travis-migrations}"
-  cat $(bundle show "${gemname}")/db/logs/structure.sql
-}
-
-main "$@"

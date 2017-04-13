@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -o errexit
+set -o pipefail
+
+main() {
+  if [[ $# -lt 3 ]] || [[ "${1}" =~ -h|--help|help ]]; then
+    __usage
+    exit 1
+  fi
+
+  local dbvar="${1}"
+  shift
+  local appname="${1}"
+  shift
+
+  sqitch "$@" "$(__db_url "${dbvar}" "${appname}")"
+}
+
+__usage() {
+  local prog
+  prog="$(basename "${0}")"
+  cat <<EOF
+Usage: ${prog} <dbvar> <appname> <sqitch-arg> [sqitch-arg,...]
+
+Examples:
+
+  ${prog} LOGS_DATABASE_URL travis-logs-staging status
+  ${prog} LOGS_DATABASE_URL travis-logs-production verify
+
+EOF
+}
+
+__db_url() {
+  echo -n "db:pg:"
+  local full_url
+  full_url="$(heroku config:get "${1}" -a "${2}")"
+
+  echo "${full_url##postgres:}"
+}
+
+main "$@"

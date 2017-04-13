@@ -55,8 +55,6 @@ module Travis
             'LOGS_DATABASE_URL',
             "postgres://localhost/travis_logs_#{env}"
           ),
-          vacuum_cost_delay: 20,
-          vacuum_cost_limit: 10_000
         },
         metrics: { reporter: 'librato' },
         pusher: {
