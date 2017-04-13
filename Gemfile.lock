@@ -31,12 +31,6 @@ GIT
     travis-metrics (0.0.1)
       metriks-librato_metrics (~> 1.0)
 
-GIT
-  remote: https://github.com/travis-ci/travis-migrations.git
-  revision: fc13b3d24f802d4a4fc229d1fa04510bf9908d70
-  specs:
-    travis-migrations (0.0.3)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -204,7 +198,6 @@ DEPENDENCIES
   travis-exceptions!
   travis-logger!
   travis-metrics!
-  travis-migrations!
 
 BUNDLED WITH
    1.14.6

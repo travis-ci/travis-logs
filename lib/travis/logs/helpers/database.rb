@@ -3,7 +3,6 @@
 require 'logger'
 require 'sequel'
 require 'pg'
-require 'travis/logs/helpers/database_vacuum_settings'
 
 module Travis
   module Logs
@@ -33,18 +32,6 @@ module Travis
             new.tap(&:connect)
           end
 
-          def vacuum_settings(config: Travis::Logs.config.logs_database.to_h,
-                              statements: DatabaseVacuumSettings::STATEMENTS)
-            db = new.db
-            variables = config.merge(
-              database: db['SELECT current_database()'].first
-                                                       .fetch(:current_database)
-            )
-            statements.each do |statement|
-              db.execute(statement.split.join(' ') % variables)
-            end
-          end
-
           private def after_connect(conn)
             execute_compat(
               conn, "SET application_name = '#{application_name}'"
@@ -52,6 +39,7 @@ module Travis
             execute_compat(
               conn, "SET statement_timeout = #{statement_timeout_ms}"
             )
+            execute_compat(conn, 'SET constraint_exclusion = partition')
           end
 
           private def application_name
