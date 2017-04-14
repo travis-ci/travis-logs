@@ -3,7 +3,6 @@
 require 'redis'
 
 require 'travis/logs'
-require 'travis/redis_pool'
 
 module Travis
   module Logs
@@ -12,7 +11,7 @@ module Travis
 
       class << self
         def redis
-          @redis ||= Travis::RedisPool.new(redis_config)
+          @redis ||= Travis::Logs::RedisPool.new(redis_config)
         end
 
         def redis_config

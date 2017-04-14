@@ -22,6 +22,7 @@ module Travis
     autoload :Metrics, 'travis/logs/metrics'
     autoload :MetricsMiddleware, 'travis/logs/metrics_middleware'
     autoload :Pusher, 'travis/logs/pusher'
+    autoload :RedisPool, 'travis/logs/redis_pool'
     autoload :S3, 'travis/logs/s3'
     autoload :Services, 'travis/logs/services'
     autoload :Sidekiq, 'travis/logs/sidekiq'
