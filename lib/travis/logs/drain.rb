@@ -2,11 +2,6 @@
 
 require 'travis/exceptions'
 require 'travis/logs'
-require 'travis/logs/helpers/database'
-require 'travis/logs/drain_queue'
-require 'travis/logs/services/process_log_part'
-require 'travis/logs/sidekiq'
-require 'travis/logs/sidekiq/log_parts'
 require 'travis/metrics'
 
 module Travis
@@ -37,7 +32,7 @@ module Travis
       end
 
       private def num_threads
-        Travis::Logs.config.logs.drain_threads
+        Travis.config.logs.drain_threads
       end
     end
   end

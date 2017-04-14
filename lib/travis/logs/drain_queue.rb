@@ -5,6 +5,8 @@ require 'coder'
 require 'multi_json'
 require 'timeout'
 
+require 'travis/logs'
+
 module Travis
   module Logs
     class DrainQueue
@@ -40,7 +42,7 @@ module Travis
       end
 
       private def amqp_config
-        Travis::Logs.config.amqp.to_h
+        Travis.config.amqp.to_h
       end
 
       private def receive(delivery_info, _properties, payload)

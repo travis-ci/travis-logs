@@ -1,15 +1,12 @@
 # frozen_string_literal: true
 
-require 'travis/logs/helpers/metrics'
-require 'travis/logs/helpers/s3'
-require 'travis/logs/sidekiq'
-require 'travis/logs/sidekiq/archive'
+require 'travis/logs'
 
 module Travis
   module Logs
     module Services
       class PurgeLog
-        include Helpers::Metrics
+        include Travis::Logs::Metrics
 
         METRIKS_PREFIX = 'logs.purge'
 
@@ -20,7 +17,7 @@ module Travis
         def initialize(log_id, storage_service = nil, database = nil,
                        archiver = nil)
           @log_id = log_id
-          @storage_service = storage_service || Helpers::S3.new
+          @storage_service = storage_service || Travis::Logs::S3.new
           @database = database || Travis::Logs.database_connection
           @archiver = archiver || proc do
             Travis::Logs::Sidekiq::Archive.perform_async(log_id)

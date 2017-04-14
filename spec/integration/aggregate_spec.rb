@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-require 'travis/logs'
-require 'travis/logs/helpers/database'
-require 'travis/logs/services/aggregate_logs'
-require 'travis/logs/services/process_log_part'
-
 describe 'aggregation' do
   let(:pusher_client) do
     double('pusher_client', push: nil, pusher_channel_name: '')
@@ -57,7 +52,7 @@ describe 'aggregation' do
   end
 
   before do
-    Travis::Logs.database_connection = Travis::Logs::Helpers::Database.connect
+    Travis::Logs.database_connection = Travis::Logs::Database.connect
     Travis.config.logs.intervals[:sweeper] = 0
     db.run('TRUNCATE log_parts; TRUNCATE logs')
     populate_logs(pusher_client, existence, 100)

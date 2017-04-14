@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
-require 'travis/exceptions'
 require 'travis/logs'
-require 'travis/logs/helpers/database'
-require 'travis/logs/services/aggregate_logs'
-require 'travis/logs/sidekiq'
+require 'travis/exceptions'
 require 'travis/metrics'
 
 module Travis

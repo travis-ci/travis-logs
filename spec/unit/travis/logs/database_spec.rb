@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require 'travis/logs/helpers/database'
-
-describe Travis::Logs::Helpers::Database do
+describe Travis::Logs::Database do
   it 'builds an application_name' do
     expect(described_class.send(:application_name)).to_not be_nil
     expect(described_class.send(:application_name)).to_not be_empty

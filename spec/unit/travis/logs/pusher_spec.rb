@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
-require 'travis/logs'
-require 'travis/logs/helpers/pusher'
-
-describe Travis::Logs::Helpers::Pusher do
+describe Travis::Logs::Pusher do
   let(:pusher_client) { double('pusher-client') }
   let(:pusher_channel) { double('pusher-channel') }
-  let(:pusher_helper) { described_class.new(pusher_client) }
+  subject { described_class.new(pusher_client) }
 
   let(:payload) do
     {
@@ -20,11 +17,11 @@ describe Travis::Logs::Helpers::Pusher do
   before(:each) do
     allow(pusher_client).to receive(:[]) { pusher_channel }
     allow(pusher_channel).to receive(:trigger)
-    allow(pusher_helper).to receive(:secure?).and_return(false)
+    allow(subject).to receive(:secure?).and_return(false)
   end
 
   it 'pushing a payload triggers a job:log message' do
-    pusher_helper.push(payload)
+    subject.push(payload)
 
     expect(pusher_client).to have_received(:[]).with('job-1919')
     expect(pusher_channel).to have_received(:trigger)

@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
 require 'ostruct'
-require 'travis/logs'
-require 'travis/logs/app'
 require 'rack/test'
 require 'openssl'
-
-ENV['RACK_ENV'] = 'test'
 
 describe Travis::Logs::App do
   include Rack::Test::Methods

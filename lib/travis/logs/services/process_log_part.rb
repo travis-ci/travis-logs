@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'travis/logs/helpers/metrics'
-require 'travis/logs/helpers/pusher'
-require 'travis/logs/existence'
-require 'travis/logs/sidekiq/aggregate'
 require 'pusher'
 require 'coder'
 
@@ -15,7 +11,7 @@ module Travis
   module Logs
     module Services
       class ProcessLogPart
-        include Helpers::Metrics
+        include Travis::Logs::Metrics
 
         METRIKS_PREFIX = 'logs.process_log_part'
         INT_MAX = 2_147_483_647
@@ -31,7 +27,7 @@ module Travis
         def initialize(database: nil, pusher_client: nil,
                        existence: nil)
           @database = database || Travis::Logs.database_connection
-          @pusher_client = pusher_client || Travis::Logs::Helpers::Pusher.new
+          @pusher_client = pusher_client || Travis::Logs::Pusher.new
           @existence = existence || Travis::Logs::Existence.new
         end
 
@@ -166,11 +162,11 @@ module Travis
         end
 
         private def existence_check_metrics?
-          Travis::Logs.config.channels_existence_metrics
+          Travis.config.channels_existence_metrics
         end
 
         private def existence_check?
-          Travis::Logs.config.channels_existence_check
+          Travis.config.channels_existence_check
         end
 
         private def intervals

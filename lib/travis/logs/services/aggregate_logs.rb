@@ -2,14 +2,13 @@
 
 require 'concurrent'
 
-require 'travis/logs/helpers/metrics'
-require 'travis/logs/sidekiq/archive'
+require 'travis/logs'
 
 module Travis
   module Logs
     module Services
       class AggregateLogs
-        include Helpers::Metrics
+        include Travis::Logs::Metrics
 
         METRIKS_PREFIX = 'logs.aggregate_logs'
 
@@ -28,7 +27,7 @@ module Travis
         def initialize(database = nil, pool_config = {})
           @database = database || Travis::Logs.database_connection
           @pool_config = if pool_config.empty?
-                           Travis::Logs.config.logs.aggregate_pool.to_h
+                           Travis.config.logs.aggregate_pool.to_h
                          else
                            pool_config
                          end

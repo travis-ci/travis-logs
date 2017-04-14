@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'travis/logs'
-require 'travis/logs/services/process_log_part'
-require 'travis/logs/helpers/database'
-
 class FakeDatabase
   attr_reader :logs, :log_parts
 
@@ -41,8 +37,8 @@ describe Travis::Logs::Services::ProcessLogPart do
   end
 
   before(:each) do
-    Travis::Logs.config.channels_existence_check = true
-    Travis::Logs.config.channels_existence_metrics = true
+    Travis.config.channels_existence_check = true
+    Travis.config.channels_existence_metrics = true
     allow(Metriks).to receive(:meter).and_return(double('meter', mark: nil))
     allow(service).to receive(:channel_occupied?) { true }
     allow(service).to receive(:channel_name) { 'channel' }
@@ -128,7 +124,7 @@ describe Travis::Logs::Services::ProcessLogPart do
 
   context 'when pusher.secure is true' do
     before(:each) do
-      Travis::Logs.config.pusher.secure = true
+      Travis.config.pusher.secure = true
     end
 
     it 'notifies pusher on a private channel' do
@@ -142,7 +138,7 @@ describe Travis::Logs::Services::ProcessLogPart do
 
   context 'when pusher.secure is false' do
     before(:each) do
-      Travis::Logs.config.pusher.secure = false
+      Travis.config.pusher.secure = false
     end
 
     it 'notifies pusher on a regular channel' do

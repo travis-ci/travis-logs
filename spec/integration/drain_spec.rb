@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'travis/logs'
-require 'travis/logs/drain_queue'
-require 'travis/logs/helpers/database'
-
 class FakeAmqpQueue
   def subscribe(_opts, &block)
     @block = block
