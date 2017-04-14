@@ -35,13 +35,11 @@ module Travis
           object(url).content_length
         end
 
-        private
-
-        def object(url)
+        private def object(url)
           bucket(url).object(URI(url).path[1..-1])
         end
 
-        def bucket(url)
+        private def bucket(url)
           s3.bucket(URI(url).host)
         end
       end

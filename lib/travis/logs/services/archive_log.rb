@@ -129,29 +129,30 @@ module Travis
           "http://#{hostname}/jobs/#{job_id}/log.txt"
         end
 
-        private
-
         attr_reader :storage_service, :database
+        private :storage_service
+        private :database
 
-        def archived_content_length
+        private def archived_content_length
           storage_service.content_length(target_url)
         end
 
-        def content
+        private def content
           @content ||= log[:content]
         end
 
-        def job_id
+        private def job_id
           (log || {}).fetch(:job_id, 'unknown')
         end
 
         attr_writer :content
+        private :content
 
-        def hostname
+        private def hostname
           Travis.config.s3.hostname
         end
 
-        def retrying(header, times = 5)
+        private def retrying(header, times = 5)
           yield
         rescue => e
           count ||= 0
