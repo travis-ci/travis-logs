@@ -4,7 +4,6 @@ require 'jwt'
 require 'multi_json'
 require 'pusher'
 require 'rack/ssl'
-require 'raven'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/param'
@@ -14,13 +13,6 @@ require 'travis/metrics'
 
 module Travis
   module Logs
-    class SentryMiddleware < Sinatra::Base
-      configure do
-        Raven.configure { |c| c.tags = { environment: environment } }
-        use Raven::Rack
-      end
-    end
-
     class App < Sinatra::Base
       helpers Sinatra::Param
 
@@ -30,8 +22,10 @@ module Travis
       end
 
       configure do
-        enable :logging if Travis::Logs.config.logs.api_logging?
-        use SentryMiddleware if ENV['SENTRY_DSN']
+        enable :logging if Travis.config.logs.api_logging?
+        unless Travis.config.sentry.dsn.to_s.empty?
+          use Travis::Logs::SentryMiddleware
+        end
       end
 
       def initialize(auth_token: ENV['AUTH_TOKEN'].to_s,

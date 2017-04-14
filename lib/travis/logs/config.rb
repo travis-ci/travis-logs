@@ -71,7 +71,9 @@ module Travis
           hostname: 'archive.travis-ci.org',
           secret_access_key: ''
         },
-        sentry: {},
+        sentry: {
+          dsn: ENV['SENTRY_DSN']
+        },
         sidekiq: { namespace: 'sidekiq', pool_size: 7 }
       )
 
