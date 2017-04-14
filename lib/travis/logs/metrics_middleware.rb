@@ -5,7 +5,7 @@ require 'travis/logs'
 module Travis
   module Logs
     class MetricsMiddleware
-      include Travis::Logs::Metrics
+      include Travis::Logs::MetricsMethods
 
       METRIKS_PREFIX = 'logs.app'
       KNOWN_TIMER_NAMES = %w[

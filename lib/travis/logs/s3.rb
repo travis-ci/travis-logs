@@ -25,23 +25,27 @@ module Travis
       end
 
       def store(data, url)
-        object(url).put(
+        object(URI(url)).put(
           body: data,
           content_type: 'text/plain',
-          acl: Travis.config.s3.acl.to_s.tr('_', '-')
+          acl: acl
         )
       end
 
       def content_length(url)
-        object(url).content_length
+        object(URI(url)).content_length
       end
 
-      private def object(url)
-        bucket(url).object(URI(url).path[1..-1])
+      private def object(uri)
+        bucket(uri).object(uri.path[1..-1])
       end
 
-      private def bucket(url)
-        s3.bucket(URI(url).host)
+      private def bucket(uri)
+        s3.bucket(uri.host)
+      end
+
+      private def acl
+        @acl ||= Travis.config.s3.acl.to_s.tr('_', '-')
       end
     end
   end

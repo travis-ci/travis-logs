@@ -19,7 +19,7 @@ module Travis
     autoload :Drain, 'travis/logs/drain'
     autoload :DrainQueue, 'travis/logs/drain_queue'
     autoload :Existence, 'travis/logs/existence'
-    autoload :Metrics, 'travis/logs/metrics'
+    autoload :MetricsMethods, 'travis/logs/metrics_methods'
     autoload :MetricsMiddleware, 'travis/logs/metrics_middleware'
     autoload :Pusher, 'travis/logs/pusher'
     autoload :RedisPool, 'travis/logs/redis_pool'

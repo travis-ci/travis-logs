@@ -10,7 +10,7 @@ module Travis
   module Logs
     module Services
       class ArchiveLog
-        include Travis::Logs::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.archive'
 

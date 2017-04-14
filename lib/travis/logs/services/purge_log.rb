@@ -6,7 +6,7 @@ module Travis
   module Logs
     module Services
       class PurgeLog
-        include Travis::Logs::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.purge'
 

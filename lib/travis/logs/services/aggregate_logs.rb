@@ -8,7 +8,7 @@ module Travis
   module Logs
     module Services
       class AggregateLogs
-        include Travis::Logs::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.aggregate_logs'
 

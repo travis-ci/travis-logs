@@ -11,7 +11,7 @@ module Travis
   module Logs
     module Services
       class ProcessLogPart
-        include Travis::Logs::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.process_log_part'
         INT_MAX = 2_147_483_647
