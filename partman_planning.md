@@ -15,7 +15,7 @@ similar process _should_ work for travis-ci.com.
   - upgrade on travis-logs-production: 9h41m50s
     - ~9h37m waiting for WAL catch-up
     - ~4m for upgrade
-- [ ] Announce maintenance window at least 2d ahead of time
+- [x] Announce maintenance window at least 2d ahead of time (https://www.traviscistatus.com/incidents/xnw9tr0b8wwm)
 
 ### create gap in `log_parts` table
 
