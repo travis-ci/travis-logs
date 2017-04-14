@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+libdir = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
+
+require 'json'
+require 'stringio'
+require 'json_to_env'
+require 'travis/logs'
+
+$stdout.sync = true
+$stderr.sync = true
+
+JsonToEnv.main(
+  input: StringIO.new(JSON.dump(Travis.config.to_h)),
+  prefix: 'TRAVIS'
+)

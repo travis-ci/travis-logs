@@ -21,22 +21,23 @@ module Travis
       end
 
       def run
-        1.upto(Travis::Logs.config.logs.threads) do |n|
+        1.upto(num_threads) do |n|
           Travis.logger.debug('spawning receiver thread', n: n)
           Travis::Logs::DrainQueue.subscribe('logs') do |payload|
             receive(payload)
           end
         end
-        Travis.logger.info(
-          'consumer threads spawned',
-          n: Travis::Logs.config.logs.threads
-        )
+        Travis.logger.info('consumer threads spawned', n: num_threads)
         sleep
       end
 
       private def receive(payload)
         Travis.logger.debug('received payload')
         Travis::Logs::Sidekiq::LogParts.perform_async(payload)
+      end
+
+      private def num_threads
+        Travis::Logs.config.logs.drain_threads
       end
     end
   end

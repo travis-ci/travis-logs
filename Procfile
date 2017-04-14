@@ -7,3 +7,4 @@ purge: bin/travis-logs-sidekiq purge_log ${TRAVIS_LOGS_PURGE_CONCURRENCY:-5}
 web: bin/travis-logs-server
 
 console: bundle exec je script/console
+config: bundle exec je bin/travis-logs-config

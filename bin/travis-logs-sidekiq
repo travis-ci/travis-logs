@@ -15,6 +15,9 @@ main() {
   local concurrency="${1}"
   shift
 
+  TRAVIS_SIDEKIQ_POOL_SIZE="$(( ${concurrency} + 2 ))"
+  export TRAVIS_SIDEKIQ_POOL_SIZE
+
   set -o xtrace
   exec bundle exec je sidekiq \
     -q "${queue}" \
