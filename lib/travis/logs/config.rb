@@ -51,6 +51,7 @@ module Travis
           log_parts_autovacuum_vacuum_scale_factor: 0.001,
           log_parts_autovacuum_vacuum_threshold: 0,
           min_messages: 'warning',
+          min_readable_cutoff_age: 60 * 60 * 24 * 180,
           sql_logging: false,
           url: ENV.fetch(
             'LOGS_DATABASE_URL',

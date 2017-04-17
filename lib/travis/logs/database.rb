@@ -10,16 +10,16 @@ module Travis
   module Logs
     class Database
       class << self
-        def create_sequel
-          config = Travis.config.logs_database.to_h
-
+        def create_sequel(config: Travis.config.logs_database.to_h)
           Sequel.default_timezone = :utc
+          Sequel.extension(:pg_hstore_ops)
           conn = Sequel.connect(
             config[:url],
             max_connections: config[:pool],
             after_connect: ->(c) { after_connect(c) }
           )
           conn.loggers << Logger.new($stdout) if config[:sql_logging]
+          conn.extension(:pg_hstore)
           conn
         end
 
@@ -64,16 +64,36 @@ module Travis
         end
       end
 
-      def initialize
-        @db = self.class.create_sequel
+      def initialize(config: Travis.config.logs_database.to_h)
+        @db = self.class.create_sequel(config: config)
         Travis.logger.info(
           'new database connection',
           object_id: object_id,
           max_size: db.pool.max_size
         )
+        @min_readable_cutoff_age = config[:min_readable_cutoff_age]
       end
 
-      attr_reader :db
+      attr_reader :db, :min_readable_cutoff_age
+      private :min_readable_cutoff_age
+
+      def log_id_min_readable
+        min_readable_settings[:id] || 0
+      end
+
+      def job_id_min_readable
+        min_readable_settings[:job_id] || 0
+      end
+
+      private def min_readable_settings
+        cutoff = (Time.now.utc - min_readable_cutoff_age).strftime('%Y-%m-%d')
+        db[:logs]
+          .select(:id, :job_id)
+          .where { archived_at < cutoff }
+          .reverse(:archived_at)
+          .limit(1)
+          .first
+      end
 
       def connect
         db.test_connection
