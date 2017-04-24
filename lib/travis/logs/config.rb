@@ -6,11 +6,6 @@ module Travis
   module Logs
     class Config < Travis::Config
       define(
-        amqp: {
-          host: 'localhost',
-          password: 'guest',
-          username: 'guest'
-        },
         channels_existence_check: true,
         lock: { strategy: :redis, ttl: 150 },
         log_level: :info,
@@ -63,7 +58,6 @@ module Travis
           secret: 'secret',
           secure: false
         },
-        redis: { url: 'redis://localhost:6379' },
         s3: {
           access_key_id: '',
           acl: :public_read,
