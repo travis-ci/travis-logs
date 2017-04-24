@@ -70,8 +70,6 @@ module Travis
         sidekiq: { namespace: 'sidekiq', pool_size: 7 }
       )
 
-      default(_access: [:key])
-
       def metrics
         super.to_h.merge(librato: librato.to_h.merge(source: librato_source))
       end
