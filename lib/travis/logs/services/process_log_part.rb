@@ -46,7 +46,7 @@ module Travis
         private :existence
 
         private def create_part(log_id, payload)
-          if log_id.zero?
+          if log_id.nil? || log_id.zero?
             mark_invalid_log_id(log_id, payload)
             return
           end
