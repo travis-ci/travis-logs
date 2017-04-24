@@ -12,14 +12,12 @@ module Travis
       class << self
         def create_sequel(config: Travis.config.logs_database.to_h)
           Sequel.default_timezone = :utc
-          Sequel.extension(:pg_hstore_ops)
           conn = Sequel.connect(
             config[:url],
             max_connections: config[:pool],
             after_connect: ->(c) { after_connect(c) }
           )
           conn.loggers << Logger.new($stdout) if config[:sql_logging]
-          conn.extension(:pg_hstore)
           conn
         end
 
