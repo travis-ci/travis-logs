@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -o errexit
+
+: ${BINDIR:=${HOME}/bin}
+: ${CACHEDIR:=${HOME}/.cache}
+: ${PERL5DIR:=${HOME}/perl5}
+
+mkdir -p "${BINDIR}"
+
+if [[ ! -f "${CACHEDIR}/cpanm" ]] ; then
+  curl -sL 'https://cpanmin.us/' -o "${CACHEDIR}/cpanm"
+  chmod +x "${CACHEDIR}/cpanm"
+fi
+
+cp -v "${CACHEDIR}/cpanm" "${BINDIR}/cpanm"
+"${BINDIR}/cpanm" --local-lib=${PERL5DIR} 'local::lib'
+
+eval "$(perl -I "${PERL5DIR}/lib/perl5/" '-Mlocal::lib')"
+
+if ! sqitch --version &>/dev/null ; then
+  "${BINDIR}/cpanm" --quiet --notest 'App::Sqitch'
+fi
+
+"${BINDIR}/cpanm" --quiet --notest 'DBD::Pg'
+sqitch --version

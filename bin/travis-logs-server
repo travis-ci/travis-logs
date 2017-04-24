@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "${0}")/.."
+
+: ${PORT:=5555}
+: ${RACK_ENV:=development}
+: ${PUMA_MIN_THREADS:=8}
+: ${PUMA_MAX_THREADS:=12}
+
+exec bundle exec je -v \
+  puma \
+  -I lib \
+  -p "${PORT}" \
+  -t "${PUMA_MIN_THREADS}:${PUMA_MAX_THREADS}"

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
-require 'simplecov' unless RUBY_PLATFORM =~ /^java/
 
-ENV['PG_DISABLE_SSL'] = '1'
+require 'simplecov'
+
 ENV['RACK_ENV'] = 'test'
 
 require 'travis/logs'

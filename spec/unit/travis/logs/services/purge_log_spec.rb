@@ -1,7 +1,4 @@
 # frozen_string_literal: true
-require 'travis/logs'
-require 'travis/support'
-require 'travis/logs/services/purge_log'
 
 describe Travis::Logs::Services::PurgeLog do
   context 'content is null' do

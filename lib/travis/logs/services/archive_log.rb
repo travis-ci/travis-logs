@@ -1,16 +1,16 @@
 # frozen_string_literal: true
-require 'travis/logs/helpers/metrics'
-require 'travis/logs/helpers/s3'
-require 'travis/logs/investigator'
+
+require 'uri'
+
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
-require 'uri'
+require 'multi_json'
 
 module Travis
   module Logs
     module Services
       class ArchiveLog
-        include Helpers::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.archive'
 
@@ -30,8 +30,11 @@ module Travis
 
         attr_reader :log_id
 
-        def initialize(log_id, storage_service = Helpers::S3.new,
-                       database = Travis::Logs.database_connection)
+        def initialize(
+          log_id,
+          storage_service: Travis::Logs::S3.new,
+          database: Travis::Logs.database_connection
+        )
           @log_id = log_id
           @storage_service = storage_service
           @database = database
@@ -49,7 +52,6 @@ module Travis
             action: 'archive', id: log_id, job_id: job_id, result: 'successful'
           )
           queue_purge
-          investigate if investigation_enabled?
         ensure
           mark_as_archiving(false)
         end
@@ -118,7 +120,7 @@ module Travis
         end
 
         def queue_purge
-          return unless Travis::Logs.config.logs.purge
+          return unless Travis::Logs.config.logs.purge?
           delay = Travis::Logs.config.logs.intervals.purge
           Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
         end
@@ -127,51 +129,39 @@ module Travis
           "http://#{hostname}/jobs/#{job_id}/log.txt"
         end
 
-        def investigate
-          investigators.each do |investigator|
-            result = investigator.investigate(content)
-            next if result.nil?
-
-            mark(result.marking) unless result.marking.empty?
-            Travis.logger.warn(
-              'investigator matched',
-              action: 'investigate', investigator: investigator.name,
-              result: result.label, id: log_id, job_id: job_id
-            )
-          end
-        end
-
-        private
-
         attr_reader :storage_service, :database
+        private :storage_service
+        private :database
 
-        def archived_content_length
+        private def archived_content_length
           storage_service.content_length(target_url)
         end
 
-        def content
+        private def content
           @content ||= log[:content]
         end
 
-        def job_id
+        private def job_id
           (log || {}).fetch(:job_id, 'unknown')
         end
 
         attr_writer :content
+        private :content
 
-        def hostname
+        private def hostname
           Travis.config.s3.hostname
         end
 
-        def retrying(header, times = 5)
+        private def retrying(header, times: retry_times)
           yield
         rescue => e
           count ||= 0
-          if times > (count += 1) && ENV['RACK_ENV'] != 'test'
+          count += 1
+          if times > count
             Travis.logger.debug(
               'error while archiving',
               action: 'archive', retrying: header,
-              error: JSON.dump(e.backtrace), type: e.class.name
+              error: MultiJson.dump(e.backtrace), type: e.class.name
             )
             Travis.logger.warn(
               'error while archiving',
@@ -190,23 +180,8 @@ module Travis
           end
         end
 
-        def investigation_enabled?
-          Travis.config.investigation.enabled?
-        end
-
-        def investigators
-          @investigators ||= investigators_cfg.map do |name, h|
-            ::Travis::Logs::Investigator.new(
-              name,
-              Regexp.new(h[:matcher]),
-              h[:marking_tmpl],
-              h[:label_tmpl]
-            )
-          end.sort_by(&:name)
-        end
-
-        private def investigators_cfg
-          @investigators_cfg ||= Travis.config.investigation.investigators.to_h
+        private def retry_times
+          @retry_times ||= 5
         end
       end
     end

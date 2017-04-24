@@ -1,3 +1,4 @@
 # frozen_string_literal: true
-require 'travis/logs/app'
+
+require 'travis/logs'
 run Travis::Logs::App.new

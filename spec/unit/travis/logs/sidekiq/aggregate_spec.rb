@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'travis/logs/sidekiq/aggregate'
 
 describe Travis::Logs::Sidekiq::Aggregate do
   let(:log_id) { rand(10_000..19_999) }

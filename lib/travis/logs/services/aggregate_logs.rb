@@ -1,14 +1,14 @@
 # frozen_string_literal: true
+
 require 'concurrent'
 
-require 'travis/logs/helpers/metrics'
-require 'travis/logs/sidekiq/archive'
+require 'travis/logs'
 
 module Travis
   module Logs
     module Services
       class AggregateLogs
-        include Helpers::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.aggregate_logs'
 
@@ -27,7 +27,7 @@ module Travis
         def initialize(database = nil, pool_config = {})
           @database = database || Travis::Logs.database_connection
           @pool_config = if pool_config.empty?
-                           Travis::Logs.config.logs.aggregate_pool.to_h
+                           Travis.config.logs.aggregate_pool.to_h
                          else
                            pool_config
                          end
@@ -96,7 +96,7 @@ module Travis
           measure do
             database.transaction do
               aggregate(log_id)
-              vacuum(log_id) unless skip_empty? && log_empty?(log_id)
+              clean(log_id) unless skip_empty? && log_empty?(log_id)
             end
           end
           queue_archiving(log_id)
@@ -128,7 +128,7 @@ module Travis
           true
         end
 
-        private def vacuum(log_id)
+        private def clean(log_id)
           measure('vacuum') do
             database.delete_log_parts(log_id)
           end
@@ -159,7 +159,7 @@ module Travis
         end
 
         private def intervals
-          Travis.config.logs.intervals
+          Travis.config.logs.intervals.to_h
         end
 
         private def per_aggregate_limit
@@ -167,15 +167,16 @@ module Travis
         end
 
         private def archive?
-          Travis.config.logs.archive
+          Travis.config.logs.archive?
         end
 
         private def skip_empty?
-          Travis.config.logs.vacuum_skip_empty
+          Travis.config.logs.aggregate_clean_skip_empty
         end
 
         private def aggregatable_order
-          Travis.config.logs.aggregatable_order
+          value = Travis.config.logs.aggregatable_order.to_s.strip
+          value.empty? ? nil : value
         end
       end
     end

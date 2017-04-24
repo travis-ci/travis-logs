@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Travis
   module Logs
     module Services
@@ -16,6 +17,20 @@ module Travis
             raise ArgumentError, 'only one of job_id or id allowed'
           end
 
+          if job_id && job_id < min_accepted_job_id
+            return spoofed_archived_log(job_id: job_id)
+          end
+
+          return spoofed_archived_log(id: id) if id && id < min_accepted_id
+
+          fetch(
+            job_id: job_id,
+            id: id,
+            aggregate_on_demand: aggregate_on_demand
+          )
+        end
+
+        private def fetch(job_id: nil, id: nil, aggregate_on_demand: true)
           result = nil
           result = database.log_for_job_id(job_id) if job_id
           result = database.log_for_id(id) if id
@@ -34,6 +49,28 @@ module Travis
             content: content,
             removed_by_id: removed_by_id
           )
+        end
+
+        private def min_accepted_job_id
+          Travis.config.logs.archive_spoofing.min_accepted_job_id
+        end
+
+        private def min_accepted_id
+          Travis.config.logs.archive_spoofing.min_accepted_id
+        end
+
+        private def spoofed_archived_log(job_id: nil, id: nil)
+          {
+            aggregated_at: Time.now - 300,
+            archive_verified: true,
+            archived_at: Time.now - 300,
+            content: nil,
+            id: id,
+            job_id: job_id,
+            removed_at: nil,
+            removed_by: nil,
+            updated_at: Time.now
+          }
         end
       end
     end

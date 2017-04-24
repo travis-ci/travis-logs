@@ -1,43 +1,31 @@
 # frozen_string_literal: true
-require 'json'
+
 require 'jwt'
+require 'multi_json'
 require 'pusher'
 require 'rack/ssl'
-require 'raven'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/param'
 
 require 'travis/logs'
-require 'travis/logs/existence'
-require 'travis/logs/helpers/metrics_middleware'
-require 'travis/logs/helpers/pusher'
-require 'travis/logs/services/fetch_log'
-require 'travis/logs/services/fetch_log_parts'
-require 'travis/logs/services/process_log_part'
-require 'travis/logs/services/upsert_log'
-require 'travis/logs/sidekiq'
+require 'travis/metrics'
 
 module Travis
   module Logs
-    class SentryMiddleware < Sinatra::Base
-      configure do
-        Raven.configure { |c| c.tags = { environment: environment } }
-        use Raven::Rack
-      end
-    end
-
     class App < Sinatra::Base
       helpers Sinatra::Param
 
       configure(:production, :staging) do
         use Rack::SSL
-        use Travis::Logs::Helpers::MetricsMiddleware
+        use Travis::Logs::MetricsMiddleware
       end
 
       configure do
-        enable :logging if Travis::Logs.config.logs.api_logging?
-        use SentryMiddleware if ENV['SENTRY_DSN']
+        enable :logging if Travis.config.logs.api_logging?
+        unless Travis.config.sentry.dsn.to_s.empty?
+          use Travis::Logs::SentryMiddleware
+        end
       end
 
       def initialize(auth_token: ENV['AUTH_TOKEN'].to_s,
@@ -113,7 +101,7 @@ module Travis
 
         request.body.rewind
 
-        items = Array(JSON.parse(request.body.read))
+        items = Array(MultiJson.load(request.body.read))
         halt 400 unless all_items_valid?(items)
 
         database.transaction do
@@ -158,7 +146,7 @@ module Travis
 
         if auth_header.start_with?('Bearer ')
           halt 500, 'key is not set' if rsa_public_key.nil?
-          Travis.uuid = request.env['HTTP_X_REQUEST_ID']
+          Thread.current[:uuid] = request.env['HTTP_X_REQUEST_ID']
           jwt_decode!(auth_header[7..-1], params[:job_id])
         elsif auth_header.start_with?('token ')
           halt 500, 'authentication token is not set' if auth_token.empty?
@@ -167,16 +155,16 @@ module Travis
           halt 403
         end
 
-        data = JSON.parse(request.body.read)
+        data = MultiJson.load(request.body.read)
         if data['@type'] != 'log_part'
-          halt 400, JSON.dump('error' => '@type should be log_part')
+          halt 400, MultiJson.dump(error: '@type should be log_part')
         end
 
         if data['encoding'] != 'base64'
-          halt 400, JSON.dump(error: 'invalid encoding, only base64 supported')
+          halt 400, MultiJson.dump(error: 'invalid encoding')
         end
 
-        process_log_part_service.run(
+        Travis::Logs::Sidekiq::LogParts.perform_async(
           'id' => Integer(params[:job_id]),
           'log' => Base64.decode64(data['content']),
           'number' => params[:log_part_id], # NOTE: `log_part_id` may be "last"
@@ -242,21 +230,12 @@ module Travis
         )
       end
 
-      private def process_log_part_service
-        @process_log_part_service ||=
-          Travis::Logs::Services::ProcessLogPart.new(
-            database: database,
-            pusher_client: pusher,
-            existence: existence
-          )
-      end
-
       private def existence
         @existence ||= Travis::Logs::Existence.new
       end
 
       private def pusher
-        @pusher ||= Travis::Logs::Helpers::Pusher.new
+        @pusher ||= Travis::Logs::Pusher.new
       end
 
       private def database
@@ -264,7 +243,7 @@ module Travis
       end
 
       private def setup
-        Travis::Metrics.setup
+        Travis::Metrics.setup(Travis.config.metrics, Travis.logger)
         Travis::Logs::Sidekiq.setup
       end
 

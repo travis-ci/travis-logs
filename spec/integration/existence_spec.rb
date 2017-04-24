@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require 'travis/logs'
-require 'travis/logs/existence'
 
 describe Travis::Logs::Existence do
   let(:existence) { described_class.new }

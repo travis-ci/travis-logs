@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 libdir = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
-require 'bundler/setup'
 require 'pry'
+require 'travis'
 require 'travis/logs'
 
 Pry.config.prompt = Pry::SIMPLE_PROMPT

@@ -1,9 +1,6 @@
 # frozen_string_literal: true
-require 'travis/logs'
-require 'travis/support'
-require 'travis/logs/helpers/database'
 
-describe Travis::Logs::Helpers::Database do
+describe Travis::Logs::Database do
   let(:database) { described_class.new }
   let(:sequel) { described_class.create_sequel }
   let(:now) { Time.now.utc }

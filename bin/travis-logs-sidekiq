@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -o errexit
+
+main() {
+  if [[ $# -lt 2 ]] || [[ "$*" =~ -h|--help ]]; then
+    echo "Usage: $(basename "${0}") <queue> <concurrency>"
+    exit 1
+  fi
+
+  local top
+  top="$(cd "$(dirname "${0}")/.." && pwd)"
+
+  local queue="${1}"
+  shift
+  local concurrency="${1}"
+  shift
+
+  TRAVIS_SIDEKIQ_POOL_SIZE="$(( ${concurrency} + 2 ))"
+  export TRAVIS_SIDEKIQ_POOL_SIZE
+
+  set -o xtrace
+  exec bundle exec je sidekiq \
+    -q "${queue}" \
+    -c "${concurrency}" \
+    -r "${top}/lib/travis/logs/sidekiq/initializer.rb" \
+    "$@"
+}
+
+main "$@"

@@ -1,14 +1,12 @@
 # frozen_string_literal: true
-require 'travis/logs/helpers/metrics'
-require 'travis/logs/helpers/s3'
-require 'travis/logs/sidekiq'
-require 'travis/logs/sidekiq/archive'
+
+require 'travis/logs'
 
 module Travis
   module Logs
     module Services
       class PurgeLog
-        include Helpers::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.purge'
 
@@ -19,7 +17,7 @@ module Travis
         def initialize(log_id, storage_service = nil, database = nil,
                        archiver = nil)
           @log_id = log_id
-          @storage_service = storage_service || Helpers::S3.new
+          @storage_service = storage_service || Travis::Logs::S3.new
           @database = database || Travis::Logs.database_connection
           @archiver = archiver || proc do
             Travis::Logs::Sidekiq::Archive.perform_async(log_id)
@@ -34,13 +32,11 @@ module Travis
           end
         end
 
-        private
-
-        def db_content_length_empty?
+        private def db_content_length_empty?
           content_length_from_db.nil? || content_length_from_db.zero?
         end
 
-        def process_empty_log_content
+        private def process_empty_log_content
           if content_length_from_s3.nil?
             Travis.logger.warn(
               'no content',
@@ -61,7 +57,7 @@ module Travis
           end
         end
 
-        def process_log_content
+        private def process_log_content
           if content_lengths_match?
             measure('purged') do
               @database.purge(@log_id)
@@ -85,15 +81,15 @@ module Travis
           end
         end
 
-        def content_lengths_match?
+        private def content_lengths_match?
           content_length_from_db == content_length_from_s3
         end
 
-        def content_length_from_db
+        private def content_length_from_db
           log[:content_length]
         end
 
-        def content_length_from_s3
+        private def content_length_from_s3
           @content_length_from_s3 ||= begin
             measure('check_content_length') do
               @storage_service.content_length(log_url)
@@ -103,7 +99,7 @@ module Travis
           end
         end
 
-        def log
+        private def log
           unless defined?(@log)
             @log = @database.log_content_length_for_id(@log_id)
             unless @log
@@ -118,7 +114,7 @@ module Travis
           @log
         end
 
-        def log_url
+        private def log_url
           "http://#{Travis.config.s3.hostname}/jobs/#{log[:job_id]}/log.txt"
         end
       end
