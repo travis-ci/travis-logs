@@ -5,15 +5,10 @@ require 'travis/config'
 module Travis
   module Logs
     class Config < Travis::Config
-      extend Hashr::Env
-
-      self.env_namespace = 'TRAVIS'
-
       define(
         amqp: {
           host: 'localhost',
           password: 'guest',
-          prefetch: 1,
           username: 'guest'
         },
         channels_existence_check: true,
