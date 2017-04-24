@@ -5,12 +5,6 @@ GIT
     jemalloc (1.4.5)
 
 GIT
-  remote: https://github.com/meatballhat/json-to-env.git
-  revision: ef2cf0f773130540e34ddba46da03ca85f721df4
-  specs:
-    json-to-env (0.1.0)
-
-GIT
   remote: https://github.com/travis-ci/travis-exceptions.git
   revision: 71b11939f1f3b86d1e2fd94f3b9b8f78af290e12
   specs:
@@ -164,7 +158,7 @@ GEM
     slop (3.6.0)
     thread_safe (0.3.6)
     tilt (2.0.7)
-    travis-config (1.0.13)
+    travis-config (1.1.1)
       hashr (~> 2.0.0)
     tzinfo (1.2.3)
       thread_safe (~> 0.1)
@@ -181,7 +175,6 @@ DEPENDENCIES
   concurrent-ruby
   connection_pool
   jemalloc!
-  json-to-env!
   jwt
   metriks
   metriks-librato_metrics

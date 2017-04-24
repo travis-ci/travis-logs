@@ -6,13 +6,15 @@ $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
 require 'json'
 require 'stringio'
-require 'json_to_env'
 require 'travis/logs'
+require 'travis/config'
 
 $stdout.sync = true
 $stderr.sync = true
 
-JsonToEnv.main(
-  input: StringIO.new(JSON.dump(Travis.config.to_h)),
-  prefix: 'TRAVIS'
-)
+Travis::Config::Serialize::Env.new(
+  Travis::Logs.config.to_h,
+  prefix: 'travis'
+).apply.sort.each do |entry|
+  $stdout.puts entry
+end

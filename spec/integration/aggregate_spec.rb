@@ -33,21 +33,26 @@ describe 'aggregation' do
     }
   end
 
-  def populate_logs(pusher_client, existence, count = 100)
+  def populate_logs(pusher_client, existence, job_count: 10, parts_count: 50)
     lps = Travis::Logs::Services::ProcessLogPart.new(
       database: nil,
       pusher_client: pusher_client,
       existence: existence
     )
 
-    count.times do |n|
+    job_count.times do |n|
       job_id = 17_321 + n
 
-      100.times do |log_part_n|
-        lps.run(create_payload(job_id, log_part_n))
+      entries = []
+      parts_count.times do |log_part_n|
+        entries.push(create_payload(job_id, log_part_n))
       end
 
-      lps.run(create_payload(job_id, 101).merge('final' => true))
+      entries.push(
+        create_payload(job_id, 101).merge('final' => true)
+      )
+
+      lps.run(entries)
     end
   end
 
@@ -55,7 +60,7 @@ describe 'aggregation' do
     Travis::Logs.database_connection = Travis::Logs::Database.connect
     Travis.config.logs.intervals[:sweeper] = 0
     db.run('TRUNCATE log_parts; TRUNCATE logs')
-    populate_logs(pusher_client, existence, 100)
+    populate_logs(pusher_client, existence)
   end
 
   it 'aggregates logs' do

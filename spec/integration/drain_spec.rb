@@ -15,7 +15,9 @@ describe 'receive_logs' do
 
   before do
     allow_any_instance_of(Travis::Logs::DrainQueue)
-      .to receive(:jobs_queue) { queue }
+      .to receive(:jobs_queue).and_return(queue)
+    allow_any_instance_of(Travis::Logs::DrainQueue)
+      .to receive(:batch_size).and_return(1)
   end
 
   it 'passes logs queue messages to callable' do

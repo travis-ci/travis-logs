@@ -13,9 +13,9 @@ class FakeDatabase
     log_id
   end
 
-  def create_log_part(params)
-    log_part_id = @log_parts.length + 1
-    @log_parts << params
+  def create_log_parts(entries)
+    log_part_id = @log_parts.length + entries.length
+    @log_parts += entries
     log_part_id
   end
 
@@ -25,7 +25,7 @@ class FakeDatabase
 end
 
 describe Travis::Logs::Services::ProcessLogPart do
-  let(:payload) { { 'id' => 2, 'log' => 'hello, world', 'number' => 1 } }
+  let(:payload) { [{ 'id' => 2, 'log' => 'hello, world', 'number' => 1 }] }
   let(:database) { FakeDatabase.new }
   let(:pusher_client) { double('pusher-client', push: nil) }
 
@@ -89,7 +89,9 @@ describe Travis::Logs::Services::ProcessLogPart do
   it 'creates a log part' do
     service.run(payload)
 
-    expect(database.log_parts.last).to include(content: 'hello, world', number: 1, final: false)
+    expect(database.log_parts.last).to include(
+      content: 'hello, world', number: 1, final: false
+    )
   end
 
   describe 'existence check' do
