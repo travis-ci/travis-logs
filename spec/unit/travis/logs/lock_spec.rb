@@ -1,6 +1,6 @@
-require 'travis/logs/helpers/lock'
+# frozen_string_literal: true
 
-describe Travis::Logs::Helpers::Lock do
+describe Travis::Logs::Lock do
   let(:lock_options) { lock_config.merge(url: redis_url) }
   let(:lock_config) { { official: :config, very: :srs } }
   let(:redis_url) { 'redis://very.memory.example.com' }

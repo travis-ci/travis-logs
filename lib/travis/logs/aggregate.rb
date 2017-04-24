@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'travis/logs'
-require 'travis/logs/helpers/lock'
 require 'travis/exceptions'
 require 'travis/metrics'
 
@@ -65,7 +64,7 @@ module Travis
       end
 
       private def lock
-        @lock ||= Travis::Logs::Helpers::Lock.new('logs.aggregate')
+        @lock ||= Travis::Logs::Lock.new('logs.aggregate')
       end
     end
   end
