@@ -53,15 +53,15 @@ module Travis
         },
         metrics: { reporter: 'librato' },
         pusher: {
-          app_id: 'app-id',
-          key: 'key',
-          secret: 'secret',
+          app_id: '',
+          key: '',
+          secret: '',
           secure: false
         },
         s3: {
           access_key_id: '',
-          acl: :public_read,
-          hostname: 'archive.travis-ci.org',
+          acl: '',
+          hostname: '',
           secret_access_key: ''
         },
         sentry: {
