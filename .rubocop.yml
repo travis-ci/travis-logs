@@ -21,3 +21,12 @@ Metrics/BlockLength:
   Max: 30
   Exclude:
   - 'spec/**/*'
+
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10

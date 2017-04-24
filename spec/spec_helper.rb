@@ -2,7 +2,6 @@
 
 require 'simplecov'
 
-ENV['PG_DISABLE_SSL'] = '1'
 ENV['RACK_ENV'] = 'test'
 
 require 'travis/logs'

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require 'redis'
-require 'travis/redis_pool'
+
+require 'travis/logs'
 
 module Travis
   module Logs
@@ -10,11 +11,11 @@ module Travis
 
       class << self
         def redis
-          @redis ||= RedisPool.new(redis_config)
+          @redis ||= Travis::Logs::RedisPool.new(redis_config)
         end
 
         def redis_config
-          (Logs.config.logs_redis || Logs.config.redis || {}).to_h
+          (Travis.config.logs_redis || Travis.config.redis || {}).to_h
         end
       end
 
@@ -25,7 +26,7 @@ module Travis
       def occupied!(channel_name)
         key = self.key(channel_name)
         redis.set(key, true)
-        redis.expire(key, 6 * 3600)
+        redis.expire(key, 6 * 3_600)
       end
 
       def occupied?(channel_name)

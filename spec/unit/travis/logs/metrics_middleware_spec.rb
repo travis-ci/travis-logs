@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require 'travis/logs/helpers/metrics_middleware'
-
-describe Travis::Logs::Helpers::MetricsMiddleware do
+describe Travis::Logs::MetricsMiddleware do
   let(:app) { double('app', call: [200, {}, 'hai']) }
   subject { described_class.new(app) }
 

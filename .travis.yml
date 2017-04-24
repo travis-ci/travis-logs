@@ -16,9 +16,6 @@ addons:
   apt:
     packages:
     - postgresql-server-dev-9.6
-env:
-  global:
-  - PG_DISABLE_SSL='1'
 before_install:
 - script/install-sqitch
 - script/install-partman

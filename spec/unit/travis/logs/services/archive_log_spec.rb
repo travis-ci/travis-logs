@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'travis/logs'
-require 'travis/logs/services/archive_log'
-require 'travis/logs/helpers/database'
-
 class FakeStorageService
   attr_reader :objects
 
@@ -44,7 +40,11 @@ describe Travis::Logs::Services::ArchiveLog do
   let(:log) { { id: 1, job_id: 2, content: content } }
   let(:database) { double('database', update_archiving_status: nil, mark_archive_verified: nil, log_for_id: log) }
   let(:storage_service) { FakeStorageService.new }
-  let(:service) { described_class.new(log[:id], storage_service, database) }
+  let(:service) { described_class.new(log[:id], storage_service: storage_service, database: database) }
+
+  before do
+    allow(service).to receive(:retry_times).and_return(0)
+  end
 
   it 'pushes the log to S3' do
     service.run

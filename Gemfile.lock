@@ -11,12 +11,6 @@ GIT
     json-to-env (0.1.0)
 
 GIT
-  remote: https://github.com/rkh/coder.git
-  revision: 44b0cf89b98caecc654dd1a724a448e17ef7aa6c
-  specs:
-    coder (0.4.0)
-
-GIT
   remote: https://github.com/travis-ci/travis-exceptions.git
   revision: 71b11939f1f3b86d1e2fd94f3b9b8f78af290e12
   specs:
@@ -61,6 +55,7 @@ GEM
     backports (3.7.0)
     bunny (2.6.4)
       amq-protocol (>= 2.0.1)
+    coder (0.4.0)
     coderay (1.1.1)
     concurrent-ruby (1.0.5)
     connection_pool (2.2.1)
@@ -174,7 +169,7 @@ DEPENDENCIES
   activesupport
   aws-sdk
   bunny
-  coder!
+  coder
   concurrent-ruby
   connection_pool
   jemalloc!

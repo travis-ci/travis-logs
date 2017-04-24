@@ -11,7 +11,7 @@ end
 gem 'activesupport'
 gem 'aws-sdk'
 gem 'bunny'
-gem 'coder', git: gh('rkh/coder')
+gem 'coder'
 gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'jemalloc', git: gh('joshk/jemalloc-rb')

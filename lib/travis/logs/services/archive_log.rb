@@ -6,14 +6,11 @@ require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
 require 'multi_json'
 
-require 'travis/logs/helpers/metrics'
-require 'travis/logs/helpers/s3'
-
 module Travis
   module Logs
     module Services
       class ArchiveLog
-        include Helpers::Metrics
+        include Travis::Logs::MetricsMethods
 
         METRIKS_PREFIX = 'logs.archive'
 
@@ -33,8 +30,11 @@ module Travis
 
         attr_reader :log_id
 
-        def initialize(log_id, storage_service = Helpers::S3.new,
-                       database = Travis::Logs.database_connection)
+        def initialize(
+          log_id,
+          storage_service: Travis::Logs::S3.new,
+          database: Travis::Logs.database_connection
+        )
           @log_id = log_id
           @storage_service = storage_service
           @database = database
@@ -129,33 +129,35 @@ module Travis
           "http://#{hostname}/jobs/#{job_id}/log.txt"
         end
 
-        private
-
         attr_reader :storage_service, :database
+        private :storage_service
+        private :database
 
-        def archived_content_length
+        private def archived_content_length
           storage_service.content_length(target_url)
         end
 
-        def content
+        private def content
           @content ||= log[:content]
         end
 
-        def job_id
+        private def job_id
           (log || {}).fetch(:job_id, 'unknown')
         end
 
         attr_writer :content
+        private :content
 
-        def hostname
+        private def hostname
           Travis.config.s3.hostname
         end
 
-        def retrying(header, times = 5)
+        private def retrying(header, times: retry_times)
           yield
         rescue => e
           count ||= 0
-          if times > (count += 1) && ENV['RACK_ENV'] != 'test'
+          count += 1
+          if times > count
             Travis.logger.debug(
               'error while archiving',
               action: 'archive', retrying: header,
@@ -176,6 +178,10 @@ module Travis
             )
             raise
           end
+        end
+
+        private def retry_times
+          @retry_times ||= 5
         end
       end
     end

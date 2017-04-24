@@ -22,7 +22,7 @@ main() {
   exec bundle exec je sidekiq \
     -q "${queue}" \
     -c "${concurrency}" \
-    -r "${top}/lib/travis/logs/initializers/sidekiq.rb" \
+    -r "${top}/lib/travis/logs/sidekiq/initializer.rb" \
     "$@"
 }
 

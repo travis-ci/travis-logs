@@ -2,7 +2,8 @@
 
 require 'sidekiq'
 require 'sidekiq/worker'
-require 'travis/logs/services/aggregate_logs'
+
+require 'travis/logs'
 
 module Travis
   module Logs

@@ -4,42 +4,28 @@ require 'jwt'
 require 'multi_json'
 require 'pusher'
 require 'rack/ssl'
-require 'raven'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/param'
 
 require 'travis/logs'
-require 'travis/logs/existence'
-require 'travis/logs/helpers/metrics_middleware'
-require 'travis/logs/helpers/pusher'
-require 'travis/logs/services/fetch_log'
-require 'travis/logs/services/fetch_log_parts'
-require 'travis/logs/services/upsert_log'
-require 'travis/logs/sidekiq'
-require 'travis/logs/sidekiq/log_parts'
 require 'travis/metrics'
 
 module Travis
   module Logs
-    class SentryMiddleware < Sinatra::Base
-      configure do
-        Raven.configure { |c| c.tags = { environment: environment } }
-        use Raven::Rack
-      end
-    end
-
     class App < Sinatra::Base
       helpers Sinatra::Param
 
       configure(:production, :staging) do
         use Rack::SSL
-        use Travis::Logs::Helpers::MetricsMiddleware
+        use Travis::Logs::MetricsMiddleware
       end
 
       configure do
-        enable :logging if Travis::Logs.config.logs.api_logging?
-        use SentryMiddleware if ENV['SENTRY_DSN']
+        enable :logging if Travis.config.logs.api_logging?
+        unless Travis.config.sentry.dsn.to_s.empty?
+          use Travis::Logs::SentryMiddleware
+        end
       end
 
       def initialize(auth_token: ENV['AUTH_TOKEN'].to_s,
@@ -249,7 +235,7 @@ module Travis
       end
 
       private def pusher
-        @pusher ||= Travis::Logs::Helpers::Pusher.new
+        @pusher ||= Travis::Logs::Pusher.new
       end
 
       private def database

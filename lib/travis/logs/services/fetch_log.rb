@@ -23,6 +23,14 @@ module Travis
 
           return spoofed_archived_log(id: id) if id && id < min_accepted_id
 
+          fetch(
+            job_id: job_id,
+            id: id,
+            aggregate_on_demand: aggregate_on_demand
+          )
+        end
+
+        private def fetch(job_id: nil, id: nil, aggregate_on_demand: true)
           result = nil
           result = database.log_for_job_id(job_id) if job_id
           result = database.log_for_id(id) if id
