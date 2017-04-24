@@ -58,6 +58,7 @@ module Travis
           secret: '',
           secure: false
         },
+        redis: { url: '' },
         s3: {
           access_key_id: '',
           acl: '',
