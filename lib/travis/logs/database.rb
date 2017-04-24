@@ -77,7 +77,6 @@ module Travis
 
       def connect
         db.test_connection
-        prepare_statements
       end
 
       def now
@@ -85,16 +84,16 @@ module Travis
       end
 
       def log_for_id(log_id)
-        db.call(:find_log, log_id: log_id)
+        db[:logs].where(id: log_id).first
       end
 
       def log_id_for_job_id(job_id)
-        log = db.call(:find_log_id, job_id: job_id)
+        log = db[:logs].select(:id).where(job_id: job_id).first
         log[:id] if log
       end
 
       def log_for_job_id(job_id)
-        db.call(:find_log_by_job_id, job_id: job_id)
+        db[:logs].where(job_id: job_id).first
       end
 
       def log_content_length_for_id(log_id)
@@ -126,20 +125,16 @@ module Travis
       end
 
       def create_log(job_id)
-        db.call(
-          :create_log,
-          job_id: job_id,
-          created_at: Time.now.utc,
-          updated_at: Time.now.utc
-        )
+        now = Time.now.utc
+        db[:logs].insert(job_id: job_id, created_at: now, updated_at: now)
       end
 
       def create_log_part(params)
-        db.call(:create_log_part, params.merge(created_at: Time.now.utc))
+        db[:log_parts].insert(params.merge(created_at: Time.now.utc))
       end
 
       def delete_log_parts(log_id)
-        db.call(:delete_log_parts, log_id: log_id)
+        db[:log_parts].where(log_id: log_id).delete
       end
 
       def log_parts(log_id, after: nil, part_numbers: [])
@@ -153,17 +148,21 @@ module Travis
       def set_log_content(log_id, content, removed_by: nil)
         transaction do
           delete_log_parts(log_id)
-          aggregated_at = Time.now.utc unless content.nil?
-          removed_at = Time.now.utc unless removed_by.nil?
-          db.call(:set_log_content,
-                  log_id: log_id,
-                  content: content,
-                  aggregated_at: aggregated_at,
-                  archived_at: nil,
-                  archive_verified: nil,
-                  updated_at: Time.now.utc,
-                  removed_by: removed_by,
-                  removed_at: removed_at)
+          now = Time.now.utc
+          aggregated_at = now unless content.nil?
+          removed_at = now unless removed_by.nil?
+          db[:logs]
+            .where(id: log_id)
+            .returning
+            .update(
+              content: content,
+              aggregated_at: aggregated_at,
+              archived_at: nil,
+              archive_verified: nil,
+              updated_at: now,
+              removed_by: removed_by,
+              removed_at: removed_at
+            )
         end
       end
 
@@ -227,55 +226,6 @@ module Travis
 
       def transaction(&block)
         db.transaction(&block)
-      end
-
-      private def prepare_statements
-        prepare_logs_statements
-        prepare_log_parts_statements
-      end
-
-      private def prepare_logs_statements
-        db[:logs]
-          .where(id: :$log_id)
-          .prepare(:first, :find_log)
-
-        db[:logs]
-          .select(:id)
-          .where(job_id: :$job_id)
-          .prepare(:first, :find_log_id)
-
-        db[:logs]
-          .where(job_id: :$job_id)
-          .prepare(:first, :find_log_by_job_id)
-
-        db[:logs]
-          .prepare(:insert, :create_log,
-                   job_id: :$job_id, created_at: :$created_at,
-                   updated_at: :$updated_at)
-
-        db[:logs]
-          .where(id: :$log_id)
-          .returning
-          .prepare(:update, :set_log_content,
-                   content: :$content,
-                   aggregated_at: :$aggregated_at,
-                   archived_at: :$archived_at,
-                   archive_verified: :$archive_verified,
-                   updated_at: :$updated_at,
-                   removed_by: :$removed_by,
-                   removed_at: :$removed_at)
-      end
-
-      private def prepare_log_parts_statements
-        db[:log_parts]
-          .prepare(:insert, :create_log_part,
-                   log_id: :$log_id, content: :$content,
-                   number: :$number, final: :$final,
-                   created_at: :$created_at)
-
-        db[:log_parts]
-          .where(log_id: :$log_id)
-          .prepare(:delete, :delete_log_parts)
       end
     end
   end
