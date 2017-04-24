@@ -18,6 +18,12 @@ GIT
       sentry-raven
 
 GIT
+  remote: https://github.com/travis-ci/travis-lock.git
+  revision: b418401c79e082aa53a62364f7b01a9be6f0d768
+  specs:
+    travis-lock (0.1.1)
+
+GIT
   remote: https://github.com/travis-ci/travis-logger.git
   revision: 1518ce2d056d0f5c6a0a4f15040aeaef673a53de
   ref: 1518ce2
@@ -107,6 +113,8 @@ GEM
     redis (3.3.3)
     redis-namespace (1.5.3)
       redis (~> 3.0, >= 3.0.4)
+    redlock (0.2.0)
+      redis (~> 3, >= 3.0.0)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
@@ -187,6 +195,7 @@ DEPENDENCIES
   rack-test
   rake
   redis-namespace
+  redlock
   rspec
   rubocop
   sentry-raven
@@ -198,6 +207,7 @@ DEPENDENCIES
   sinatra-param
   travis-config
   travis-exceptions!
+  travis-lock!
   travis-logger!
   travis-metrics!
 

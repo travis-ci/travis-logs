@@ -29,6 +29,7 @@ gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rake'
 gem 'redis-namespace'
+gem 'redlock'
 gem 'rspec', group: :test
 gem 'rubocop', require: false, group: :test
 gem 'sentry-raven'
@@ -40,5 +41,6 @@ gem 'sinatra-contrib'
 gem 'sinatra-param'
 gem 'travis-config'
 gem 'travis-exceptions', git: gh('travis-ci/travis-exceptions')
+gem 'travis-lock', git: gh('travis-ci/travis-lock')
 gem 'travis-logger', git: gh('travis-ci/travis-logger'), ref: '1518ce2'
 gem 'travis-metrics', git: gh('travis-ci/travis-metrics')

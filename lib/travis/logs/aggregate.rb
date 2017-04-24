@@ -46,9 +46,13 @@ module Travis
       end
 
       def aggregate_logs
-        aggregator.run
-      rescue StandardError => e
-        Travis::Exceptions.handle(e)
+        lock.exclusive do
+          begin
+            aggregator.run
+          rescue StandardError => e
+            Travis::Exceptions.handle(e)
+          end
+        end
       end
 
       private def aggregator
@@ -57,6 +61,10 @@ module Travis
 
       private def sleep_interval
         Travis.config.logs.intervals.aggregate
+      end
+
+      private def lock
+        @lock ||= Travis::Logs::Lock.new('logs.aggregate')
       end
     end
   end

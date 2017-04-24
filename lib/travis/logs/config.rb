@@ -17,6 +17,7 @@ module Travis
           username: 'guest'
         },
         channels_existence_check: true,
+        lock: { strategy: :redis, ttl: 150 },
         log_level: :info,
         logger: { format_type: 'l2met', thread_id: true },
         logs: {
