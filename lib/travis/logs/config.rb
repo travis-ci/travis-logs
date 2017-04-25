@@ -25,10 +25,10 @@ module Travis
             min_accepted_job_id: 0
           },
           cache_size_bytes: 10_000_000,
-          drain_threads: 10,
-          drain_batch_size: 10,
-          drain_execution_interval: 5,
-          drain_timeout_interval: 5,
+          drain_threads: 4,
+          drain_batch_size: 100,
+          drain_execution_interval: 3,
+          drain_timeout_interval: 3,
           intervals: {
             aggregate: 60,
             force: 3 * 60 * 60,
