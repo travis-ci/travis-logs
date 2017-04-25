@@ -7,6 +7,8 @@ require 'coder'
 # constant error
 require 'net/https'
 
+require 'travis/exceptions'
+
 module Travis
   module Logs
     module Services
@@ -25,58 +27,85 @@ module Travis
         end
 
         def initialize(database: nil, pusher_client: nil,
-                       existence: nil)
+                       existence: nil, cache: nil)
           @database = database || Travis::Logs.database_connection
           @pusher_client = pusher_client || Travis::Logs::Pusher.new
           @existence = existence || Travis::Logs::Existence.new
+          @cache = cache || Travis::Logs.cache
         end
 
         def run(payload)
+          payload = [payload] if payload.is_a?(Hash)
+          payload = Array(payload)
+
           measure do
-            log_id = find_or_create_log(payload)
-            payload = normalize_number(payload)
-            create_part(log_id, payload)
-            notify(payload)
+            by_log_id = normalized_entries(payload)
+            create_parts(by_log_id)
+            by_log_id.each { |_, entry| notify(entry) }
           end
         end
 
-        attr_reader :database, :pusher_client, :existence
+        attr_reader :database, :pusher_client, :existence, :cache
         private :database
         private :pusher_client
         private :existence
+        private :cache
 
-        private def create_part(log_id, payload)
-          if log_id.nil? || log_id.zero?
-            mark_invalid_log_id(log_id, payload)
-            return
+        private def normalized_entries(payload)
+          mapped = payload.map do |entry|
+            [
+              find_or_create_log(entry),
+              normalize_number(entry)
+            ]
           end
-          database.create_log_part(
-            log_id: log_id,
-            content: chars(payload),
-            number: payload['number'],
-            final: final?(payload)
-          )
-          aggregate_async(log_id, payload) if final?(payload)
-        rescue Sequel::Error => e
-          Travis.logger.warn(
-            'Could not save log_part in create_part',
-            job_id: payload['id'], warning: e.message
-          )
-          Travis.logger.warn(e.backtrace.join("\n"))
+          mapped.sort_by { |e| e.first.to_i }
         end
 
-        private def mark_invalid_log_id(log_id, payload)
+        private def create_parts(by_log_id)
+          by_log_id.reject! do |log_id, entry|
+            if log_id.nil? || log_id.zero?
+              mark_invalid_log_id(log_id, entry)
+              true
+            else
+              false
+            end
+          end
+
+          entries = by_log_id.map do |log_id, entry|
+            {
+              log_id: log_id,
+              content: chars(entry),
+              number: entry['number'],
+              final: final?(entry)
+            }
+          end
+
+          database.create_log_parts(entries)
+
+          by_log_id.each do |log_id, entry|
+            aggregate_async(log_id, entry) if final?(entry)
+          end
+        rescue Sequel::Error => e
+          Travis.logger.error(
+            'Could not save log parts in create_parts',
+            error: e.message
+          )
+          Travis::Exceptions.handle(e)
+          raise
+        end
+
+        private def mark_invalid_log_id(log_id, entry)
           Travis.logger.warn(
             'invalid log id',
-            action: 'process', job_id: payload['id'],
+            action: 'process', job_id: entry['id'],
             result: 'invalid_id', log_id: log_id
           )
           mark('log.id_invalid')
         end
 
-        private def notify(payload)
+        private def notify(entry)
           if existence_check_metrics? || existence_check?
-            if channel_occupied?(channel_name(payload))
+            if channel_occupied?(channel_name(entry))
               mark('pusher.send')
             else
               mark('pusher.ignore')
@@ -86,57 +115,59 @@ module Travis
           end
 
           measure('pusher') do
-            pusher_client.push(pusher_payload(payload))
+            pusher_client.push(pusher_payload(entry))
           end
-        rescue => e
+        rescue StandardError => e
           Travis.logger.error(
             'Error notifying of log update',
             err: e.message, from: e.backtrace.first
           )
+          Travis::Exceptions.handle(e)
         end
 
-        private def aggregate_async(log_id, payload)
+        private def aggregate_async(log_id, entry)
           Travis::Logs::Sidekiq::Aggregate.perform_in(
             intervals[:regular], log_id
           )
           Travis.logger.info(
             'scheduled async aggregation',
-            job_id: payload['id'], log_id: log_id,
+            job_id: entry['id'], log_id: log_id,
             in_seconds: intervals[:regular]
           )
         end
 
-        private def find_or_create_log(payload)
-          find_log_id(payload) || create_log(payload)
+        private def find_or_create_log(entry)
+          find_log_id(entry) || create_log(entry)
         end
 
-        private def normalize_number(payload)
-          if payload['number'] == 'last'
-            return payload.merge('number' => INT_MAX)
-          end
-          payload.merge('number' => Integer(payload['number']))
+        private def normalize_number(entry)
+          return entry.merge('number' => INT_MAX) if entry['number'] == 'last'
+          entry.merge('number' => Integer(entry['number']))
         end
 
-        private def find_log_id(payload)
-          database.log_id_for_job_id(payload['id'])
+        private def find_log_id(entry)
+          log_id = cache.read("log_id.#{entry['id']}") ||
+                   database.log_id_for_job_id(entry['id'])
+          cache.write("log_id.#{entry['id']}", log_id) if log_id
+          log_id
         end
 
-        private def create_log(payload)
+        private def create_log(entry)
           mark('log.create')
-          created = database.create_log(payload['id'])
+          created = database.create_log(entry['id'])
           Travis.logger.warn(
             'created log',
-            action: 'process', job_id: payload['id'], message: 'log_created'
+            action: 'process', job_id: entry['id'], message: 'log_created'
           )
           created
         end
 
-        private def chars(payload)
-          filter(payload['log'])
+        private def chars(entry)
+          filter(entry['log'])
         end
 
-        private def final?(payload)
-          !!payload['final'] # rubocop:disable Style/DoubleNegation
+        private def final?(entry)
+          !!entry['final'] # rubocop:disable Style/DoubleNegation
         end
 
         private def filter(chars)
@@ -144,12 +175,12 @@ module Travis
           Coder.clean!(chars.to_s.delete("\0"))
         end
 
-        private def pusher_payload(payload)
+        private def pusher_payload(entry)
           {
-            'id' => payload['id'],
-            'chars' => chars(payload),
-            'number' => payload['number'],
-            'final' => final?(payload)
+            'id' => entry['id'],
+            'chars' => chars(entry),
+            'number' => entry['number'],
+            'final' => final?(entry)
           }
         end
 
@@ -157,8 +188,8 @@ module Travis
           existence.occupied?(name)
         end
 
-        private def channel_name(payload)
-          pusher_client.pusher_channel_name(payload)
+        private def channel_name(entry)
+          pusher_client.pusher_channel_name(entry)
         end
 
         private def existence_check_metrics?
