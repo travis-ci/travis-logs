@@ -78,7 +78,7 @@ module Travis
         ) do
           Travis.logger.info(
             'triggering periodic flush',
-            interval: "#{logs_config[:drain_execution_interval]}s"
+            interval: "#{logs_config[:drain_execution_interval]}s",
             timeout: "#{logs_config[:drain_timeout_interval]}s"
           )
           flush_mutex.synchronize { flush_batch_buffer }
