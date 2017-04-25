@@ -109,7 +109,7 @@ module Travis
           end
 
           begin
-            jobs_channel.ack(delivery_tag, true)
+            jobs_channel.ack(delivery_tag)
           rescue StandardError => e
             Travis.logger.error(
               'failed to ack message',
@@ -134,7 +134,7 @@ module Travis
             end
           else
             Travis.logger.info('acking empty or undecodable payload')
-            jobs_channel.ack(delivery_info.delivery_tag, true)
+            jobs_channel.ack(delivery_info.delivery_tag)
           end
         end
       rescue => e

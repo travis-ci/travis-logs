@@ -134,8 +134,9 @@ module Travis
       end
 
       def create_log_parts(entries)
+        now = Time.now.utc
         db[:log_parts].multi_insert(
-          entries.map { |e| e.merge(created_at: Time.now.utc) }
+          entries.map { |e| e.merge(created_at: now) }
         )
       end
 
