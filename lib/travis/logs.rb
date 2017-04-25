@@ -50,7 +50,7 @@ module Travis
 
       def readonly_database_connection
         @readonly_database_connection ||= Travis::Logs::Database.connect(
-          readonly: true
+          config: config.logs_readonly_database.to_h
         )
       end
 
