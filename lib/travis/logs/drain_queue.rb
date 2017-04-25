@@ -76,7 +76,7 @@ module Travis
           execution_interval: logs_config[:drain_execution_interval],
           timeout_interval: logs_config[:drain_timeout_interval]
         ) do
-          Travis.logger.info(
+          Travis.logger.debug(
             'triggering periodic flush',
             interval: "#{logs_config[:drain_execution_interval]}s",
             timeout: "#{logs_config[:drain_timeout_interval]}s"
