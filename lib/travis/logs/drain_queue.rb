@@ -43,9 +43,7 @@ module Travis
       end
 
       private def jobs_channel
-        @jobs_channel ||= amqp_conn.create_channel.tap do |ch|
-          ch.prefetch(batch_size) if batch_size.positive?
-        end
+        @jobs_channel ||= amqp_conn.create_channel
       end
 
       private def batch_size
@@ -82,6 +80,7 @@ module Travis
       end
 
       private def flush_batch_buffer
+        Travis.logger.info('flushing batch buffer', size: batch_buffer.size)
         sample = {}
         payload = []
 
