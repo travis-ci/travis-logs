@@ -10,7 +10,7 @@ describe 'aggregation' do
   end
 
   def db
-    Travis::Logs.database_connection.instance_variable_get(:@db)
+    Travis::Logs.database_connection.db
   end
 
   def lorem_ipsum_words
@@ -49,7 +49,7 @@ describe 'aggregation' do
       end
 
       entries.push(
-        create_payload(job_id, 101).merge('final' => true)
+        create_payload(job_id, parts_count + 1).merge('final' => true)
       )
 
       lps.run(entries)

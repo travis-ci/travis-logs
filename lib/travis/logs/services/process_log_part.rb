@@ -27,10 +27,11 @@ module Travis
         end
 
         def initialize(database: nil, pusher_client: nil,
-                       existence: nil)
+                       existence: nil, cache: nil)
           @database = database || Travis::Logs.database_connection
           @pusher_client = pusher_client || Travis::Logs::Pusher.new
           @existence = existence || Travis::Logs::Existence.new
+          @cache = cache || Travis::Logs.cache
         end
 
         def run(payload)
@@ -44,10 +45,11 @@ module Travis
           end
         end
 
-        attr_reader :database, :pusher_client, :existence
+        attr_reader :database, :pusher_client, :existence, :cache
         private :database
         private :pusher_client
         private :existence
+        private :cache
 
         private def normalized_entries(payload)
           mapped = payload.map do |entry|
@@ -121,7 +123,6 @@ module Travis
             err: e.message, from: e.backtrace.first
           )
           Travis::Exceptions.handle(e)
-          raise
         end
 
         private def aggregate_async(log_id, entry)
@@ -145,7 +146,10 @@ module Travis
         end
 
         private def find_log_id(entry)
-          database.log_id_for_job_id(entry['id'])
+          log_id = cache.read("log_id.#{entry['id']}") ||
+                   database.log_id_for_job_id(entry['id'])
+          cache.write("log_id.#{entry['id']}", log_id) if log_id
+          log_id
         end
 
         private def create_log(entry)

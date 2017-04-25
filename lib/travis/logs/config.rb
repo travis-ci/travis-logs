@@ -24,6 +24,7 @@ module Travis
             min_accepted_id: 0,
             min_accepted_job_id: 0
           },
+          cache_size_bytes: 10_000_000,
           drain_threads: 10,
           drain_batch_size: 10,
           drain_execution_interval: 5,

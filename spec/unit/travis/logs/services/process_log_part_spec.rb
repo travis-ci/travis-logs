@@ -29,7 +29,7 @@ describe Travis::Logs::Services::ProcessLogPart do
   let(:database) { FakeDatabase.new }
   let(:pusher_client) { double('pusher-client', push: nil) }
 
-  let(:service) do
+  subject(:service) do
     described_class.new(
       database: database,
       pusher_client: pusher_client
@@ -39,6 +39,7 @@ describe Travis::Logs::Services::ProcessLogPart do
   before(:each) do
     Travis.config.channels_existence_check = true
     Travis.config.channels_existence_metrics = true
+    Travis::Logs.cache.clear
     allow(Metriks).to receive(:meter).and_return(double('meter', mark: nil))
     allow(service).to receive(:channel_occupied?) { true }
     allow(service).to receive(:channel_name) { 'channel' }
@@ -73,15 +74,16 @@ describe Travis::Logs::Services::ProcessLogPart do
   end
 
   context 'with an invalid log ID' do
+    let(:meter) { double('log.id_invalid meter') }
+
     before(:each) do
       database.create_log(2, 0)
+      allow(Metriks).to receive(:meter)
+        .with('logs.process_log_part.log.id_invalid').and_return(meter)
     end
 
     it 'marks the log.id_invalid metric' do
-      meter = double('log.id_invalid meter')
-      expect(Metriks).to receive(:meter).with('logs.process_log_part.log.id_invalid').and_return(meter)
       expect(meter).to receive(:mark)
-
       service.run(payload)
     end
   end
