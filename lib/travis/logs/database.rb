@@ -10,8 +10,12 @@ module Travis
   module Logs
     class Database
       class << self
-        def create_sequel
-          config = Travis.config.logs_database.to_h
+        def create_sequel(readonly: false)
+          config = if readonly
+                     Travis.config.logs_readonly_database.to_h
+                   else
+                     Travis.config.logs_database.to_h
+                   end
 
           Sequel.default_timezone = :utc
           conn = Sequel.connect(
@@ -23,8 +27,8 @@ module Travis
           conn
         end
 
-        def connect
-          new.tap(&:connect)
+        def connect(readonly: false)
+          new(readonly: readonly).tap(&:connect)
         end
 
         private def after_connect(conn)
@@ -64,8 +68,8 @@ module Travis
         end
       end
 
-      def initialize
-        @db = self.class.create_sequel
+      def initialize(readonly: false)
+        @db = self.class.create_sequel(readonly: readonly)
         Travis.logger.info(
           'new database connection',
           object_id: object_id,

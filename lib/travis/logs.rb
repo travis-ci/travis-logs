@@ -48,6 +48,12 @@ module Travis
         @database_connection ||= Travis::Logs::Database.connect
       end
 
+      def readonly_database_connection
+        @readonly_database_connection ||= Travis::Logs::Database.connect(
+          readonly: true
+        )
+      end
+
       def redis_pool
         @redis_pool ||= ::Sidekiq::RedisConnection.create(
           url: config.redis.url,
