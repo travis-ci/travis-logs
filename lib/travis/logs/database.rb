@@ -151,6 +151,13 @@ module Travis
         db[:log_parts].insert(params.merge(created_at: Time.now.utc))
       end
 
+      def create_log_parts(entries)
+        now = Time.now.utc
+        db[:log_parts].multi_insert(
+          entries.map { |e| e.merge(created_at: now) }
+        )
+      end
+
       def delete_log_parts(log_id)
         db[:log_parts].where(log_id: log_id).delete
       end

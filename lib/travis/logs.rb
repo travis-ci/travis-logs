@@ -2,6 +2,7 @@
 
 require 'forwardable'
 
+require 'active_support'
 require 'sidekiq/redis_connection'
 
 require 'travis/logger'
@@ -60,6 +61,12 @@ module Travis
           'HEROKU_SLUG_COMMIT',
           `git rev-parse HEAD 2>/dev/null`
         ).strip
+      end
+
+      def cache
+        @cache ||= ActiveSupport::Cache::MemoryStore.new(
+          size: config.logs.cache_size_bytes
+        )
       end
     end
   end

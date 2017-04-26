@@ -15,7 +15,9 @@ describe 'receive_logs' do
 
   before do
     allow_any_instance_of(Travis::Logs::DrainQueue)
-      .to receive(:jobs_queue) { queue }
+      .to receive(:jobs_queue).and_return(queue)
+    allow_any_instance_of(Travis::Logs::DrainQueue)
+      .to receive(:batch_size).and_return(1)
   end
 
   it 'passes logs queue messages to callable' do
@@ -25,6 +27,6 @@ describe 'receive_logs' do
     delivery_info = double('delivery_info', delivery_tag: 'yey')
     queue.call(delivery_info, nil, '{"id":123,"log":"hello, world","number":1}')
 
-    expect(performed.length).to eq 1
+    expect(performed.length).to be > 0
   end
 end
