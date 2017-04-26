@@ -9,7 +9,7 @@ set -o errexit
 main() {
   cd "$(dirname "$0")/.."
 
-  for d in "${PGBOUNCER_ENABLED_FOR_DYNOS[@]}"; do
+  for d in ${PGBOUNCER_ENABLED_FOR_DYNOS}; do
     if [ "${d}" = "${DYNO}" ]; then
       export PGBOUNCER_ENABLED=true
     fi
