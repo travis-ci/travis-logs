@@ -70,7 +70,7 @@ module Travis
         json uptime: Time.now.utc - boot_time,
              greeting: 'hello, human 👋!',
              pong: redis_ping,
-             now: database.now,
+             now: readonly_database.now,
              version: Travis::Logs.version
       end
 
@@ -174,13 +174,6 @@ module Travis
         status 204
       end
 
-      put '/logs/:job_id/archived' do
-        halt 500, 'authentication token is not set' if auth_token.empty?
-        halt 403 unless authorized?(request)
-
-        halt 501
-      end
-
       get '/logs/:id' do
         halt 500, 'authentication token is not set' if auth_token.empty?
         halt 403 unless authorized?(request)
@@ -188,6 +181,7 @@ module Travis
         result = fetch_log_service.run(
           (params[:by] || :job_id).to_sym => Integer(params[:id])
         )
+
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200
@@ -198,7 +192,10 @@ module Travis
         halt 500, 'authentication token is not set' if auth_token.empty?
         halt 403 unless authorized?(request)
 
-        result = database.log_id_for_job_id(Integer(params[:job_id]))
+        result = readonly_database.cached_log_id_for_job_id(
+          Integer(params[:job_id])
+        )
+
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200
@@ -214,13 +211,13 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
-          database: database
+          database: readonly_database
         )
       end
 
       private def fetch_log_parts_service
         @fetch_log_parts_service ||= Travis::Logs::Services::FetchLogParts.new(
-          database: database
+          database: readonly_database
         )
       end
 
@@ -240,6 +237,10 @@ module Travis
 
       private def database
         @database ||= Travis::Logs.database_connection
+      end
+
+      private def readonly_database
+        @readonly_database ||= Travis::Logs.readonly_database_connection
       end
 
       private def setup

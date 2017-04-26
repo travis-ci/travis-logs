@@ -22,6 +22,8 @@ class FakeDatabase
   def log_id_for_job_id(job_id)
     @logs.select { |log| log[:job_id] == job_id }.map { |log| log[:id] }.first
   end
+
+  alias cached_log_id_for_job_id log_id_for_job_id
 end
 
 describe Travis::Logs::Services::ProcessLogPart do

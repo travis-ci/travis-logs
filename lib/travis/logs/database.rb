@@ -10,9 +10,7 @@ module Travis
   module Logs
     class Database
       class << self
-        def create_sequel
-          config = Travis.config.logs_database.to_h
-
+        def create_sequel(config: Travis.config.logs_database.to_h)
           Sequel.default_timezone = :utc
           conn = Sequel.connect(
             config[:url],
@@ -23,8 +21,8 @@ module Travis
           conn
         end
 
-        def connect
-          new.tap(&:connect)
+        def connect(config: Travis.config.logs_database.to_h)
+          new(config: config).tap(&:connect)
         end
 
         private def after_connect(conn)
@@ -64,8 +62,10 @@ module Travis
         end
       end
 
-      def initialize
-        @db = self.class.create_sequel
+      def initialize(config: Travis.config.logs_database.to_h,
+                     cache: nil)
+        @db = self.class.create_sequel(config: config)
+        @cache = cache || Travis::Logs.cache
         Travis.logger.info(
           'new database connection',
           object_id: object_id,
@@ -73,7 +73,8 @@ module Travis
         )
       end
 
-      attr_reader :db
+      attr_reader :db, :cache
+      private :cache
 
       def connect
         db.test_connection
@@ -90,6 +91,18 @@ module Travis
       def log_id_for_job_id(job_id)
         log = db[:logs].select(:id).where(job_id: job_id).first
         log[:id] if log
+      end
+
+      def cached_log_id_for_job_id(job_id)
+        cache_key = "log_id.#{job_id}"
+        log_id = cache.read(cache_key)
+
+        if log_id.nil?
+          log_id = log_id_for_job_id(job_id)
+          cache.write(cache_key, log_id) if log_id
+        end
+
+        log_id
       end
 
       def log_for_job_id(job_id)

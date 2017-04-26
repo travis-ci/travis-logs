@@ -40,17 +40,23 @@ module Travis
           purge: false
         },
         logs_database: {
-          adapter: 'postgresql',
-          database: "travis_logs_#{env}",
-          encoding: 'unicode',
-          log_parts_autovacuum_vacuum_scale_factor: 0.001,
-          log_parts_autovacuum_vacuum_threshold: 0,
-          min_messages: 'warning',
           sql_logging: false,
           url: ENV.fetch(
             'LOGS_DATABASE_URL',
             "postgres://localhost/travis_logs_#{env}"
           )
+        },
+        logs_readonly_database: {
+          sql_logging: false,
+          url: ENV.fetch(
+            'LOGS_READONLY_DATABASE_URL',
+            "postgres://localhost/travis_logs_#{env}"
+          )
+        },
+        memcached: {
+          servers: ENV.fetch('MEMCACHIER_SERVERS', ''),
+          username: ENV.fetch('MEMCACHIER_USERNAME', ''),
+          password: ENV.fetch('MEMCACHIER_PASSWORD', '')
         },
         metrics: { reporter: 'librato' },
         pusher: {
@@ -78,6 +84,10 @@ module Travis
 
       def librato_source
         ENV['LIBRATO_SOURCE'] || super
+      end
+
+      def memcached
+        super.to_h
       end
     end
   end

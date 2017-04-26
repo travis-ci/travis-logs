@@ -14,6 +14,7 @@ gem 'bunny'
 gem 'coder'
 gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
+gem 'dalli'
 gem 'jemalloc', git: gh('joshk/jemalloc-rb')
 gem 'jwt'
 gem 'metriks'

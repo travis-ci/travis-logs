@@ -48,6 +48,12 @@ module Travis
         @database_connection ||= Travis::Logs::Database.connect
       end
 
+      def readonly_database_connection
+        @readonly_database_connection ||= Travis::Logs::Database.connect(
+          config: config.logs_readonly_database.to_h
+        )
+      end
+
       def redis_pool
         @redis_pool ||= ::Sidekiq::RedisConnection.create(
           url: config.redis.url,
@@ -64,8 +70,24 @@ module Travis
       end
 
       def cache
-        @cache ||= ActiveSupport::Cache::MemoryStore.new(
-          size: config.logs.cache_size_bytes
+        @cache ||= build_cache
+      end
+
+      private def build_cache
+        if config.memcached[:servers].to_s.empty?
+          return ActiveSupport::Cache::MemoryStore.new(
+            size: config.logs.cache_size_bytes
+          )
+        end
+
+        require 'connection_pool'
+        require 'active_support/cache/dalli_store'
+
+        ActiveSupport::Cache::DalliStore.new(
+          config.memcached[:servers].to_s.split(','),
+          username: config.memcached[:username],
+          password: config.memcached[:password],
+          namespace: 'logs'
         )
       end
     end
