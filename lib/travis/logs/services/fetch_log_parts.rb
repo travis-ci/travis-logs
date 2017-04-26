@@ -26,7 +26,7 @@ module Travis
         private def fetch(
           log_id: nil, job_id: nil, after: nil, part_numbers: []
         )
-          log_id = database.log_id_for_job_id(job_id) if log_id.nil?
+          log_id = database.cached_log_id_for_job_id(job_id) if log_id.nil?
           return nil if log_id.nil?
           database.log_parts(log_id, after: after, part_numbers: part_numbers)
         end

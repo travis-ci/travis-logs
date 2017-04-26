@@ -146,10 +146,7 @@ module Travis
         end
 
         private def find_log_id(entry)
-          log_id = cache.read("log_id.#{entry['id']}") ||
-                   database.log_id_for_job_id(entry['id'])
-          cache.write("log_id.#{entry['id']}", log_id) if log_id
-          log_id
+          database.cached_log_id_for_job_id(entry['id'])
         end
 
         private def create_log(entry)
