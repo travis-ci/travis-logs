@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/integer'
+require 'active_support/core_ext/numeric'
+require 'active_support/core_ext/time'
+
 require 'travis/config'
 
 module Travis
@@ -24,17 +28,17 @@ module Travis
             min_accepted_id: 0,
             min_accepted_job_id: 0
           },
-          cache_size_bytes: 10_000_000,
+          cache_size_bytes: 10.megabytes,
           drain_threads: 4,
           drain_batch_size: 100,
           drain_execution_interval: 3,
           drain_timeout_interval: 3,
           intervals: {
-            aggregate: 60,
-            force: 3 * 60 * 60,
-            purge: 6,
-            regular: 3 * 60,
-            sweeper: 10 * 60
+            aggregate: 1.minute,
+            force: 3.hours,
+            purge: 6.seconds,
+            regular: 3.minutes,
+            sweeper: 10.minutes
           },
           per_aggregate_limit: 500,
           purge: false
@@ -46,7 +50,7 @@ module Travis
           log_parts_autovacuum_vacuum_scale_factor: 0.001,
           log_parts_autovacuum_vacuum_threshold: 0,
           min_messages: 'warning',
-          min_readable_cutoff_age: 60 * 60 * 24 * 180,
+          min_readable_cutoff_age: 6.months,
           sql_logging: false,
           url: ENV.fetch(
             'LOGS_DATABASE_URL',
