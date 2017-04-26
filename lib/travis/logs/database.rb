@@ -95,8 +95,13 @@ module Travis
 
       def cached_log_id_for_job_id(job_id)
         cache_key = "log_id.#{job_id}"
-        log_id = cache.read(cache_key) || log_id_for_job_id(job_id)
-        cache.write(cache_key, log_id) if log_id
+        log_id = cache.read(cache_key)
+
+        if log_id.nil?
+          log_id = log_id_for_job_id(job_id)
+          cache.write(cache_key, log_id) if log_id
+        end
+
         log_id
       end
 
