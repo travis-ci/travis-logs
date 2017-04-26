@@ -104,7 +104,11 @@ describe Travis::Logs::App do
       allow(database).to receive(:transaction) { |&b| b.call }
       allow(database).to receive(:log_id_for_job_id)
         .with(anything).and_return(nil)
+      allow(database).to receive(:cached_log_id_for_job_id)
+        .with(anything).and_return(nil)
       allow(database).to receive(:log_id_for_job_id)
+        .with(@job_id).and_return(@log_id)
+      allow(database).to receive(:cached_log_id_for_job_id)
         .with(@job_id).and_return(@log_id)
       allow(database).to receive(:log_for_job_id)
         .with(@job_id)

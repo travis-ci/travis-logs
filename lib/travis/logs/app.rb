@@ -181,6 +181,7 @@ module Travis
         result = fetch_log_service.run(
           (params[:by] || :job_id).to_sym => Integer(params[:id])
         )
+
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200
@@ -191,7 +192,10 @@ module Travis
         halt 500, 'authentication token is not set' if auth_token.empty?
         halt 403 unless authorized?(request)
 
-        result = readonly_database.log_id_for_job_id(Integer(params[:job_id]))
+        result = readonly_database.cached_log_id_for_job_id(
+          Integer(params[:job_id])
+        )
+
         halt 404 if result.nil?
         content_type :json, charset: 'utf-8'
         status 200

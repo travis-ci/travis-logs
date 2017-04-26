@@ -62,8 +62,10 @@ module Travis
         end
       end
 
-      def initialize(config: Travis.config.logs_database.to_h)
+      def initialize(config: Travis.config.logs_database.to_h,
+                     cache: nil)
         @db = self.class.create_sequel(config: config)
+        @cache = cache || Travis::Logs.cache
         Travis.logger.info(
           'new database connection',
           object_id: object_id,
@@ -71,7 +73,8 @@ module Travis
         )
       end
 
-      attr_reader :db
+      attr_reader :db, :cache
+      private :cache
 
       def connect
         db.test_connection
@@ -88,6 +91,13 @@ module Travis
       def log_id_for_job_id(job_id)
         log = db[:logs].select(:id).where(job_id: job_id).first
         log[:id] if log
+      end
+
+      def cached_log_id_for_job_id(job_id)
+        cache_key = "log_id.#{job_id}"
+        log_id = cache.read(cache_key) || log_id_for_job_id(job_id)
+        cache.write(cache_key, log_id) if log_id
+        log_id
       end
 
       def log_for_job_id(job_id)

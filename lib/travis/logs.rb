@@ -70,8 +70,24 @@ module Travis
       end
 
       def cache
-        @cache ||= ActiveSupport::Cache::MemoryStore.new(
-          size: config.logs.cache_size_bytes
+        @cache ||= build_cache
+      end
+
+      private def build_cache
+        if config.memcached[:servers].to_s.empty?
+          return ActiveSupport::Cache::MemoryStore.new(
+            size: config.logs.cache_size_bytes
+          )
+        end
+
+        require 'connection_pool'
+        require 'active_support/cache/dalli_store'
+
+        ActiveSupport::Cache::DalliStore.new(
+          config.memcached[:servers].to_s.split(','),
+          username: config.memcached[:username],
+          password: config.memcached[:password],
+          namespace: 'logs'
         )
       end
     end

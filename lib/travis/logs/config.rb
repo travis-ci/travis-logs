@@ -53,6 +53,11 @@ module Travis
             "postgres://localhost/travis_logs_#{env}"
           )
         },
+        memcached: {
+          servers: ENV.fetch('MEMCACHIER_SERVERS', ''),
+          username: ENV.fetch('MEMCACHIER_USERNAME', ''),
+          password: ENV.fetch('MEMCACHIER_PASSWORD', '')
+        },
         metrics: { reporter: 'librato' },
         pusher: {
           app_id: '',
@@ -79,6 +84,10 @@ module Travis
 
       def librato_source
         ENV['LIBRATO_SOURCE'] || super
+      end
+
+      def memcached
+        super.to_h
       end
     end
   end
