@@ -37,7 +37,7 @@ module Travis
         end
 
         private def db
-          Travis::Logs.database_connection.db
+          @db ||= Travis::Logs::Database.create_sequel
         end
 
         private def statement_timeout_ms
