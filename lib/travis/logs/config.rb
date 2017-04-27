@@ -38,7 +38,7 @@ module Travis
             regular: 3 * 60,
             sweeper: 10 * 60
           },
-          maintenance_expiry_secs: 5.minutes,
+          maintenance_expiry: 5.minutes,
           maintenance_initial_sleep: 30.seconds,
           maintenance_statement_timeout_ms: 30.minutes.in_milliseconds,
           per_aggregate_limit: 500,

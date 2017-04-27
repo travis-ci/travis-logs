@@ -25,7 +25,7 @@ module Travis
       MAINTENANCE_KEY = 'travis-logs:maintenance'
 
       def initialize(redis: Travis::Logs.redis,
-                     expiry: Travis.config.logs.maintenance_expiry_secs)
+                     expiry: Travis.config.logs.maintenance_expiry)
         @redis = redis
         @expiry = expiry
       end
