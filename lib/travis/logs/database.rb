@@ -63,9 +63,11 @@ module Travis
       end
 
       def initialize(config: Travis.config.logs_database.to_h,
-                     cache: nil)
+                     cache: Travis::Logs.cache,
+                     maint: Travis::Logs::Maintenance.new)
         @db = self.class.create_sequel(config: config)
-        @cache = cache || Travis::Logs.cache
+        @cache = cache
+        @maint = maint
         Travis.logger.info(
           'new database connection',
           object_id: object_id,
@@ -73,8 +75,9 @@ module Travis
         )
       end
 
-      attr_reader :db, :cache
+      attr_reader :db, :cache, :maint
       private :cache
+      private :maint
 
       def connect
         db.test_connection
@@ -116,37 +119,44 @@ module Travis
       end
 
       def update_archiving_status(log_id, archiving)
+        maint.restrict!
         db[:logs].where(id: log_id).update(archiving: archiving)
       end
 
       def mark_archive_verified(log_id)
+        maint.restrict!
         db[:logs]
           .where(id: log_id)
           .update(archived_at: Time.now.utc, archive_verified: true)
       end
 
       def mark_not_archived(log_id)
+        maint.restrict!
         db[:logs]
           .where(id: log_id)
           .update(archived_at: nil, archive_verified: false)
       end
 
       def purge(log_id)
+        maint.restrict!
         db[:logs]
           .where(id: log_id)
           .update(purged_at: Time.now.utc, content: nil)
       end
 
       def create_log(job_id)
+        maint.restrict!
         now = Time.now.utc
         db[:logs].insert(job_id: job_id, created_at: now, updated_at: now)
       end
 
       def create_log_part(params)
+        maint.restrict!
         db[:log_parts].insert(params.merge(created_at: Time.now.utc))
       end
 
       def create_log_parts(entries)
+        maint.restrict!
         now = Time.now.utc
         db[:log_parts].multi_insert(
           entries.map { |e| e.merge(created_at: now) }
@@ -154,6 +164,7 @@ module Travis
       end
 
       def delete_log_parts(log_id)
+        maint.restrict!
         db[:log_parts].where(log_id: log_id).delete
       end
 
@@ -166,7 +177,8 @@ module Travis
       end
 
       def set_log_content(log_id, content, removed_by: nil)
-        transaction do
+        maint.restrict!
+        db.transaction do
           delete_log_parts(log_id)
           now = Time.now.utc
           aggregated_at = now unless content.nil?
@@ -234,6 +246,7 @@ module Travis
       SQL
 
       def aggregate(log_id)
+        maint.restrict!
         db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
       end
 
@@ -242,10 +255,6 @@ module Travis
           AGGREGATE_PARTS_SELECT_SQL,
           log_id
         ].first.fetch(:array_to_string, '') || ''
-      end
-
-      def transaction(&block)
-        db.transaction(&block)
       end
     end
   end

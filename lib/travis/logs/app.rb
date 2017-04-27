@@ -249,7 +249,7 @@ module Travis
       end
 
       private def redis_ping
-        Travis::Logs.redis_pool.with { |conn| conn.ping.to_s }
+        Travis::Logs.redis.ping.to_s
       end
 
       private def all_items_valid?(items)

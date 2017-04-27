@@ -19,7 +19,11 @@ module Travis
             pool_size: Travis.config.sidekiq.pool_size,
             host: URI(Travis.config.redis.url).host
           )
-          ::Sidekiq.redis = Travis::Logs.redis_pool
+          ::Sidekiq.redis = ::Sidekiq::RedisConnection.create(
+            url: Travis.config.redis.url,
+            namespace: Travis.config.sidekiq.namespace,
+            size: Travis.config.sidekiq.pool_size
+          )
           ::Sidekiq.logger = ::Logger.new($stdout) if debug?
 
           %w[Aggregate Archive LogParts PartmanMaintenance Purge].each do |name|
