@@ -24,6 +24,8 @@ module Travis
                 table: table_name
               )
 
+              db.run("SET statement_timeout = #{statement_timeout_ms}")
+
               db[<<~SQL].to_a
                 SELECT partman.run_maintenance(
                   '#{table_name}',
@@ -36,6 +38,10 @@ module Travis
 
         private def db
           Travis::Logs.database_connection.db
+        end
+
+        private def statement_timeout_ms
+          Travis.config.logs.maintenance_statement_timeout_ms
         end
 
         private def table_names
