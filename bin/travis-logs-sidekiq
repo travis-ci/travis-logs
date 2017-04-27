@@ -2,28 +2,38 @@
 set -o errexit
 
 main() {
-  if [[ $# -lt 2 ]] || [[ "$*" =~ -h|--help ]]; then
-    echo "Usage: $(basename "${0}") <queue> <concurrency>"
+  if [[ "$*" =~ -h|--help ]]; then
+    echo "Usage: $(basename "${0}") <arg> [arg...]"
     exit 1
   fi
 
   local top
   top="$(cd "$(dirname "${0}")/.." && pwd)"
 
-  local queue="${1}"
-  shift
-  local concurrency="${1}"
-  shift
+  local concurrency=1
+  local concurrency_index=0
+  local i=0
+  local args=()
+
+  for arg in "${@}"; do
+    if [[ "${arg}" = -c ]]; then
+      concurrency_index="$((i + 1))"
+    fi
+    let i+=1
+    args=( "${args[@]}" "${arg}" )
+  done
+
+  if [[ "${concurrency_index}" -gt 0 ]]; then
+    concurrency="${args[${concurrency_index}]}"
+  fi
 
   TRAVIS_SIDEKIQ_POOL_SIZE="$(( ${concurrency} + 2 ))"
   export TRAVIS_SIDEKIQ_POOL_SIZE
 
   set -o xtrace
   exec bundle exec je sidekiq \
-    -q "${queue}" \
-    -c "${concurrency}" \
     -r "${top}/lib/travis/logs/sidekiq/initializer.rb" \
-    "$@"
+    "${@}"
 }
 
 main "$@"
