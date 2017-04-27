@@ -104,7 +104,7 @@ module Travis
         items = Array(MultiJson.load(request.body.read))
         halt 400 unless all_items_valid?(items)
 
-        database.transaction do
+        database.db.transaction do
           items.each do |item|
             removed_by = (Integer(item['removed_by']) if item['removed_by'])
             upsert_log_service.run(
@@ -249,7 +249,7 @@ module Travis
       end
 
       private def redis_ping
-        Travis::Logs.redis_pool.with { |conn| conn.ping.to_s }
+        Travis::Logs.redis.ping.to_s
       end
 
       private def all_items_valid?(items)
