@@ -20,6 +20,9 @@ module Travis
           @maint = maint
         end
 
+        attr_reader :maint
+        private :maint
+
         def run
           maint.with_maintenance_on { run_maintenance }
         end
