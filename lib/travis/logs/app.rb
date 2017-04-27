@@ -211,13 +211,13 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
-          database: readonly_database
+          database: database
         )
       end
 
       private def fetch_log_parts_service
         @fetch_log_parts_service ||= Travis::Logs::Services::FetchLogParts.new(
-          database: readonly_database
+          database: database
         )
       end
 
