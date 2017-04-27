@@ -12,6 +12,8 @@ require 'travis/logs'
 module Travis
   module Logs
     class DrainQueue
+      Shutdown = Class.new(RuntimeError)
+
       include Travis::Logs::MetricsMethods
 
       METRIKS_PREFIX = 'logs.queue'
@@ -70,6 +72,17 @@ module Travis
         @flush_mutex ||= Mutex.new
       end
 
+      private def shutdown!
+        jobs_channel.close
+        amqp_conn.close
+      rescue StandardError => e
+        Travis::Exceptions.handle(e)
+      ensure
+        @jobs_channel = nil
+        @amqp_conn = nil
+        raise Shutdown
+      end
+
       private def build_periodic_flush_task
         Concurrent::TimerTask.execute(
           run_now: true,
@@ -109,7 +122,7 @@ module Travis
           end
 
           begin
-            jobs_channel.ack(delivery_tag)
+            safe_ack(delivery_tag)
           rescue StandardError => e
             Travis.logger.error(
               'failed to ack message',
@@ -134,7 +147,7 @@ module Travis
             end
           else
             Travis.logger.info('acking empty or undecodable payload')
-            jobs_channel.ack(delivery_info.delivery_tag)
+            safe_ack(delivery_info.delivery_tag)
           end
         end
       rescue => e
@@ -185,6 +198,16 @@ module Travis
         )
         mark('payload.decode_error')
         nil
+      end
+
+      private def safe_ack(delivery_tag)
+        jobs_channel.ack(delivery_tag)
+      rescue Bunny::ConnectionClosedError => e
+        Travis.logger.error(
+          'shutting down due to channel closed',
+          error: e.inspect
+        )
+        shutdown!
       end
 
       private def log_exception(error, payload)
