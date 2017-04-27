@@ -192,7 +192,7 @@ module Travis
         halt 500, 'authentication token is not set' if auth_token.empty?
         halt 403 unless authorized?(request)
 
-        result = readonly_database.cached_log_id_for_job_id(
+        result = database.cached_log_id_for_job_id(
           Integer(params[:job_id])
         )
 
@@ -211,13 +211,13 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
-          database: readonly_database
+          database: database
         )
       end
 
       private def fetch_log_parts_service
         @fetch_log_parts_service ||= Travis::Logs::Services::FetchLogParts.new(
-          database: readonly_database
+          database: database
         )
       end
 
