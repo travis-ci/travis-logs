@@ -104,7 +104,7 @@ module Travis
         items = Array(MultiJson.load(request.body.read))
         halt 400 unless all_items_valid?(items)
 
-        database.transaction do
+        database.db.transaction do
           items.each do |item|
             removed_by = (Integer(item['removed_by']) if item['removed_by'])
             upsert_log_service.run(
@@ -192,7 +192,7 @@ module Travis
         halt 500, 'authentication token is not set' if auth_token.empty?
         halt 403 unless authorized?(request)
 
-        result = readonly_database.cached_log_id_for_job_id(
+        result = database.cached_log_id_for_job_id(
           Integer(params[:job_id])
         )
 
@@ -211,13 +211,13 @@ module Travis
 
       private def fetch_log_service
         @fetch_log_service ||= Travis::Logs::Services::FetchLog.new(
-          database: readonly_database
+          database: database
         )
       end
 
       private def fetch_log_parts_service
         @fetch_log_parts_service ||= Travis::Logs::Services::FetchLogParts.new(
-          database: readonly_database
+          database: database
         )
       end
 
@@ -249,7 +249,7 @@ module Travis
       end
 
       private def redis_ping
-        Travis::Logs.redis_pool.with { |conn| conn.ping.to_s }
+        Travis::Logs.redis.ping.to_s
       end
 
       private def all_items_valid?(items)

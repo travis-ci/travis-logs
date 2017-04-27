@@ -50,8 +50,8 @@ describe Travis::Logs::App do
 
   describe 'POST /pusher/existence' do
     it 'sets proper properties on channel' do
-      expect(existence.occupied?('foo')).to be nil
-      expect(existence.occupied?('bar')).to be nil
+      expect(existence.occupied?('foo')).to be false
+      expect(existence.occupied?('bar')).to be false
 
       webhook = OpenStruct.new(valid?: true, events: [
                                  { 'name' => 'channel_occupied', 'channel' => 'foo' },
@@ -65,8 +65,8 @@ describe Travis::Logs::App do
       response = post '/pusher/existence'
       expect(response.status).to eq(204)
 
-      expect(existence.occupied?('foo')).to eq('true')
-      expect(existence.occupied?('bar')).to be nil
+      expect(existence.occupied?('foo')).to be true
+      expect(existence.occupied?('bar')).to be false
 
       webhook = OpenStruct.new(valid?: true, events: [
                                  { 'name' => 'channel_vacated', 'channel' => 'foo' },
@@ -80,8 +80,8 @@ describe Travis::Logs::App do
       response = post '/pusher/existence'
       expect(response.status).to eq(204)
 
-      expect(existence.occupied?('foo')).to be nil
-      expect(existence.occupied?('bar')).to eq('true')
+      expect(existence.occupied?('foo')).to be false
+      expect(existence.occupied?('bar')).to be true
     end
 
     it 'responds with 401 with invalid webhook' do
