@@ -5,14 +5,14 @@ libdir = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
 require 'travis/logs'
-require 'travis/config'
 
 $stdout.sync = true
 $stderr.sync = true
 
-Travis::Config::Serialize::Env.new(
-  Travis::Logs.config.to_h,
-  prefix: 'travis'
-).apply.sort.each do |entry|
-  $stdout.puts entry
-end
+Travis::Logs::Sidekiq.setup
+jid = Travis::Logs::Sidekiq::PartmanMaintenance.perform_async
+Travis.logger.info(
+  'performed async',
+  jid: jid,
+  class_name: Travis::Logs::Sidekiq::PartmanMaintenance.name
+)
