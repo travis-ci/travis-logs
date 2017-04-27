@@ -120,6 +120,7 @@ module Travis
           end
         end
 
+        return if payload.empty?
         handler_callable.call(payload)
       end
 
