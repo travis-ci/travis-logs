@@ -28,6 +28,7 @@ module Travis
         end
 
         private def run_maintenance
+          setup_connection
           sleep(initial_sleep)
           terminate_conflicting_backends!
 
@@ -38,8 +39,6 @@ module Travis
                 table: table_name
               )
 
-              db.run("SET statement_timeout = #{statement_timeout_ms}")
-
               db[<<~SQL].to_a
                 SELECT partman.run_maintenance(
                   '#{table_name}',
@@ -48,6 +47,11 @@ module Travis
               SQL
             end
           end
+        end
+
+        def setup_connection
+          db.run("SET statement_timeout = #{statement_timeout_ms}")
+          db.run("SET application_name = 'partman_maintenance'")
         end
 
         TERMINATE_LOGS_WRITE_QUERIES_SQL = <<~SQL
