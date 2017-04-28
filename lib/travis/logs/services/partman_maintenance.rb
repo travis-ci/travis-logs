@@ -28,8 +28,8 @@ module Travis
         end
 
         private def run_maintenance
-          terminate_conflicting_backends!
           sleep(initial_sleep)
+          terminate_conflicting_backends!
 
           table_names.each do |table_name|
             measure(table_name) do
