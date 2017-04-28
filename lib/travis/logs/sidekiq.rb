@@ -28,7 +28,8 @@ module Travis
           ::Sidekiq.logger = ::Logger.new($stdout) if debug?
           ::Sidekiq.configure_server do |config|
             config.server_middleware do |chain|
-              chain.add Travis::Logs::Sidekiq::ErrorMiddleware
+              chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
+                        pause_time: Travis.config.logs.sidekiq_error_retry_pause
             end
           end
         end

@@ -42,7 +42,8 @@ module Travis
           maintenance_initial_sleep: 30.seconds,
           maintenance_statement_timeout_ms: 30.minutes.in_milliseconds,
           per_aggregate_limit: 500,
-          purge: false
+          purge: false,
+          sidekiq_error_retry_pause: 3.seconds
         },
         logs_database: {
           sql_logging: false,

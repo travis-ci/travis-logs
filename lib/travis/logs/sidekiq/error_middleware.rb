@@ -4,9 +4,12 @@ module Travis
   module Logs
     module Sidekiq
       class ErrorMiddleware
-        def initialize(*)
-          # nah
+        def initialize(pause_time: 3.seconds)
+          @pause_time = pause_time
         end
+
+        attr_reader :pause_time
+        private :pause_time
 
         def call(worker, _msg, queue)
           yield
@@ -15,9 +18,9 @@ module Travis
             'rescued maintenance error',
             worker: worker,
             queue: queue,
-            sleeping: e.ttl
+            maintenance_ttl: e.ttl
           )
-          sleep(e.ttl)
+          sleep(pause_time)
           retry
         end
       end
