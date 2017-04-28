@@ -30,6 +30,7 @@ module Travis
         private def run_maintenance
           setup_connection
           sleep(initial_sleep)
+          cancel_conflicting_backends
           terminate_conflicting_backends!
 
           table_names.each do |table_name|
@@ -54,23 +55,40 @@ module Travis
           db.run("SET application_name = 'partman_maintenance'")
         end
 
-        TERMINATE_LOGS_WRITE_QUERIES_SQL = <<~SQL
-          SELECT pg_terminate_backend(q.pid)
-          FROM (
-            SELECT pid
-            FROM pg_stat_activity
-            WHERE application_name ~ '^logs\..+'
-          ) q
+        LOGS_QUERIES_SQL = <<~SQL
+          SELECT pid
+          FROM pg_stat_activity
+          WHERE application_name ~ '^logs\..+'
         SQL
-        private_constant :TERMINATE_LOGS_WRITE_QUERIES_SQL
+        private_constant :LOGS_QUERIES_SQL
 
-        private def terminate_conflicting_backends!(loops: 3)
+        CANCEL_LOGS_QUERIES_SQL = <<~SQL
+          SELECT pg_cancel_backend(q.pid)
+          FROM (#{LOGS_QUERIES_SQL}) q
+        SQL
+        private_constant :CANCEL_LOGS_QUERIES_SQL
+
+        TERMINATE_LOGS_QUERIES_SQL = <<~SQL
+          SELECT pg_terminate_backend(q.pid)
+          FROM (#{LOGS_QUERIES_SQL}) q
+        SQL
+        private_constant :TERMINATE_LOGS_QUERIES_SQL
+
+        private def cancel_conflicting_backends
+          backoff_loop { db[CANCEL_LOGS_QUERIES_SQL].to_a.empty? }
+        end
+
+        private def terminate_conflicting_backends!
+          backoff_loop { db[TERMINATE_LOGS_QUERIES_SQL].to_a.empty? }
+        end
+
+        private def backoff_loop(loops: 3)
           i = 1
           loop do
-            break if i >= loops
-            results = db[TERMINATE_LOGS_WRITE_QUERIES_SQL].to_a
-            break if results.empty?
+            break if yield
+            sleep(i**i)
             i += 1
+            break if i >= loops
           end
         end
 

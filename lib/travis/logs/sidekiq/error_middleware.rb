@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'pg'
+
+require 'travis/logs'
+
 module Travis
   module Logs
     module Sidekiq
