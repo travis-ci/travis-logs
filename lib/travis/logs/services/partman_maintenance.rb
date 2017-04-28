@@ -59,6 +59,7 @@ module Travis
           SELECT pid
           FROM pg_stat_activity
           WHERE application_name ~ '^logs\..+'
+            AND query ~ '.+log_parts.+'
         SQL
         private_constant :LOGS_QUERIES_SQL
 

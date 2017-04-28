@@ -75,17 +75,12 @@ module Travis
         )
       end
 
-      attr_reader :cache, :maint
+      attr_reader :db, :cache, :maint
       private :cache
       private :maint
 
       def connect
         db.test_connection
-      end
-
-      def db
-        maint.restrict!
-        @db
       end
 
       def now
@@ -151,10 +146,12 @@ module Travis
       end
 
       def create_log_part(params)
+        maint.restrict!
         db[:log_parts].insert(params.merge(created_at: Time.now.utc))
       end
 
       def create_log_parts(entries)
+        maint.restrict!
         now = Time.now.utc
         db[:log_parts].multi_insert(
           entries.map { |e| e.merge(created_at: now) }
@@ -162,10 +159,12 @@ module Travis
       end
 
       def delete_log_parts(log_id)
+        maint.restrict!
         db[:log_parts].where(log_id: log_id).delete
       end
 
       def log_parts(log_id, after: nil, part_numbers: [])
+        maint.restrict!
         query = db[:log_parts].select(:id, :number, :content, :final)
                               .where(log_id: log_id)
         query = query.where { number > after } if after
@@ -196,6 +195,7 @@ module Travis
 
       def aggregatable_logs(regular_interval, force_interval, limit,
                             order: :created_at)
+        maint.restrict!
         query = db[:log_parts]
                 .select(:log_id)
                 .where { created_at <= (Time.now.utc - regular_interval) }
@@ -207,6 +207,7 @@ module Travis
       end
 
       def min_log_part_id
+        maint.restrict!
         db['SELECT min(id) AS id FROM log_parts'].first[:id]
       end
 
@@ -218,6 +219,7 @@ module Travis
       SQL
 
       def aggregatable_logs_page(cursor, per_page)
+        maint.restrict!
         db[
           AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
           cursor, cursor + per_page
@@ -242,10 +244,12 @@ module Travis
       SQL
 
       def aggregate(log_id)
+        maint.restrict!
         db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
       end
 
       def aggregated_on_demand(log_id)
+        maint.restrict!
         db[
           AGGREGATE_PARTS_SELECT_SQL,
           log_id
