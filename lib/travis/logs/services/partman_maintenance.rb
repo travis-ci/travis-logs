@@ -28,6 +28,7 @@ module Travis
         end
 
         private def run_maintenance
+          terminate_conflicting_backends!
           sleep(initial_sleep)
 
           table_names.each do |table_name|
@@ -46,6 +47,27 @@ module Travis
                 )
               SQL
             end
+          end
+        end
+
+        TERMINATE_LOGS_WRITE_QUERIES_SQL = <<~SQL
+          SELECT pg_terminate_backend(q.pid)
+          FROM (
+            SELECT pid
+            FROM pg_stat_activity
+            WHERE application_name ~ '^logs\..+'
+              AND query ~ '^(INSERT|UPDATE).+'
+          ) q
+        SQL
+        private_constant :TERMINATE_LOGS_WRITE_QUERIES_SQL
+
+        private def terminate_conflicting_backends!(loops: 3)
+          i = 1
+          loop do
+            break if i >= loops
+            results = db[TERMINATE_LOGS_WRITE_QUERIES_SQL].to_a
+            break if results.empty?
+            i += 1
           end
         end
 

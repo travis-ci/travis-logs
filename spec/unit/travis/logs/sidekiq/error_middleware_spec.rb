@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 describe Travis::Logs::Sidekiq::ErrorMiddleware do
+  subject do
+    described_class.new(pause_time: 0)
+  end
+
   it 'calls the block it wraps' do
     state = { foo: 1 }
     subject.call('worky', 'flah', 'qbert') do
