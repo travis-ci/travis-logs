@@ -22,6 +22,14 @@ module Travis
           )
           sleep(pause_time)
           retry
+        rescue PG::ConnectionBad => e
+          Travis.logger.warn(
+            'rescued bad postgres connection',
+            worker: worker,
+            queue: queue
+          )
+          sleep(pause_time)
+          retry
         end
       end
     end
