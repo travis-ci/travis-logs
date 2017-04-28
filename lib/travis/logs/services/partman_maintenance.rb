@@ -56,7 +56,6 @@ module Travis
             SELECT pid
             FROM pg_stat_activity
             WHERE application_name ~ '^logs\..+'
-              AND query ~ '^(INSERT|UPDATE).+'
           ) q
         SQL
         private_constant :TERMINATE_LOGS_WRITE_QUERIES_SQL
