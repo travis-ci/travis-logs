@@ -28,7 +28,10 @@ module Travis
         end
 
         private def run_maintenance
+          setup_connection
           sleep(initial_sleep)
+          cancel_conflicting_backends
+          terminate_conflicting_backends!
 
           table_names.each do |table_name|
             measure(table_name) do
@@ -37,8 +40,6 @@ module Travis
                 table: table_name
               )
 
-              db.run("SET statement_timeout = #{statement_timeout_ms}")
-
               db[<<~SQL].to_a
                 SELECT partman.run_maintenance(
                   '#{table_name}',
@@ -46,6 +47,49 @@ module Travis
                 )
               SQL
             end
+          end
+        end
+
+        def setup_connection
+          db.run("SET statement_timeout = #{statement_timeout_ms}")
+          db.run("SET application_name = 'partman_maintenance'")
+        end
+
+        LOGS_QUERIES_SQL = <<~SQL
+          SELECT pid
+          FROM pg_stat_activity
+          WHERE application_name ~ '^logs\..+'
+            AND query ~ '.+log_parts.+'
+        SQL
+        private_constant :LOGS_QUERIES_SQL
+
+        CANCEL_LOGS_QUERIES_SQL = <<~SQL
+          SELECT pg_cancel_backend(q.pid)
+          FROM (#{LOGS_QUERIES_SQL}) q
+        SQL
+        private_constant :CANCEL_LOGS_QUERIES_SQL
+
+        TERMINATE_LOGS_QUERIES_SQL = <<~SQL
+          SELECT pg_terminate_backend(q.pid)
+          FROM (#{LOGS_QUERIES_SQL}) q
+        SQL
+        private_constant :TERMINATE_LOGS_QUERIES_SQL
+
+        private def cancel_conflicting_backends
+          backoff_loop { db[CANCEL_LOGS_QUERIES_SQL].to_a.empty? }
+        end
+
+        private def terminate_conflicting_backends!
+          backoff_loop { db[TERMINATE_LOGS_QUERIES_SQL].to_a.empty? }
+        end
+
+        private def backoff_loop(loops: 3)
+          i = 1
+          loop do
+            break if yield
+            sleep(i**i)
+            i += 1
+            break if i >= loops
           end
         end
 

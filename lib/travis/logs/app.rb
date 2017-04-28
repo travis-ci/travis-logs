@@ -17,6 +17,7 @@ module Travis
       helpers Sinatra::Param
 
       configure(:production, :staging) do
+        disable :dump_errors
         use Rack::SSL
         use Travis::Logs::MetricsMiddleware
       end
@@ -122,6 +123,7 @@ module Travis
       get '/log-parts/:job_id' do
         halt 500, 'authentication token is not set' if auth_token.empty?
         halt 403 unless authorized?(request)
+        halt 503 if maint.enabled?
 
         param :job_id, Integer
         param :part_numbers, Array, default: []
@@ -143,6 +145,7 @@ module Travis
       put '/log-parts/:job_id/:log_part_id' do
         auth_header = request.env['HTTP_AUTHORIZATION']
         halt 403 if auth_header.nil?
+        halt 503 if maint.enabled?
 
         if auth_header.start_with?('Bearer ')
           halt 500, 'key is not set' if rsa_public_key.nil?
@@ -241,6 +244,10 @@ module Travis
 
       private def readonly_database
         @readonly_database ||= Travis::Logs.readonly_database_connection
+      end
+
+      private def maint
+        @maint ||= Travis::Logs::Maintenance.new
       end
 
       private def setup
