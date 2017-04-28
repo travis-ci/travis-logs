@@ -30,6 +30,7 @@ module Travis
     autoload :SentryMiddleware, 'travis/logs/sentry_middleware'
     autoload :Services, 'travis/logs/services'
     autoload :Sidekiq, 'travis/logs/sidekiq'
+    autoload :UnderMaintenanceError, 'travis/logs/under_maintenance_error'
 
     class << self
       attr_writer :config, :database_connection
