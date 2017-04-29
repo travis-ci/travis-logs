@@ -75,6 +75,49 @@ The `aggregate_sweeper` process is an optional process that periodically queries
 the `log_parts` table for records that may have been missed by the event-based
 aggregation process that flows through the `aggregate` sidekiq queue.
 
+## Database specifics
+
+### Schema management
+
+The schema and migrations for travis-logs are managed with
+[sqitch](http://sqitch.org/).  All of the deploy, verify, and revert scripts may
+be found in the `./db/` directory.
+
+### Data lifecycle
+
+The process types above use PostgreSQL for various operations, with a structure
+of two tables: `logs` and `log_parts`.  Normal operations may be generalized as
+a progression from writing to `log_parts`, to combining those records into
+`logs`, and then moving the content to S3.
+
+For this reason, the `log_parts` table at any one time is mostly empty space,
+with the size reported by PostgreSQL being significantly larger than what is
+really there.  To a lesser degree, the `logs` table is also mostly empty,
+although the live record count will continue to grow over the lifetime of a
+deployment as metadata is retained after the content has been moved to S3.
+
+### Partitioned `log_parts`
+
+In order to address the empty space growth caused by the high record churn of
+`log_parts`, the deployments of travis-logs used for hosted Travis CI use the
+[pg_partman](https://github.com/keithf4/pg_partman) extension to drop daily
+partitions that are 2 days old.
+
+The partitions are maintained by running the `partman.run_maintenance` query,
+triggered via a daily Heroku scheduled job.  Because the `log_parts` table is
+being accessed constantly in production, and various operations within
+`partman.run_maintenance` require a PostgreSQL lock type of
+`AccessExclusiveLock` of the `log_parts` table, the implementation of the
+maintenance operation includes a redis-based switch that prevents access to the
+`log_parts` table via other processes.
+
+During the maintenance operation, sidekiq workers will sleep and retry, then
+resume upon maintenance completion.  Any requests to `web` dynos during
+maintenance that require access to the `log_parts` table will return `503`.
+This is certainly not ideal, and more changes may be considered to further
+reduce production impact in the future.  In practice, the complete maintenance
+operation lasts about 1 minute.
+
 ## License & copyright information
 
 See LICENSE file.
