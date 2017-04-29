@@ -31,7 +31,6 @@ module Travis
     autoload :Pusher, 'travis/logs/pusher'
     autoload :RedisPool, 'travis/logs/redis_pool'
     autoload :S3, 'travis/logs/s3'
-    autoload :SentryMiddleware, 'travis/logs/sentry_middleware'
     autoload :Services, 'travis/logs/services'
     autoload :Sidekiq, 'travis/logs/sidekiq'
     autoload :UnderMaintenanceError, 'travis/logs/under_maintenance_error'
