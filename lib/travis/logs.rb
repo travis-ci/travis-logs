@@ -94,7 +94,7 @@ module Travis
       end
 
       def setup
-        setup_raven if config.env == 'production'
+        setup_raven unless config.sentry.dsn.to_s.empty?
       end
 
       private def setup_raven
