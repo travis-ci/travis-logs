@@ -7,7 +7,6 @@ module Travis
   module Logs
     class SentryMiddleware < Sinatra::Base
       configure do
-        Raven.configure { |c| c.tags = { environment: environment } }
         use Raven::Rack
       end
     end

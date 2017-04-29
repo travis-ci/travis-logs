@@ -92,6 +92,24 @@ module Travis
           namespace: 'logs'
         )
       end
+
+      def setup
+        setup_raven if config.env == 'production'
+      end
+
+      private def setup_raven
+        require 'raven'
+        require 'raven/processor/removestacktrace'
+
+        Raven.configure do |c|
+          c.tags = { environment: config.env }
+          c.release = version
+          c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
+          c.processors << Raven::Processor::RemoveStacktrace
+        end
+      end
     end
+
+    setup
   end
 end
