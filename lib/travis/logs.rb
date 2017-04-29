@@ -104,11 +104,16 @@ module Travis
 
       private def setup_exceptions
         Travis::Exceptions.setup(config, config.env, logger)
-
         Raven.configure do |c|
-          c.release = version
+          c.dsn = config.sentry.dsn unless config.sentry.dsn.to_s.empty?
+
+          c.current_environment = config.env.to_s
+          c.environments = %w[staging production]
+
           c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
           c.processors << Raven::Processor::RemoveStacktrace
+          c.release = version
+          c.silence_ready = true
         end
       end
 
