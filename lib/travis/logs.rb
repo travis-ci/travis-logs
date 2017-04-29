@@ -3,9 +3,13 @@
 require 'forwardable'
 
 require 'active_support'
+require 'raven'
+require 'raven/processor/removestacktrace'
 require 'sidekiq/redis_connection'
 
+require 'travis/exceptions'
 require 'travis/logger'
+require 'travis/metrics'
 
 module Travis
   extend Forwardable
@@ -94,19 +98,27 @@ module Travis
       end
 
       def setup
-        setup_raven unless config.sentry.dsn.to_s.empty?
+        setup_exceptions
+        setup_metrics
+        setup_s3
       end
 
-      private def setup_raven
-        require 'raven'
-        require 'raven/processor/removestacktrace'
+      private def setup_exceptions
+        Travis::Exceptions.setup(config, config.env, logger)
 
         Raven.configure do |c|
-          c.tags = { environment: config.env }
           c.release = version
           c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
           c.processors << Raven::Processor::RemoveStacktrace
         end
+      end
+
+      private def setup_metrics
+        Travis::Metrics.setup(config.metrics, logger)
+      end
+
+      private def setup_s3
+        Travis::Logs::S3.setup
       end
     end
 
