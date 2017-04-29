@@ -97,7 +97,6 @@ module Travis
       end
 
       def setup
-        return if config.env.to_s == 'test'
         setup_exceptions
         setup_metrics
         setup_s3
@@ -127,6 +126,6 @@ module Travis
       end
     end
 
-    setup
+    setup unless config.env.to_s == 'test'
   end
 end
