@@ -5,23 +5,6 @@ require 'travis/logs'
 module Travis
   module Logs
     class Maintenance
-      class UnderMaintenanceError < StandardError
-        def initialize(ttl)
-          @ttl = ttl
-        end
-
-        attr_reader :ttl
-        private :ttl
-
-        def http_status
-          503
-        end
-
-        def message
-          "under maintenance for the next #{ttl}s"
-        end
-      end
-
       MAINTENANCE_KEY = 'travis-logs:maintenance'
 
       def initialize(redis: Travis::Logs.redis,
@@ -47,7 +30,7 @@ module Travis
 
       def restrict!
         return unless enabled?
-        raise UnderMaintenanceError, redis.ttl(MAINTENANCE_KEY)
+        raise Travis::Logs::UnderMaintenanceError, redis.ttl(MAINTENANCE_KEY)
       end
     end
   end

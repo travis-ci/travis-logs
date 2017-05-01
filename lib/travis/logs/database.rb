@@ -119,33 +119,28 @@ module Travis
       end
 
       def update_archiving_status(log_id, archiving)
-        maint.restrict!
         db[:logs].where(id: log_id).update(archiving: archiving)
       end
 
       def mark_archive_verified(log_id)
-        maint.restrict!
         db[:logs]
           .where(id: log_id)
           .update(archived_at: Time.now.utc, archive_verified: true)
       end
 
       def mark_not_archived(log_id)
-        maint.restrict!
         db[:logs]
           .where(id: log_id)
           .update(archived_at: nil, archive_verified: false)
       end
 
       def purge(log_id)
-        maint.restrict!
         db[:logs]
           .where(id: log_id)
           .update(purged_at: Time.now.utc, content: nil)
       end
 
       def create_log(job_id)
-        maint.restrict!
         now = Time.now.utc
         db[:logs].insert(job_id: job_id, created_at: now, updated_at: now)
       end
@@ -169,6 +164,7 @@ module Travis
       end
 
       def log_parts(log_id, after: nil, part_numbers: [])
+        maint.restrict!
         query = db[:log_parts].select(:id, :number, :content, :final)
                               .where(log_id: log_id)
         query = query.where { number > after } if after
@@ -177,7 +173,6 @@ module Travis
       end
 
       def set_log_content(log_id, content, removed_by: nil)
-        maint.restrict!
         db.transaction do
           delete_log_parts(log_id)
           now = Time.now.utc
@@ -200,6 +195,7 @@ module Travis
 
       def aggregatable_logs(regular_interval, force_interval, limit,
                             order: :created_at)
+        maint.restrict!
         query = db[:log_parts]
                 .select(:log_id)
                 .where { created_at <= (Time.now.utc - regular_interval) }
@@ -211,6 +207,7 @@ module Travis
       end
 
       def min_log_part_id
+        maint.restrict!
         db['SELECT min(id) AS id FROM log_parts'].first[:id]
       end
 
@@ -222,6 +219,7 @@ module Travis
       SQL
 
       def aggregatable_logs_page(cursor, per_page)
+        maint.restrict!
         db[
           AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
           cursor, cursor + per_page
@@ -251,6 +249,7 @@ module Travis
       end
 
       def aggregated_on_demand(log_id)
+        maint.restrict!
         db[
           AGGREGATE_PARTS_SELECT_SQL,
           log_id

@@ -8,6 +8,7 @@ module Travis
     module Sidekiq
       autoload :Aggregate, 'travis/logs/sidekiq/aggregate'
       autoload :Archive, 'travis/logs/sidekiq/archive'
+      autoload :ErrorMiddleware, 'travis/logs/sidekiq/error_middleware'
       autoload :LogParts, 'travis/logs/sidekiq/log_parts'
       autoload :PartmanMaintenance, 'travis/logs/sidekiq/partman_maintenance'
       autoload :Purge, 'travis/logs/sidekiq/purge'
@@ -25,9 +26,11 @@ module Travis
             size: Travis.config.sidekiq.pool_size
           )
           ::Sidekiq.logger = ::Logger.new($stdout) if debug?
-
-          %w[Aggregate Archive LogParts PartmanMaintenance Purge].each do |name|
-            Travis::Logs::Sidekiq.const_get(name)
+          ::Sidekiq.configure_server do |config|
+            config.server_middleware do |chain|
+              chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
+                        pause_time: Travis.config.logs.sidekiq_error_retry_pause
+            end
           end
         end
 
