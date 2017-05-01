@@ -25,42 +25,55 @@ such as a `DATABASE_URL` that points to a valid PostgreSQL server.  See the
 Some of the process types listed in [`./Procfile`](./Procfile) depend on other
 process types, while others are independent:
 
-### `logs`
+### `drain` process
 
-The `logs` process is responsible for consuming log parts messages via AMQP, writing
-each log part to the logs database, and sending the log part to Pusher.
+The `drain` process is responsible for consuming log parts messages via AMQP and
+batching them together as enqueued jobs in the `log_parts` sidekiq queue.
 
-### `web`
+### `web` process
 
-The `web` process runs a Sinatra web app that exposes APIs to handle Pusher
-webhook events and to set log contents.
+The `web` process runs a Sinatra web app that exposes APIs to handle
+interactions with other Travis applications and the external Pusher service.
 
-### `aggregate`
+### `worker_high` process
 
-The `aggregate` process is responsible for finding all log parts that are
-eligible for "aggregation" into single log records.  The aggregation itself may
-either be done within the `aggregate` process or offloaded to the `aggregator`
-process via Sidekiq.  Once aggregation is complete, a job is sent for
-consumption by the `archive` process via Sidekiq.
+The `worker_high` process is responsible for handling jobs from the following
+sidekiq queues:
 
-### `aggregator`
+#### `log_parts` sidekiq queue
 
-The `aggregator` process is an optional complement to the `aggregate` process,
-handling the heavy lifting via Sidekiq so that aggregation may be performed in
-parallel.
+The jobs in the `log_parts` sidekiq queue write batches of log parts records to
+the `log_parts` table and forward each log part individually to Pusher.
 
-### `archive`
+#### `aggregate` sidekiq queue
 
-The `archive` process is responsible for moving the content of each fully
-aggregated log record from the database to S3.  Once archiving is complete, a
-job is sent for consumption by the `purge` process via Sidekiq.
+The jobs in the `aggregate` sidekiq queue combine all `log_parts` records for a
+given log id into a single content blob that is set on the corresponding `logs`
+record and then deletes the `log_parts` records.
 
-### `purge`
+### `worker_low` process
 
-The `purge` process is responsible for setting log record content to NULL after
+The `worker_low` process is responsible for handling jobs from the following
+sidekiq queues:
+
+#### `archive` sidekiq queue
+
+Jobs in the `archive` sidekiq queue move the content of each fully aggregated
+log record from the database to S3.  Once archiving is complete, a job is sent
+for consumption in the `purge` sidekiq queue.
+
+#### `purge` sidekiq queue
+
+Jobs in the `purge` sidekiq queue set the log record content to NULL after
 verifying that the archived (S3) content fully matches the log record content.
-If there is a mismatch, the log id is sent to the `archive` process for
-re-archiving via Sidekiq.
+If there is a mismatch, the log id is sent to the `archive` sidekiq queue for
+re-archiving.
+
+### `aggregate_sweeper` process
+
+The `aggregate_sweeper` process is an optional process that periodically queries
+the `log_parts` table for records that may have been missed by the event-based
+aggregation process that flows through the `aggregate` sidekiq queue.
 
 ## License & copyright information
 

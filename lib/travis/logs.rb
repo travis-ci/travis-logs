@@ -21,6 +21,7 @@ module Travis
     autoload :DrainQueue, 'travis/logs/drain_queue'
     autoload :Existence, 'travis/logs/existence'
     autoload :Lock, 'travis/logs/lock'
+    autoload :Maintenance, 'travis/logs/maintenance'
     autoload :MetricsMethods, 'travis/logs/metrics_methods'
     autoload :MetricsMiddleware, 'travis/logs/metrics_middleware'
     autoload :Pusher, 'travis/logs/pusher'
@@ -29,9 +30,10 @@ module Travis
     autoload :SentryMiddleware, 'travis/logs/sentry_middleware'
     autoload :Services, 'travis/logs/services'
     autoload :Sidekiq, 'travis/logs/sidekiq'
+    autoload :UnderMaintenanceError, 'travis/logs/under_maintenance_error'
 
     class << self
-      attr_writer :config, :database_connection, :redis_pool
+      attr_writer :config, :database_connection
 
       def config
         @config ||= Travis::Logs::Config.load
@@ -54,12 +56,12 @@ module Travis
         )
       end
 
-      def redis_pool
-        @redis_pool ||= ::Sidekiq::RedisConnection.create(
-          url: config.redis.url,
-          namespace: config.sidekiq.namespace,
-          size: config.sidekiq.pool_size
-        )
+      def redis
+        @redis ||= Travis::Logs::RedisPool.new(redis_config)
+      end
+
+      def redis_config
+        (config.logs_redis || config.redis || {}).to_h
       end
 
       def version

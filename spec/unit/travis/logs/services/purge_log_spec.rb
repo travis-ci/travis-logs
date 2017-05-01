@@ -6,7 +6,7 @@ describe Travis::Logs::Services::PurgeLog do
       @database = double('database', mark_archive_verified: nil, purge: nil)
       @log_id = 1
       allow(@database).to receive(:log_content_length_for_id).with(@log_id).and_return(content_length: nil)
-      allow(@database).to receive(:transaction).and_yield
+      allow(@database).to receive_message_chain(:db, :transaction).and_yield
     end
 
     context 'log is on S3' do

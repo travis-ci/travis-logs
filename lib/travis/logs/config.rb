@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/numeric/time'
+
 require 'travis/config'
 
 module Travis
@@ -36,8 +38,12 @@ module Travis
             regular: 3 * 60,
             sweeper: 10 * 60
           },
+          maintenance_expiry: 5.minutes,
+          maintenance_initial_sleep: 30.seconds,
+          maintenance_statement_timeout_ms: 30.minutes.in_milliseconds,
           per_aggregate_limit: 500,
-          purge: false
+          purge: false,
+          sidekiq_error_retry_pause: 3.seconds
         },
         logs_database: {
           sql_logging: false,

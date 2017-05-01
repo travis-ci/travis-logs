@@ -63,9 +63,11 @@ module Travis
       end
 
       def initialize(config: Travis.config.logs_database.to_h,
-                     cache: nil)
+                     cache: Travis::Logs.cache,
+                     maint: Travis::Logs::Maintenance.new)
         @db = self.class.create_sequel(config: config)
-        @cache = cache || Travis::Logs.cache
+        @cache = cache
+        @maint = maint
         Travis.logger.info(
           'new database connection',
           object_id: object_id,
@@ -73,8 +75,9 @@ module Travis
         )
       end
 
-      attr_reader :db, :cache
+      attr_reader :db, :cache, :maint
       private :cache
+      private :maint
 
       def connect
         db.test_connection
@@ -143,10 +146,12 @@ module Travis
       end
 
       def create_log_part(params)
+        maint.restrict!
         db[:log_parts].insert(params.merge(created_at: Time.now.utc))
       end
 
       def create_log_parts(entries)
+        maint.restrict!
         now = Time.now.utc
         db[:log_parts].multi_insert(
           entries.map { |e| e.merge(created_at: now) }
@@ -154,10 +159,12 @@ module Travis
       end
 
       def delete_log_parts(log_id)
+        maint.restrict!
         db[:log_parts].where(log_id: log_id).delete
       end
 
       def log_parts(log_id, after: nil, part_numbers: [])
+        maint.restrict!
         query = db[:log_parts].select(:id, :number, :content, :final)
                               .where(log_id: log_id)
         query = query.where { number > after } if after
@@ -166,7 +173,7 @@ module Travis
       end
 
       def set_log_content(log_id, content, removed_by: nil)
-        transaction do
+        db.transaction do
           delete_log_parts(log_id)
           now = Time.now.utc
           aggregated_at = now unless content.nil?
@@ -188,6 +195,7 @@ module Travis
 
       def aggregatable_logs(regular_interval, force_interval, limit,
                             order: :created_at)
+        maint.restrict!
         query = db[:log_parts]
                 .select(:log_id)
                 .where { created_at <= (Time.now.utc - regular_interval) }
@@ -199,6 +207,7 @@ module Travis
       end
 
       def min_log_part_id
+        maint.restrict!
         db['SELECT min(id) AS id FROM log_parts'].first[:id]
       end
 
@@ -210,6 +219,7 @@ module Travis
       SQL
 
       def aggregatable_logs_page(cursor, per_page)
+        maint.restrict!
         db[
           AGGREGATABLE_SELECT_WITH_MIN_ID_SQL,
           cursor, cursor + per_page
@@ -234,18 +244,16 @@ module Travis
       SQL
 
       def aggregate(log_id)
+        maint.restrict!
         db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
       end
 
       def aggregated_on_demand(log_id)
+        maint.restrict!
         db[
           AGGREGATE_PARTS_SELECT_SQL,
           log_id
         ].first.fetch(:array_to_string, '') || ''
-      end
-
-      def transaction(&block)
-        db.transaction(&block)
       end
     end
   end

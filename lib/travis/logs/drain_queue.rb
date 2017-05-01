@@ -133,7 +133,7 @@ module Travis
           end
         end
 
-        handler_callable.call(payload)
+        handler_callable.call(payload) unless payload.empty?
       end
 
       private def receive(delivery_info, _properties, payload)
