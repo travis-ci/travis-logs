@@ -40,7 +40,6 @@ module Travis
           },
           maintenance_expiry: 5.minutes,
           maintenance_initial_sleep: 30.seconds,
-          maintenance_statement_timeout_ms: 30.minutes.in_milliseconds,
           per_aggregate_limit: 500,
           purge: false,
           sidekiq_error_retry_pause: 3.seconds

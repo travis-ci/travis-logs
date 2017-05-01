@@ -15,7 +15,6 @@ module Travis
 
       attr_reader :redis, :expiry
       private :redis
-      private :expiry
 
       def with_maintenance_on
         redis.setex(MAINTENANCE_KEY, expiry, 'on')
