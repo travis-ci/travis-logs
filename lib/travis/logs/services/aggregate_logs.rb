@@ -94,7 +94,7 @@ module Travis
 
         def aggregate_log(log_id)
           measure do
-            database.transaction do
+            database.db.transaction do
               aggregate(log_id)
               clean(log_id) unless skip_empty? && log_empty?(log_id)
             end
@@ -104,7 +104,7 @@ module Travis
             'aggregating',
             action: 'aggregate', log_id: log_id, result: 'successful'
           )
-        rescue => e
+        rescue StandardError => e
           Travis::Exceptions.handle(e)
         end
 

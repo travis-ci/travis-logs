@@ -24,6 +24,11 @@ module Travis
           end
         end
 
+        attr_reader :archiver, :database, :storage_service
+        private :archiver
+        private :database
+        private :storage_service
+
         def run
           if db_content_length_empty?
             process_empty_log_content
@@ -45,9 +50,9 @@ module Travis
             mark('log.content_empty')
           else
             measure('already_purged') do
-              @database.transaction do
-                @database.mark_archive_verified(@log_id)
-                @database.purge(@log_id)
+              database.db.transaction do
+                database.mark_archive_verified(@log_id)
+                database.purge(@log_id)
               end
             end
             Travis.logger.info(
@@ -60,7 +65,7 @@ module Travis
         private def process_log_content
           if content_lengths_match?
             measure('purged') do
-              @database.purge(@log_id)
+              database.purge(@log_id)
             end
             Travis.logger.debug(
               'content lengths match',
@@ -69,8 +74,8 @@ module Travis
             )
           else
             measure('requeued_for_achiving') do
-              @database.mark_not_archived(@log_id)
-              @archiver.call(@log_id)
+              database.mark_not_archived(@log_id)
+              archiver.call(@log_id)
             end
             Travis.logger.info(
               'content lengths do not match',
@@ -92,7 +97,7 @@ module Travis
         private def content_length_from_s3
           @content_length_from_s3 ||= begin
             measure('check_content_length') do
-              @storage_service.content_length(log_url)
+              storage_service.content_length(log_url)
             end
           rescue
             mark('check_content_length.failed')
@@ -101,7 +106,7 @@ module Travis
 
         private def log
           unless defined?(@log)
-            @log = @database.log_content_length_for_id(@log_id)
+            @log = database.log_content_length_for_id(@log_id)
             unless @log
               Travis.logger.warn(
                 'log not found',

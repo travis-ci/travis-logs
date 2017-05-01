@@ -40,8 +40,12 @@ module Travis
             regular: 3.minutes,
             sweeper: 10.minutes
           },
+          maintenance_expiry: 5.minutes,
+          maintenance_initial_sleep: 30.seconds,
+          maintenance_statement_timeout_ms: 30.minutes.in_milliseconds,
           per_aggregate_limit: 500,
-          purge: false
+          purge: false,
+          sidekiq_error_retry_pause: 3.seconds
         },
         logs_database: {
           min_readable_cutoff_age: 6.months,
