@@ -4,6 +4,7 @@ require 'jwt'
 require 'multi_json'
 require 'pusher'
 require 'rack/ssl'
+require 'raven'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/param'
@@ -20,13 +21,11 @@ module Travis
         disable :dump_errors
         use Rack::SSL
         use Travis::Logs::MetricsMiddleware
+        use Raven::Rack
       end
 
       configure do
         enable :logging if Travis.config.logs.api_logging?
-        unless Travis.config.sentry.dsn.to_s.empty?
-          use Travis::Logs::SentryMiddleware
-        end
       end
 
       def initialize(auth_token: ENV['AUTH_TOKEN'].to_s,
