@@ -53,6 +53,7 @@ module Travis
         def setup_connection
           db.run("SET statement_timeout = #{statement_timeout_ms}")
           db.run("SET application_name = 'partman_maintenance'")
+          db.run('SET client_min_messages = DEBUG5')
         end
 
         LOGS_QUERIES_SQL = <<~SQL
@@ -102,7 +103,7 @@ module Travis
         end
 
         private def statement_timeout_ms
-          Travis.config.logs.maintenance_statement_timeout_ms
+          (initial_sleep + maint.expiry + 5.minutes) * 1000
         end
 
         private def table_names
