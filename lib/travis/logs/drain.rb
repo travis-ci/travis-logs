@@ -29,6 +29,7 @@ module Travis
       private def receive(payload)
         Travis.logger.debug('received payload')
         Travis::Logs::Sidekiq::LogParts.perform_async(payload)
+        Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
       end
 
       private def num_threads

@@ -34,11 +34,7 @@ describe 'aggregation' do
   end
 
   def populate_logs(pusher_client, existence, job_count: 10, parts_count: 50)
-    lps = Travis::Logs::Services::ProcessLogPart.new(
-      database: nil,
-      pusher_client: pusher_client,
-      existence: existence
-    )
+    lps = Travis::Logs::LogPartsWriter.new
 
     job_count.times do |n|
       job_id = 17_321 + n

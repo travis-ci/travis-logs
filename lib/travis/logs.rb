@@ -25,6 +25,7 @@ module Travis
     autoload :DrainQueue, 'travis/logs/drain_queue'
     autoload :Existence, 'travis/logs/existence'
     autoload :Lock, 'travis/logs/lock'
+    autoload :LogPartsWriter, 'travis/logs/log_parts_writer'
     autoload :Maintenance, 'travis/logs/maintenance'
     autoload :MetricsMethods, 'travis/logs/metrics_methods'
     autoload :MetricsMiddleware, 'travis/logs/metrics_middleware'

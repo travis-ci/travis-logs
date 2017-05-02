@@ -14,6 +14,7 @@ module Travis
       autoload :LogParts, 'travis/logs/sidekiq/log_parts'
       autoload :PartmanMaintenance, 'travis/logs/sidekiq/partman_maintenance'
       autoload :Purge, 'travis/logs/sidekiq/purge'
+      autoload :PusherForwarding, 'travis/logs/sidekiq/pusher_forwarding'
 
       class << self
         def setup
