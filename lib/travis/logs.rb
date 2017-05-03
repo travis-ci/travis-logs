@@ -30,6 +30,7 @@ module Travis
     autoload :MetricsMethods, 'travis/logs/metrics_methods'
     autoload :MetricsMiddleware, 'travis/logs/metrics_middleware'
     autoload :Pusher, 'travis/logs/pusher'
+    autoload :PusherForwarder, 'travis/logs/pusher_forwarder'
     autoload :RedisPool, 'travis/logs/redis_pool'
     autoload :S3, 'travis/logs/s3'
     autoload :Services, 'travis/logs/services'
