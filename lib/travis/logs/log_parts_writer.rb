@@ -20,14 +20,18 @@ module Travis
       end
 
       def initialize(database: nil, log_parts_normalizer: nil)
-        @database = database || Travis::Logs.database_connection
-        @log_parts_normalizer = log_parts_normalizer ||
-          Travis::Logs::Services::NormalizeLogParts.new(database: @database)
+        @database = database
+        @log_parts_normalizer = log_parts_normalizer
       end
 
-      attr_reader :database, :log_parts_normalizer
-      private :database
-      private :log_parts_normalizer
+      private def database
+        @database ||= Travis::Logs.database_connection
+      end
+
+      private def log_parts_normalizer
+        @log_parts_normalizer ||=
+          Travis::Logs::Services::NormalizeLogParts.new(database: database)
+      end
 
       def run(payload)
         payload = [payload] if payload.is_a?(Hash)

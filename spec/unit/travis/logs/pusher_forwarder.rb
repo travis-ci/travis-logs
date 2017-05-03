@@ -4,7 +4,7 @@ describe Travis::Logs::PusherForwarder do
   let(:payload) { [{ 'id' => 2, 'log' => 'hello, world', 'number' => 1 }] }
 
   subject(:service) do
-    described_class.new(
+    described_class.new
   end
 
   before(:each) do

@@ -26,18 +26,28 @@ module Travis
 
       def initialize(database: nil, pusher_client: nil, existence: nil,
                      log_parts_normalizer: nil)
-        @database = database || Travis::Logs.database_connection
-        @pusher_client = pusher_client || Travis::Logs::Pusher.new
-        @existence = existence || Travis::Logs::Existence.new
-        @log_parts_normalizer = log_parts_normalizer ||
-          Travis::Logs::Services::NormalizeLogParts.new(database: @database)
+        @database = database
+        @pusher_client = pusher_client
+        @existence = existence
+        @log_parts_normalizer = log_parts_normalizer
       end
 
-      attr_reader :database, :pusher_client, :existence, :log_parts_normalizer
-      private :database
-      private :pusher_client
-      private :existence
-      private :log_parts_normalizer
+      private def database
+        @database ||= Travis::Logs.database_connection
+      end
+
+      private def pusher_client
+        @pusher_client ||= Travis::Logs::Pusher.new
+      end
+
+      private def existence
+        @existence ||= Travis::Logs::Existence.new
+      end
+
+      private def log_parts_normalizer
+        @log_parts_normalizer ||=
+          Travis::Logs::Services::NormalizeLogParts.new(database: @database)
+      end
 
       def run(payload)
         payload = [payload] if payload.is_a?(Hash)

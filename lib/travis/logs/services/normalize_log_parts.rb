@@ -9,13 +9,18 @@ module Travis
         INT_MAX = 2_147_483_647
 
         def initialize(database: nil, log_finder: nil)
-          @database = database || Travis::Logs.database_connection
-          @log_finder = log_finder ||
-            Travis::Logs::Services::FindOrCreateLog.new(database: @database)
+          @database = database
+          @log_finder = log_finder
         end
 
-        attr_reader :log_finder
-        private :log_finder
+        private def database
+          @database ||= Travis::Logs.database_connection
+        end
+
+        private def log_finder
+          @log_finder ||=
+            Travis::Logs::Services::FindOrCreateLog.new(database: @database)
+        end
 
         def run(log_parts)
           normalized_entries(log_parts)
