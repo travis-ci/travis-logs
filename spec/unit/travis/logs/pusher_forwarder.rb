@@ -17,7 +17,7 @@ describe Travis::Logs::PusherForwarder do
   end
 
   describe 'existence check' do
-    xit 'sends a part if channel is not occupied but the existence check is disabled' do
+    it 'sends a part if channel is not occupied but the existence check is disabled' do
       expect(service).to receive(:existence_check?) { false }
       expect(service).to receive(:channel_occupied?) { false }
       expect(service).to receive(:mark).with(any_args)
@@ -27,7 +27,7 @@ describe Travis::Logs::PusherForwarder do
       service.run(payload)
     end
 
-    xit 'ignores a part if channel is not occupied' do
+    it 'ignores a part if channel is not occupied' do
       expect(service).to receive(:channel_occupied?) { false }
       expect(service).to receive(:mark).with(any_args)
       expect(service).to receive(:mark).with('pusher.ignore')
@@ -36,7 +36,7 @@ describe Travis::Logs::PusherForwarder do
       service.run(payload)
     end
 
-    xit 'sends a part if channel is occupied' do
+    it 'sends a part if channel is occupied' do
       expect(service).to receive(:channel_occupied?) { true }
       expect(service).to receive(:mark).with(any_args)
       expect(service).to receive(:mark).with('pusher.send')
@@ -51,7 +51,7 @@ describe Travis::Logs::PusherForwarder do
       Travis.config.pusher.secure = true
     end
 
-    xit 'notifies pusher on a private channel' do
+    it 'notifies pusher on a private channel' do
       expect(pusher_client).to receive(:push)
         .with(
           'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false
@@ -65,7 +65,7 @@ describe Travis::Logs::PusherForwarder do
       Travis.config.pusher.secure = false
     end
 
-    xit 'notifies pusher on a regular channel' do
+    it 'notifies pusher on a regular channel' do
       expect(pusher_client).to receive(:push)
         .with(
           'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false

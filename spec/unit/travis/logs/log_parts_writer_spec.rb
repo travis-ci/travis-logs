@@ -42,13 +42,13 @@ describe Travis::Logs::LogPartsWriter do
   end
 
   context 'without an existing log' do
-    xit 'creates a log' do
+    it 'creates a log' do
       service.run(payload)
 
       expect(database.log_id_for_job_id(2)).not_to be_nil
     end
 
-    xit 'marks the log.create metric' do
+    it 'marks the log.create metric' do
       meter = double('log.create meter')
       expect(Metriks).to receive(:meter).with('logs.process_log_part.log.create').and_return(meter)
       expect(meter).to receive(:mark)
@@ -62,7 +62,7 @@ describe Travis::Logs::LogPartsWriter do
       database.create_log(2)
     end
 
-    xit 'does not create another log' do
+    it 'does not create another log' do
       service.run(payload)
 
       expect(database.logs.count { |log| log[:job_id] == 2 }).to eq(1)
@@ -78,13 +78,13 @@ describe Travis::Logs::LogPartsWriter do
         .with('logs.process_log_part.log.id_invalid').and_return(meter)
     end
 
-    xit 'marks the log.id_invalid metric' do
+    it 'marks the log.id_invalid metric' do
       expect(meter).to receive(:mark)
       service.run(payload)
     end
   end
 
-  xit 'creates a log part' do
+  it 'creates a log part' do
     service.run(payload)
 
     expect(database.log_parts.last).to include(
