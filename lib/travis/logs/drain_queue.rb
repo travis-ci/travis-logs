@@ -20,15 +20,23 @@ module Travis
         METRIKS_PREFIX
       end
 
-      def self.subscribe(name, &handler_callable)
-        new(name, &handler_callable).subscribe
+      def self.subscribe(name, batch_handler: nil, pusher_handler: nil)
+        new(
+          name,
+          batch_handler: batch_handler,
+          pusher_handler: pusher_handler
+        ).subscribe
       end
 
-      attr_reader :name, :handler_callable, :periodic_flush_task
+      attr_reader :name, :batch_handler, :pusher_handler, :periodic_flush_task
+      private :batch_handler
+      private :pusher_handler
+      private :periodic_flush_task
 
-      def initialize(name, &handler_callable)
+      def initialize(name, batch_handler: nil, pusher_handler: nil)
         @name = name
-        @handler_callable = handler_callable
+        @batch_handler = batch_handler
+        @pusher_handler = pusher_handler
         @periodic_flush_task = build_periodic_flush_task
       end
 
@@ -120,7 +128,7 @@ module Travis
           end
         end
 
-        handler_callable.call(payload) unless payload.empty?
+        batch_handler.call(payload) unless payload.empty?
       end
 
       private def receive(delivery_info, _properties, payload)
@@ -128,6 +136,7 @@ module Travis
         smart_retry do
           decoded_payload = decode(payload)
           if decoded_payload
+            pusher_handler.call(decoded_payload)
             batch_buffer[delivery_info.delivery_tag] = decoded_payload
             if batch_buffer.size >= batch_size
               flush_mutex.synchronize { flush_batch_buffer }
