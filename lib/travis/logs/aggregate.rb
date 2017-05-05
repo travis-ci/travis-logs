@@ -15,7 +15,7 @@ module Travis
 
       def run
         loop do
-          aggregate_logs
+          aggregate_logs(partitions: partitions?)
           sleep sleep_interval
         end
       end
@@ -45,10 +45,10 @@ module Travis
         end
       end
 
-      def aggregate_logs
+      def aggregate_logs(partitions: false)
         lock.exclusive do
           begin
-            aggregator.run
+            aggregator.run(partitions: partitions)
           rescue StandardError => e
             Travis::Exceptions.handle(e)
           end
@@ -65,6 +65,10 @@ module Travis
 
       private def lock
         @lock ||= Travis::Logs::Lock.new('logs.aggregate')
+      end
+
+      private def partitions?
+        Travis.config.logs.aggregate_partitions?
       end
     end
   end

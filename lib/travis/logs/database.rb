@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/numeric'
 require 'logger'
 require 'sequel'
 require 'pg'
@@ -204,6 +205,33 @@ module Travis
                 .limit(limit)
         query = query.order(order.to_sym) unless order.nil?
         query.map(:log_id).uniq
+      end
+
+      def aggregatable_logs_by_partition(per_partition_limit,
+                                         order: :created_at,
+                                         cutoff: 1.day)
+        maint.restrict!
+        ids = []
+
+        cutoff = Time.now.utc - cutoff
+        cutoff_partition = cutoff.strftime('log_parts_p%Y_%m_%d')
+
+        partitions = db[
+          %[SELECT partman.show_partitions('public.log_parts')]
+        ].map do |row|
+          row.fetch(:show_partitions).gsub(/[()]/, '').split(',').last
+        end
+
+        partitions.each do |partition|
+          next if partition >= cutoff_partition
+
+          query = db[partition.to_sym].select(:log_id)
+                                      .limit(per_partition_limit)
+          query = query.order(order.to_sym) unless order.nil?
+          ids += query.map(:log_id)
+        end
+
+        ids.uniq
       end
 
       def min_log_part_id
