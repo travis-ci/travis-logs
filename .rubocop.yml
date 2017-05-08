@@ -6,6 +6,10 @@ AllCops:
 Style/Documentation:
   Enabled: false
 
+Style/GuardClause:
+  Exclude:
+  - 'lib/travis/logs/services/fetch*.rb'
+
 Metrics/LineLength:
   Max: 80
   Exclude:
