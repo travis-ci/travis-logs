@@ -17,11 +17,13 @@ module Travis
             raise ArgumentError, 'only one of job_id or id allowed'
           end
 
-          if job_id && job_id < min_accepted_job_id
+          if job_id && (ignored_job_id?(job_id) || job_id < min_accepted_job_id)
             return spoofed_archived_log(job_id: job_id)
           end
 
-          return spoofed_archived_log(id: id) if id && id < min_accepted_id
+          if id && (ignored_log_id?(id) || id < min_accepted_id)
+            return spoofed_archived_log(id: id)
+          end
 
           fetch(
             job_id: job_id,
@@ -57,6 +59,14 @@ module Travis
 
         private def min_accepted_id
           Travis.config.logs.archive_spoofing.min_accepted_id
+        end
+
+        private def ignored_job_id?(job_id)
+          Travis::Logs.redis.sismember('logs:ignored-job-ids', job_id.to_s)
+        end
+
+        private def ignored_log_id?(id)
+          Travis::Logs.redis.sismember('logs:ignored-log-ids', id.to_s)
         end
 
         private def spoofed_archived_log(job_id: nil, id: nil)

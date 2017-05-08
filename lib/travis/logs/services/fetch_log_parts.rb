@@ -12,8 +12,15 @@ module Travis
         private :database
 
         def run(log_id: nil, job_id: nil, after: nil, part_numbers: [])
-          return [] if job_id && job_id < min_accepted_job_id
-          return [] if log_id && log_id < min_accepted_id
+          if job_id && (
+            ignored_job_id?(job_id) || job_id < min_accepted_job_id
+          )
+            return []
+          end
+
+          if log_id && (ignored_log_id?(log_id) || log_id < min_accepted_id)
+            return []
+          end
 
           fetch(
             log_id: log_id,
@@ -37,6 +44,14 @@ module Travis
 
         private def min_accepted_id
           Travis.config.logs.archive_spoofing.min_accepted_id
+        end
+
+        private def ignored_job_id?(job_id)
+          Travis::Logs.redis.sismember('logs:ignored-job-ids', job_id.to_s)
+        end
+
+        private def ignored_log_id?(id)
+          Travis::Logs.redis.sismember('logs:ignored-log-ids', id.to_s)
         end
       end
     end
