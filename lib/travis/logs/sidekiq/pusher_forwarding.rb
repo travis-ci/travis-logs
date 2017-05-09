@@ -7,20 +7,20 @@ require 'travis/logs'
 module Travis
   module Logs
     module Sidekiq
-      class LogParts
+      class PusherForwarding
         class << self
-          def log_parts_writer
-            @log_parts_writer ||= Travis::Logs::LogPartsWriter.new
+          def pusher_forwarder
+            @pusher_forwarder ||= Travis::Logs::PusherForwarder.new
           end
         end
 
         include ::Sidekiq::Worker
 
-        sidekiq_options queue: 'log_parts', retry: 3
+        sidekiq_options queue: 'logs.pusher_forwarding', retry: 3
 
         def perform(payload)
           Travis.logger.debug('running with payload')
-          self.class.log_parts_writer.run(payload)
+          self.class.pusher_forwarder.run(payload)
         end
       end
     end
