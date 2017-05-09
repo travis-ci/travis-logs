@@ -16,27 +16,13 @@ module Travis
       end
 
       def run
-        1.upto(num_threads) do |n|
-          Thread.new { spawn_thread_loop("#{n}/#{num_threads}") }
-        end
-        Travis.logger.info('drain threads spawned', n: num_threads)
-        sleep
-      end
-
-      private def spawn_thread_loop(name)
-        Travis.logger.info('spawning drain thread', name: name)
         queue = Travis::Logs::DrainQueue.new(
           'logs',
-          name: name,
           batch_handler: ->(batch) { handle_batch(batch) },
           pusher_handler: ->(payload) { forward_pusher_payload(payload) }
         )
+        Travis.logger.info('subscribing')
         queue.subscribe
-      rescue Travis::Logs::DrainQueueShutdownError => e
-        queue = nil if defined?(queue)
-        Travis::Exceptions.handle(e)
-        Travis.logger.warn('retrying drain thread spawn', name: name)
-        retry
       end
 
       private def handle_batch(batch)
@@ -46,10 +32,6 @@ module Travis
 
       private def forward_pusher_payload(payload)
         Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
-      end
-
-      private def num_threads
-        Travis.config.logs.drain_threads
       end
     end
   end

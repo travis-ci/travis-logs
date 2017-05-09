@@ -20,16 +20,15 @@ module Travis
         METRIKS_PREFIX
       end
 
-      attr_reader :reporting_jobs_queue, :name, :batch_handler
+      attr_reader :reporting_jobs_queue, :batch_handler
       attr_reader :pusher_handler, :periodic_flush_task
       private :batch_handler
       private :pusher_handler
       private :periodic_flush_task
 
-      def initialize(reporting_jobs_queue, name: '', batch_handler: nil,
+      def initialize(reporting_jobs_queue, batch_handler: nil,
                      pusher_handler: nil)
         @reporting_jobs_queue = reporting_jobs_queue
-        @name = name
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
         @periodic_flush_task = build_periodic_flush_task
@@ -93,7 +92,7 @@ module Travis
         ) do
           Travis.logger.debug(
             'triggering periodic flush',
-            drain_queue: name,
+            drain_queue: reporting_jobs_queue,
             interval: "#{logs_config[:drain_execution_interval]}s",
             timeout: "#{logs_config[:drain_timeout_interval]}s"
           )
@@ -103,7 +102,7 @@ module Travis
 
       private def flush_batch_buffer
         Travis.logger.info(
-          'flushing batch buffer', name: name, size: batch_buffer.size
+          'flushing batch buffer', size: batch_buffer.size
         )
         sample = {}
         payload = []
@@ -120,7 +119,6 @@ module Travis
           rescue StandardError => e
             Travis.logger.error(
               'failed to delete pair from buffer',
-              name: name,
               error: e.inspect
             )
             payload.pop
@@ -132,7 +130,6 @@ module Travis
           rescue StandardError => e
             Travis.logger.error(
               'failed to ack message',
-              name: name,
               error: e.inspect
             )
             payload.pop
@@ -154,9 +151,7 @@ module Travis
               flush_mutex.synchronize { flush_batch_buffer }
             end
           else
-            Travis.logger.info(
-              'acking empty or undecodable payload', name: name
-            )
+            Travis.logger.info('acking empty or undecodable payload')
             safe_ack(delivery_info.delivery_tag)
           end
         end
@@ -164,9 +159,7 @@ module Travis
         log_exception(e, decoded_payload)
         jobs_channel.reject(delivery_info.delivery_tag, true)
         mark('receive.retry')
-        Travis.logger.error(
-          'message requeued', name: name, stage: 'queue:receive'
-        )
+        Travis.logger.error('message requeued', stage: 'queue:receive')
       end
 
       private def smart_retry(retries: 2, timeout: 3, &block)
@@ -178,7 +171,6 @@ module Travis
             retry_count += 1
             Travis.logger.error(
               'processing AMQP message timeout exceeded',
-              name: name,
               action: 'receive',
               timeout_seconds: timeout,
               retry: retry_count,
@@ -189,7 +181,6 @@ module Travis
           else
             Travis.logger.error(
               'failed to process AMQP message, aborting',
-              name: name,
               action: 'receive',
               max_retries: retries
             )
@@ -206,7 +197,6 @@ module Travis
       rescue StandardError => e
         Travis.logger.error(
           'payload could not be decoded',
-          name: name,
           error: e.inspect,
           payload: payload.inspect,
           stage: 'queue:decode'
@@ -220,14 +210,12 @@ module Travis
       rescue Bunny::ConnectionClosedError => e
         Travis.logger.error(
           'shutting down due to connection closed',
-          name: name,
           error: e.inspect
         )
         shutdown!
       rescue Bunny::ChannelAlreadyClosed => e
         Travis.logger.error(
           'shutting down due to channel closed',
-          name: name,
           error: e.inspect
         )
         shutdown!
@@ -236,15 +224,14 @@ module Travis
       private def log_exception(error, payload)
         Travis.logger.error(
           'exception caught in queue while processing payload',
-          name: name,
           action: 'receive',
           queue: reporting_jobs_queue,
           payload: payload.inspect
         )
         Travis::Exceptions.handle(error)
       rescue StandardError => e
-        Travis.logger.error("!!!FAILSAFE!!! #{e.message}", name: name)
-        Travis.logger.error(e.backtrace.first, name: name)
+        Travis.logger.error("!!!FAILSAFE!!! #{e.message}")
+        Travis.logger.error(e.backtrace.first)
       end
     end
   end
