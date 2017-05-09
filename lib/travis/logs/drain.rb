@@ -23,13 +23,15 @@ module Travis
 
       private def spawn_thread_loop(name)
         Travis.logger.info('spawning drain thread', name: name)
-        Travis::Logs::DrainQueue.subscribe(
+        queue = Travis::Logs::DrainQueue.new(
           'logs',
           name: name,
           batch_handler: ->(batch) { handle_batch(batch) },
           pusher_handler: ->(payload) { forward_pusher_payload(payload) }
         )
+        queue.subscribe
       rescue Travis::Logs::DrainQueueShutdownError => e
+        queue = nil if defined?(queue)
         Travis::Exceptions.handle(e)
         Travis.logger.warn('retrying drain thread spawn', name: name)
         retry

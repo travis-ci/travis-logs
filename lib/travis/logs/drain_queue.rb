@@ -20,21 +20,15 @@ module Travis
         METRIKS_PREFIX
       end
 
-      def self.subscribe(name, batch_handler: nil, pusher_handler: nil,
-                         block: true)
-        new(
-          name,
-          batch_handler: batch_handler,
-          pusher_handler: pusher_handler
-        ).subscribe(block: block)
-      end
-
-      attr_reader :name, :batch_handler, :pusher_handler, :periodic_flush_task
+      attr_reader :reporting_jobs_queue, :name, :batch_handler
+      attr_reader :pusher_handler, :periodic_flush_task
       private :batch_handler
       private :pusher_handler
       private :periodic_flush_task
 
-      def initialize(name, batch_handler: nil, pusher_handler: nil)
+      def initialize(reporting_jobs_queue, name: '', batch_handler: nil,
+                     pusher_handler: nil)
+        @reporting_jobs_queue = reporting_jobs_queue
         @name = name
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
@@ -47,7 +41,8 @@ module Travis
 
       private def jobs_queue
         @jobs_queue ||= jobs_channel.queue(
-          "reporting.jobs.#{name}", durable: true, exclusive: false
+          "reporting.jobs.#{reporting_jobs_queue}",
+          durable: true, exclusive: false
         )
       end
 
@@ -228,7 +223,7 @@ module Travis
         Travis.logger.error(
           'exception caught in queue while processing payload',
           action: 'receive',
-          queue: name,
+          queue: reporting_jobs_queue,
           payload: payload.inspect
         )
         Travis::Exceptions.handle(error)

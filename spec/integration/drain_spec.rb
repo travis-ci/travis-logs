@@ -24,11 +24,12 @@ describe 'receive_logs' do
     batches = []
     pusher_payloads = []
 
-    Travis::Logs::DrainQueue.subscribe(
+    dq = Travis::Logs::DrainQueue.new(
       'logs',
       batch_handler: ->(b) { batches << b },
       pusher_handler: ->(p) { pusher_payloads << p }
     )
+    dq.subscribe(block: false)
 
     delivery_info = double('delivery_info', delivery_tag: 'yey')
     queue.call(delivery_info, nil, '{"id":123,"log":"hello, world","number":1}')
