@@ -16,7 +16,9 @@ module Travis
       end
 
       def run
-        1.upto(num_threads) { |n| spawn_thread_loop("#{n}/#{num_threads}") }
+        1.upto(num_threads) do |n|
+          Thread.new { spawn_thread_loop("#{n}/#{num_threads}") }
+        end
         Travis.logger.info('drain threads spawned', n: num_threads)
         sleep
       end
