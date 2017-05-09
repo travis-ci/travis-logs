@@ -212,6 +212,12 @@ module Travis
         jobs_channel.ack(delivery_tag)
       rescue Bunny::ConnectionClosedError => e
         Travis.logger.error(
+          'shutting down due to connection closed',
+          error: e.inspect
+        )
+        shutdown!
+      rescue Bunny::ChannelAlreadyClosed => e
+        Travis.logger.error(
           'shutting down due to channel closed',
           error: e.inspect
         )
