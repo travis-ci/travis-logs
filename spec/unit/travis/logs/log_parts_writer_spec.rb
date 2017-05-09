@@ -26,16 +26,12 @@ class FakeDatabase
   alias cached_log_id_for_job_id log_id_for_job_id
 end
 
-describe Travis::Logs::Services::ProcessLogPart do
+describe Travis::Logs::LogPartsWriter do
   let(:payload) { [{ 'id' => 2, 'log' => 'hello, world', 'number' => 1 }] }
   let(:database) { FakeDatabase.new }
-  let(:pusher_client) { double('pusher-client', push: nil) }
 
   subject(:service) do
-    described_class.new(
-      database: database,
-      pusher_client: pusher_client
-    )
+    described_class.new(database: database)
   end
 
   before(:each) do
@@ -43,8 +39,6 @@ describe Travis::Logs::Services::ProcessLogPart do
     Travis.config.channels_existence_metrics = true
     Travis::Logs.cache.clear
     allow(Metriks).to receive(:meter).and_return(double('meter', mark: nil))
-    allow(service).to receive(:channel_occupied?) { true }
-    allow(service).to receive(:channel_name) { 'channel' }
   end
 
   context 'without an existing log' do
@@ -96,63 +90,5 @@ describe Travis::Logs::Services::ProcessLogPart do
     expect(database.log_parts.last).to include(
       content: 'hello, world', number: 1, final: false
     )
-  end
-
-  describe 'existence check' do
-    it 'sends a part if channel is not occupied but the existence check is disabled' do
-      expect(service).to receive(:existence_check?) { false }
-      expect(service).to receive(:channel_occupied?) { false }
-      expect(service).to receive(:mark).with(any_args)
-      expect(service).to receive(:mark).with('pusher.ignore')
-      expect(pusher_client).to receive(:push).with(any_args)
-
-      service.run(payload)
-    end
-
-    it 'ignores a part if channel is not occupied' do
-      expect(service).to receive(:channel_occupied?) { false }
-      expect(service).to receive(:mark).with(any_args)
-      expect(service).to receive(:mark).with('pusher.ignore')
-      expect(pusher_client).to_not receive(:push)
-
-      service.run(payload)
-    end
-
-    it 'sends a part if channel is occupied' do
-      expect(service).to receive(:channel_occupied?) { true }
-      expect(service).to receive(:mark).with(any_args)
-      expect(service).to receive(:mark).with('pusher.send')
-      expect(pusher_client).to receive(:push).with(any_args)
-
-      service.run(payload)
-    end
-  end
-
-  context 'when pusher.secure is true' do
-    before(:each) do
-      Travis.config.pusher.secure = true
-    end
-
-    it 'notifies pusher on a private channel' do
-      expect(pusher_client).to receive(:push)
-        .with(
-          'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false
-        )
-      service.run(payload)
-    end
-  end
-
-  context 'when pusher.secure is false' do
-    before(:each) do
-      Travis.config.pusher.secure = false
-    end
-
-    it 'notifies pusher on a regular channel' do
-      expect(pusher_client).to receive(:push)
-        .with(
-          'id' => 2, 'chars' => 'hello, world', 'number' => 1, 'final' => false
-        )
-      service.run(payload)
-    end
   end
 end
