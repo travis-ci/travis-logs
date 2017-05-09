@@ -12,8 +12,6 @@ require 'travis/logs'
 module Travis
   module Logs
     class DrainQueue
-      Shutdown = Class.new(RuntimeError)
-
       include Travis::Logs::MetricsMethods
 
       METRIKS_PREFIX = 'logs.queue'
@@ -80,7 +78,7 @@ module Travis
       ensure
         @jobs_channel = nil
         @amqp_conn = nil
-        raise Shutdown
+        raise DrainShutdownError
       end
 
       private def build_periodic_flush_task

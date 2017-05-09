@@ -23,6 +23,7 @@ module Travis
     autoload :Database, 'travis/logs/database'
     autoload :Drain, 'travis/logs/drain'
     autoload :DrainQueue, 'travis/logs/drain_queue'
+    autoload :DrainShutdownError, 'travis/logs/drain_shutdown_error'
     autoload :Existence, 'travis/logs/existence'
     autoload :Lock, 'travis/logs/lock'
     autoload :Maintenance, 'travis/logs/maintenance'
