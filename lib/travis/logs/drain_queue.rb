@@ -58,7 +58,11 @@ module Travis
       end
 
       private def amqp_config
-        @amqp_config ||= Travis.config.amqp.to_h
+        @amqp_config ||= Travis.config.amqp.to_h.merge(
+          client_properties: {
+            process: "logs.#{Travis.config.env}.#{ENV['DYNO'] || 'local'}"
+          }
+        )
       end
 
       private def logs_config
