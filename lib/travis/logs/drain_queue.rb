@@ -20,12 +20,13 @@ module Travis
         METRIKS_PREFIX
       end
 
-      def self.subscribe(name, batch_handler: nil, pusher_handler: nil)
+      def self.subscribe(name, batch_handler: nil, pusher_handler: nil,
+                         block: true)
         new(
           name,
           batch_handler: batch_handler,
           pusher_handler: pusher_handler
-        ).subscribe
+        ).subscribe(block: block)
       end
 
       attr_reader :name, :batch_handler, :pusher_handler, :periodic_flush_task
@@ -40,8 +41,8 @@ module Travis
         @periodic_flush_task = build_periodic_flush_task
       end
 
-      def subscribe
-        jobs_queue.subscribe(manual_ack: true, &method(:receive))
+      def subscribe(block: true)
+        jobs_queue.subscribe(manual_ack: true, block: block, &method(:receive))
       end
 
       private def jobs_queue
@@ -86,7 +87,7 @@ module Travis
       ensure
         @jobs_channel = nil
         @amqp_conn = nil
-        raise DrainShutdownError
+        raise DrainQueueShutdownError
       end
 
       private def build_periodic_flush_task

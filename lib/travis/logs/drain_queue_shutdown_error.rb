@@ -2,6 +2,6 @@
 
 module Travis
   module Logs
-    DrainShutdownError = Class.new(StandardError)
+    DrainQueueShutdownError = Class.new(StandardError)
   end
 end

@@ -16,16 +16,21 @@ module Travis
       end
 
       def run
-        1.upto(num_threads) do |n|
-          Travis.logger.debug('spawning receiver thread', n: n)
-          Travis::Logs::DrainQueue.subscribe(
-            'logs',
-            batch_handler: ->(batch) { handle_batch(batch) },
-            pusher_handler: ->(payload) { forward_pusher_payload(payload) }
-          )
-        end
-        Travis.logger.info('consumer threads spawned', n: num_threads)
+        1.upto(num_threads) { |n| spawn_thread_loop(n) }
+        Travis.logger.info('drain threads spawned', n: num_threads)
         sleep
+      end
+
+      private def spawn_thread_loop(n)
+        Travis.logger.debug('spawning drain thread', n: n)
+        Travis::Logs::DrainQueue.subscribe(
+          'logs',
+          batch_handler: ->(batch) { handle_batch(batch) },
+          pusher_handler: ->(payload) { forward_pusher_payload(payload) }
+        )
+      rescue Travis::Logs::DrainQueueShutdownError => e
+        Travis::Exceptions.handle(e)
+        retry
       end
 
       private def handle_batch(batch)
