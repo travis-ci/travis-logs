@@ -35,6 +35,16 @@ batching them together as enqueued jobs in the `log_parts` sidekiq queue.
 The `web` process runs a Sinatra web app that exposes APIs to handle
 interactions with other Travis applications and the external Pusher service.
 
+### `worker_critical` process
+
+The `worker_critical` process is responsible for handling jobs from the
+following sidekiq queues:
+
+#### `logs.pusher_forwarding` sidekiq queue
+
+The jobs in the `logs.pusher_forwarding` queue forward each log part
+individually to Pusher.
+
 ### `worker_high` process
 
 The `worker_high` process is responsible for handling jobs from the following
@@ -43,7 +53,7 @@ sidekiq queues:
 #### `log_parts` sidekiq queue
 
 The jobs in the `log_parts` sidekiq queue write batches of log parts records to
-the `log_parts` table and forward each log part individually to Pusher.
+the `log_parts` table.
 
 #### `aggregate` sidekiq queue
 
