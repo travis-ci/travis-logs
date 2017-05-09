@@ -6,6 +6,10 @@ AllCops:
 Style/Documentation:
   Enabled: false
 
+Style/GuardClause:
+  Exclude:
+  - 'lib/travis/logs/services/fetch*.rb'
+
 Metrics/LineLength:
   Max: 80
   Exclude:
@@ -26,7 +30,7 @@ Metrics/AbcSize:
   Max: 30
 
 Metrics/CyclomaticComplexity:
-  Max: 10
+  Max: 15
 
 Metrics/PerceivedComplexity:
-  Max: 10
+  Max: 15
