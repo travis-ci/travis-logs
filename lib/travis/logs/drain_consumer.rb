@@ -35,6 +35,11 @@ module Travis
       end
 
       def subscribe
+        Travis.logger.info(
+          'subscribing',
+          queue: jobs_queue.name,
+          conn_automatic_recovery: amqp_conn.automatically_recover?
+        )
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
       end
 
@@ -58,11 +63,7 @@ module Travis
       end
 
       private def amqp_conn
-        @amqp_conn ||= Bunny.new(amqp_config).tap(&:start)
-      end
-
-      private def amqp_config
-        @amqp_config ||= Travis.config.amqp.to_h
+        @amqp_conn ||= Bunny.new(Travis.config.amqp).tap(&:start)
       end
 
       private def logs_config

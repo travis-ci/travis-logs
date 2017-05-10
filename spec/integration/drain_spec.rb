@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class FakeAmqpQueue
+  attr_reader :name
+
   def subscribe(_opts, &block)
     @block = block
   end
