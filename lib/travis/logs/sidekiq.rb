@@ -28,7 +28,7 @@ module Travis
             namespace: Travis.config.sidekiq.namespace,
             size: Travis.config.sidekiq.pool_size
           )
-          ::Sidekiq.logger = ::Logger.new($stdout) if debug?
+          ::Sidekiq.logger = sidekiq_logger
           ::Sidekiq.configure_server do |config|
             config.server_middleware do |chain|
               chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
@@ -37,8 +37,11 @@ module Travis
           end
         end
 
-        def debug?
-          Travis.config.log_level.to_s == 'debug'
+        private def sidekiq_logger
+          if Travis.config.log_level.to_s == 'debug'
+            return ::Logger.new($stdout)
+          end
+          nil
         end
       end
     end
