@@ -15,7 +15,8 @@ module Travis
           conn = Sequel.connect(
             config[:url],
             max_connections: config[:pool],
-            after_connect: ->(c) { after_connect(c) }
+            after_connect: ->(c) { after_connect(c) },
+            preconnect: preconnect?
           )
           conn.loggers << Logger.new($stdout) if config[:sql_logging]
           conn
@@ -53,6 +54,10 @@ module Travis
             st.execute(statement)
             st.close
           end
+        end
+
+        private def preconnect?
+          %w[true 1].include?(ENV['PGBOUNCER_ENABLED'].to_s.downcase)
         end
       end
 
