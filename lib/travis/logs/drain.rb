@@ -49,6 +49,7 @@ module Travis
         dead.each do |name|
           Travis.logger.info('creating new consumer', name: name)
           consumers[name] = create_consumer
+          consumers[name].subscribe
         end
 
         sleep(loop_sleep_interval)
