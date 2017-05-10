@@ -16,7 +16,8 @@ module Travis
           conn = Sequel.connect(
             config[:url],
             max_connections: config[:pool],
-            after_connect: ->(c) { after_connect(c) }
+            after_connect: ->(c) { after_connect(c) },
+            preconnect: preconnect?
           )
           conn.loggers << Logger.new($stdout) if config[:sql_logging]
           conn
@@ -28,18 +29,12 @@ module Travis
 
         private def after_connect(conn)
           execute_compat(
-            conn, "SET application_name = '#{application_name}'"
+            conn, "SET application_name = '#{Travis.config.process_name}'"
           )
           execute_compat(
             conn, "SET statement_timeout = #{statement_timeout_ms}"
           )
           execute_compat(conn, 'SET constraint_exclusion = partition')
-        end
-
-        private def application_name
-          @application_name ||= [
-            'logs', Travis.config.env, ENV['DYNO']
-          ].compact.join('.')
         end
 
         private def statement_timeout_ms
@@ -60,6 +55,10 @@ module Travis
             st.execute(statement)
             st.close
           end
+        end
+
+        private def preconnect?
+          %w[true 1].include?(ENV['PGBOUNCER_ENABLED'].to_s.downcase)
         end
       end
 
