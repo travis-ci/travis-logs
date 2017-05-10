@@ -16,7 +16,7 @@ Metrics/LineLength:
   - 'spec/**/*'
 
 Metrics/MethodLength:
-  Max: 30
+  Max: 40
 
 Metrics/ClassLength:
   Max: 250

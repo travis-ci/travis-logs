@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class FakeAmqpQueue
+  attr_reader :name
+
   def subscribe(_opts, &block)
     @block = block
   end
@@ -14,9 +16,9 @@ describe 'receive_logs' do
   let(:queue) { FakeAmqpQueue.new }
 
   before do
-    allow_any_instance_of(Travis::Logs::DrainQueue)
+    allow_any_instance_of(Travis::Logs::DrainConsumer)
       .to receive(:jobs_queue).and_return(queue)
-    allow_any_instance_of(Travis::Logs::DrainQueue)
+    allow_any_instance_of(Travis::Logs::DrainConsumer)
       .to receive(:batch_size).and_return(1)
   end
 
@@ -24,11 +26,12 @@ describe 'receive_logs' do
     batches = []
     pusher_payloads = []
 
-    Travis::Logs::DrainQueue.subscribe(
+    dq = Travis::Logs::DrainConsumer.new(
       'logs',
       batch_handler: ->(b) { batches << b },
       pusher_handler: ->(p) { pusher_payloads << p }
     )
+    dq.subscribe
 
     delivery_info = double('delivery_info', delivery_tag: 'yey')
     queue.call(delivery_info, nil, '{"id":123,"log":"hello, world","number":1}')
