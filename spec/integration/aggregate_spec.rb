@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
 describe 'aggregation' do
-  let(:pusher_client) do
-    double('pusher_client', push: nil, pusher_channel_name: '')
-  end
-
-  let(:existence) do
-    double('existence', occupied?: nil)
-  end
-
   def db
     Travis::Logs.database_connection.db
   end
@@ -33,12 +25,8 @@ describe 'aggregation' do
     }
   end
 
-  def populate_logs(pusher_client, existence, job_count: 10, parts_count: 50)
-    lps = Travis::Logs::Services::ProcessLogPart.new(
-      database: nil,
-      pusher_client: pusher_client,
-      existence: existence
-    )
+  def populate_logs(job_count: 10, parts_count: 50)
+    lps = Travis::Logs::LogPartsWriter.new
 
     job_count.times do |n|
       job_id = 17_321 + n
@@ -60,7 +48,7 @@ describe 'aggregation' do
     Travis::Logs.database_connection = Travis::Logs::Database.connect
     Travis.config.logs.intervals[:sweeper] = 0
     db.run('TRUNCATE log_parts; TRUNCATE logs')
-    populate_logs(pusher_client, existence)
+    populate_logs
   end
 
   it 'aggregates logs' do

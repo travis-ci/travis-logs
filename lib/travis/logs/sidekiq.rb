@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'uri'
+
+require 'active_support/core_ext/hash/keys'
 require 'sidekiq'
 
 module Travis
@@ -12,6 +14,7 @@ module Travis
       autoload :LogParts, 'travis/logs/sidekiq/log_parts'
       autoload :PartmanMaintenance, 'travis/logs/sidekiq/partman_maintenance'
       autoload :Purge, 'travis/logs/sidekiq/purge'
+      autoload :PusherForwarding, 'travis/logs/sidekiq/pusher_forwarding'
 
       class << self
         def setup
@@ -25,7 +28,7 @@ module Travis
             namespace: Travis.config.sidekiq.namespace,
             size: Travis.config.sidekiq.pool_size
           )
-          ::Sidekiq.logger = ::Logger.new($stdout) if debug?
+          ::Sidekiq.logger = sidekiq_logger
           ::Sidekiq.configure_server do |config|
             config.server_middleware do |chain|
               chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
@@ -34,8 +37,11 @@ module Travis
           end
         end
 
-        def debug?
-          Travis.config.log_level.to_s == 'debug'
+        private def sidekiq_logger
+          if Travis.config.log_level.to_s == 'debug'
+            return ::Logger.new($stdout)
+          end
+          nil
         end
       end
     end

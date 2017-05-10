@@ -8,8 +8,5 @@ require 'travis/logs'
 
 $stdout.sync = true
 
-app = Travis::Logs::Drain.new
-Travis.logger.info('setting up log parts drain')
-app.setup
 Travis.logger.info('running log parts drain')
-app.run
+Travis::Logs::Drain.new.run

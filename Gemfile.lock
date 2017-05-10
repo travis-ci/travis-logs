@@ -19,8 +19,7 @@ GIT
 
 GIT
   remote: https://github.com/travis-ci/travis-logger.git
-  revision: 1518ce2d056d0f5c6a0a4f15040aeaef673a53de
-  ref: 1518ce2
+  revision: b589e0ca0e9f1a5d6cd8536ff7288d21d36c7560
   specs:
     travis-logger (0.0.1)
 
@@ -53,8 +52,8 @@ GEM
       aws-sdk-core (= 2.9.7)
     aws-sigv4 (1.0.0)
     backports (3.7.0)
-    bunny (2.6.4)
-      amq-protocol (>= 2.0.1)
+    bunny (2.6.5)
+      amq-protocol (>= 2.1.0)
     coder (0.4.0)
     coderay (1.1.1)
     concurrent-ruby (1.0.5)

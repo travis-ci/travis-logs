@@ -3,9 +3,13 @@
 require 'forwardable'
 
 require 'active_support'
+require 'raven'
+require 'raven/processor/removestacktrace'
 require 'sidekiq/redis_connection'
 
+require 'travis/exceptions'
 require 'travis/logger'
+require 'travis/metrics'
 
 module Travis
   extend Forwardable
@@ -18,16 +22,17 @@ module Travis
     autoload :Config, 'travis/logs/config'
     autoload :Database, 'travis/logs/database'
     autoload :Drain, 'travis/logs/drain'
-    autoload :DrainQueue, 'travis/logs/drain_queue'
+    autoload :DrainConsumer, 'travis/logs/drain_consumer'
     autoload :Existence, 'travis/logs/existence'
     autoload :Lock, 'travis/logs/lock'
+    autoload :LogPartsWriter, 'travis/logs/log_parts_writer'
     autoload :Maintenance, 'travis/logs/maintenance'
     autoload :MetricsMethods, 'travis/logs/metrics_methods'
     autoload :MetricsMiddleware, 'travis/logs/metrics_middleware'
     autoload :Pusher, 'travis/logs/pusher'
+    autoload :PusherForwarder, 'travis/logs/pusher_forwarder'
     autoload :RedisPool, 'travis/logs/redis_pool'
     autoload :S3, 'travis/logs/s3'
-    autoload :SentryMiddleware, 'travis/logs/sentry_middleware'
     autoload :Services, 'travis/logs/services'
     autoload :Sidekiq, 'travis/logs/sidekiq'
     autoload :UnderMaintenanceError, 'travis/logs/under_maintenance_error'
@@ -92,6 +97,37 @@ module Travis
           namespace: 'logs'
         )
       end
+
+      def setup
+        setup_exceptions
+        setup_metrics
+        setup_s3
+      end
+
+      private def setup_exceptions
+        Travis::Exceptions.setup(config, config.env, logger)
+        Raven.configure do |c|
+          c.dsn = config.sentry.dsn unless config.sentry.dsn.to_s.empty?
+
+          c.current_environment = config.env.to_s
+          c.environments = %w[staging production]
+
+          c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
+          c.processors << Raven::Processor::RemoveStacktrace
+          c.release = version
+          c.silence_ready = true
+        end
+      end
+
+      private def setup_metrics
+        Travis::Metrics.setup(config.metrics, logger)
+      end
+
+      private def setup_s3
+        Travis::Logs::S3.setup
+      end
     end
+
+    setup unless config.env.to_s == 'test'
   end
 end

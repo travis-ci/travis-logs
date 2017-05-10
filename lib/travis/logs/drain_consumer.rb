@@ -11,7 +11,7 @@ require 'travis/logs'
 
 module Travis
   module Logs
-    class DrainQueue
+    class DrainConsumer
       include Travis::Logs::MetricsMethods
 
       METRIKS_PREFIX = 'logs.queue'
@@ -20,25 +20,33 @@ module Travis
         METRIKS_PREFIX
       end
 
-      def self.subscribe(name, &handler_callable)
-        new(name, &handler_callable).subscribe
-      end
+      attr_reader :reporting_jobs_queue, :batch_handler
+      attr_reader :pusher_handler, :periodic_flush_task
+      private :batch_handler
+      private :pusher_handler
+      private :periodic_flush_task
 
-      attr_reader :name, :handler_callable, :periodic_flush_task
-
-      def initialize(name, &handler_callable)
-        @name = name
-        @handler_callable = handler_callable
+      def initialize(reporting_jobs_queue, batch_handler: nil,
+                     pusher_handler: nil)
+        @reporting_jobs_queue = reporting_jobs_queue
+        @batch_handler = batch_handler
+        @pusher_handler = pusher_handler
         @periodic_flush_task = build_periodic_flush_task
       end
 
       def subscribe
+        Travis.logger.info('subscribing', queue: jobs_queue.name)
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
+      end
+
+      def dead?
+        @dead == true
       end
 
       private def jobs_queue
         @jobs_queue ||= jobs_channel.queue(
-          "reporting.jobs.#{name}", durable: true, exclusive: false
+          "reporting.jobs.#{reporting_jobs_queue}",
+          durable: true, exclusive: false
         )
       end
 
@@ -51,11 +59,7 @@ module Travis
       end
 
       private def amqp_conn
-        @amqp_conn ||= Bunny.new(amqp_config).tap(&:start)
-      end
-
-      private def amqp_config
-        @amqp_config ||= Travis.config.amqp.to_h
+        @amqp_conn ||= Bunny.new(Travis.config.amqp).tap(&:start)
       end
 
       private def logs_config
@@ -70,6 +74,18 @@ module Travis
         @flush_mutex ||= Mutex.new
       end
 
+      private def shutdown
+        jobs_channel.close
+        amqp_conn.close
+      rescue StandardError => e
+        Travis::Exceptions.handle(e)
+      ensure
+        @jobs_channel = nil
+        @amqp_conn = nil
+        @dead = true
+        sleep
+      end
+
       private def build_periodic_flush_task
         Concurrent::TimerTask.execute(
           run_now: true,
@@ -78,6 +94,7 @@ module Travis
         ) do
           Travis.logger.debug(
             'triggering periodic flush',
+            drain_queue: reporting_jobs_queue,
             interval: "#{logs_config[:drain_execution_interval]}s",
             timeout: "#{logs_config[:drain_timeout_interval]}s"
           )
@@ -86,7 +103,9 @@ module Travis
       end
 
       private def flush_batch_buffer
-        Travis.logger.info('flushing batch buffer', size: batch_buffer.size)
+        Travis.logger.info(
+          'flushing batch buffer', size: batch_buffer.size
+        )
         sample = {}
         payload = []
 
@@ -109,7 +128,7 @@ module Travis
           end
 
           begin
-            jobs_channel.ack(delivery_tag)
+            safe_ack(delivery_tag)
           rescue StandardError => e
             Travis.logger.error(
               'failed to ack message',
@@ -120,21 +139,23 @@ module Travis
           end
         end
 
-        handler_callable.call(payload) unless payload.empty?
+        batch_handler.call(payload) unless payload.empty?
       end
 
       private def receive(delivery_info, _properties, payload)
+        return if dead?
         decoded_payload = nil
         smart_retry do
           decoded_payload = decode(payload)
           if decoded_payload
+            pusher_handler.call(decoded_payload)
             batch_buffer[delivery_info.delivery_tag] = decoded_payload
             if batch_buffer.size >= batch_size
               flush_mutex.synchronize { flush_batch_buffer }
             end
           else
             Travis.logger.info('acking empty or undecodable payload')
-            jobs_channel.ack(delivery_info.delivery_tag)
+            safe_ack(delivery_info.delivery_tag)
           end
         end
       rescue => e
@@ -187,11 +208,21 @@ module Travis
         nil
       end
 
+      private def safe_ack(delivery_tag)
+        jobs_channel.ack(delivery_tag)
+      rescue Bunny::Exception => e
+        Travis.logger.error(
+          'shutting down due to bunny exception',
+          error: e.inspect
+        )
+        shutdown
+      end
+
       private def log_exception(error, payload)
         Travis.logger.error(
           'exception caught in queue while processing payload',
           action: 'receive',
-          queue: name,
+          queue: reporting_jobs_queue,
           payload: payload.inspect
         )
         Travis::Exceptions.handle(error)

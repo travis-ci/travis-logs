@@ -10,6 +10,10 @@ module Travis
   module Logs
     class Config < Travis::Config
       define(
+        amqp: {
+          automatic_recovery: true,
+          recover_from_connection_close: true
+        },
         channels_existence_check: true,
         lock: { strategy: :redis, ttl: 150 },
         log_level: :info,
@@ -31,7 +35,9 @@ module Travis
           cache_size_bytes: 10.megabytes,
           drain_threads: 4,
           drain_batch_size: 100,
+          drain_consumer_count: 10,
           drain_execution_interval: 3,
+          drain_loop_sleep_interval: 10,
           drain_timeout_interval: 3,
           intervals: {
             aggregate: 1.minute,
@@ -42,7 +48,6 @@ module Travis
           },
           maintenance_expiry: 5.minutes,
           maintenance_initial_sleep: 30.seconds,
-          maintenance_statement_timeout_ms: 30.minutes.in_milliseconds,
           per_aggregate_limit: 500,
           purge: false,
           sidekiq_error_retry_pause: 3.seconds
@@ -88,6 +93,14 @@ module Travis
         sidekiq: { namespace: 'sidekiq', pool_size: 7 }
       )
 
+      def amqp
+        super.to_h.merge(
+          properties: {
+            process: process_name
+          }
+        )
+      end
+
       def metrics
         super.to_h.merge(librato: librato.to_h.merge(source: librato_source))
       end
@@ -98,6 +111,10 @@ module Travis
 
       def memcached
         super.to_h
+      end
+
+      def process_name
+        ['logs', env, ENV['DYNO'] || 'anon'].compact.join('.')
       end
     end
   end
