@@ -11,7 +11,7 @@ require 'travis/logs'
 
 module Travis
   module Logs
-    class DrainQueue
+    class DrainConsumer
       include Travis::Logs::MetricsMethods
 
       METRIKS_PREFIX = 'logs.queue'
@@ -34,8 +34,12 @@ module Travis
         @periodic_flush_task = build_periodic_flush_task
       end
 
-      def subscribe(block: true)
-        jobs_queue.subscribe(manual_ack: true, block: block, &method(:receive))
+      def subscribe
+        jobs_queue.subscribe(manual_ack: true, &method(:receive))
+      end
+
+      def dead?
+        @dead == true
       end
 
       private def jobs_queue
@@ -58,11 +62,7 @@ module Travis
       end
 
       private def amqp_config
-        @amqp_config ||= Travis.config.amqp.to_h.merge(
-          properties: {
-            process: "logs.#{Travis.config.env}.#{ENV['DYNO'] || 'local'}"
-          }
-        )
+        @amqp_config ||= Travis.config.amqp.to_h
       end
 
       private def logs_config
@@ -77,7 +77,7 @@ module Travis
         @flush_mutex ||= Mutex.new
       end
 
-      private def shutdown!
+      private def shutdown
         jobs_channel.close
         amqp_conn.close
       rescue StandardError => e
@@ -85,7 +85,8 @@ module Travis
       ensure
         @jobs_channel = nil
         @amqp_conn = nil
-        raise DrainQueueShutdownError
+        @dead = true
+        sleep
       end
 
       private def build_periodic_flush_task
@@ -145,6 +146,7 @@ module Travis
       end
 
       private def receive(delivery_info, _properties, payload)
+        return if dead?
         decoded_payload = nil
         smart_retry do
           decoded_payload = decode(payload)
@@ -211,18 +213,12 @@ module Travis
 
       private def safe_ack(delivery_tag)
         jobs_channel.ack(delivery_tag)
-      rescue Bunny::ConnectionClosedError => e
+      rescue Bunny::Exception => e
         Travis.logger.error(
-          'shutting down due to connection closed',
+          'shutting down due to bunny exception',
           error: e.inspect
         )
-        shutdown!
-      rescue Bunny::ChannelAlreadyClosed => e
-        Travis.logger.error(
-          'shutting down due to channel closed',
-          error: e.inspect
-        )
-        shutdown!
+        shutdown
       end
 
       private def log_exception(error, payload)
