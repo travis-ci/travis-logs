@@ -30,10 +30,7 @@ module Travis
           consumers["#{n}/#{consumer_count}"] = create_consumer
         end
 
-        consumers.each_pair do |name, consumer|
-          Travis.logger.info('subscribing consumer', name: name)
-          consumer.subscribe
-        end
+        consumers.each_pair { |_, consumer| consumer.subscribe }
 
         return run_loop_tick if once
         loop { run_loop_tick }

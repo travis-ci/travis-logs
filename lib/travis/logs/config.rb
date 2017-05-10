@@ -8,7 +8,10 @@ module Travis
   module Logs
     class Config < Travis::Config
       define(
-        amqp: { automatic_recovery: true },
+        amqp: {
+          automatic_recovery: true,
+          recover_from_connection_close: true
+        },
         channels_existence_check: true,
         lock: { strategy: :redis, ttl: 150 },
         log_level: :info,

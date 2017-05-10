@@ -35,11 +35,7 @@ module Travis
       end
 
       def subscribe
-        Travis.logger.info(
-          'subscribing',
-          queue: jobs_queue.name,
-          conn_automatic_recovery: amqp_conn.automatically_recover?
-        )
+        Travis.logger.info('subscribing', queue: jobs_queue.name)
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
       end
 
