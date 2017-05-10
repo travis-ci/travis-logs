@@ -27,18 +27,12 @@ module Travis
 
         private def after_connect(conn)
           execute_compat(
-            conn, "SET application_name = '#{application_name}'"
+            conn, "SET application_name = '#{Travis.config.process_name}'"
           )
           execute_compat(
             conn, "SET statement_timeout = #{statement_timeout_ms}"
           )
           execute_compat(conn, 'SET constraint_exclusion = partition')
-        end
-
-        private def application_name
-          @application_name ||= [
-            'logs', Travis.config.env, ENV['DYNO']
-          ].compact.join('.')
         end
 
         private def statement_timeout_ms
