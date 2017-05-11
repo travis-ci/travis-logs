@@ -61,6 +61,7 @@ module Travis
           FROM pg_stat_activity
           WHERE application_name ~ '^logs\..+'
             AND query ~ '.+log_parts.+'
+            AND query !~ '.+pg_stat_activity.+'
         SQL
         private_constant :LOGS_QUERIES_SQL
 
