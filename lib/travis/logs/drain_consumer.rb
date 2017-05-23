@@ -4,6 +4,7 @@ require 'bunny'
 require 'coder'
 require 'concurrent'
 require 'multi_json'
+require 'sequel'
 require 'thread'
 require 'timeout'
 
