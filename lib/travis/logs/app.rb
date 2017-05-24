@@ -166,12 +166,15 @@ module Travis
           halt 400, MultiJson.dump(error: 'invalid encoding')
         end
 
-        Travis::Logs::Sidekiq::LogParts.perform_async(
+        payload = {
           'id' => Integer(params[:job_id]),
           'log' => Base64.decode64(data['content']),
           'number' => params[:log_part_id], # NOTE: `log_part_id` may be "last"
           'final' => data['final']
-        )
+        }
+
+        Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
+        Travis::Logs::Sidekiq::LogParts.perform_async(payload)
 
         status 204
       end
