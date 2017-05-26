@@ -102,7 +102,7 @@ module Travis
         request.body.rewind
 
         items = Array(MultiJson.load(request.body.read))
-        halt 400 unless all_items_valid?(items)
+        halt 400 unless all_logs_valid?(items)
 
         database.db.transaction do
           items.each do |item|
@@ -142,20 +142,7 @@ module Travis
       end
 
       put '/log-parts/:job_id/:log_part_id' do
-        auth_header = request.env['HTTP_AUTHORIZATION']
-        halt 403 if auth_header.nil?
-        halt 503 if maint.enabled?
-
-        if auth_header.start_with?('Bearer ')
-          halt 500, 'key is not set' if rsa_public_key.nil?
-          Thread.current[:uuid] = request.env['HTTP_X_REQUEST_ID']
-          jwt_decode!(auth_header[7..-1], params[:job_id])
-        elsif auth_header.start_with?('token ')
-          halt 500, 'authentication token is not set' if auth_token.empty?
-          halt 403 unless authorized?(request)
-        else
-          halt 403
-        end
+        assert_log_parts_authorized!
 
         data = MultiJson.load(request.body.read)
         if data['@type'] != 'log_part'
@@ -175,6 +162,30 @@ module Travis
 
         Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
         Travis::Logs::Sidekiq::LogParts.perform_async(payload)
+
+        status 204
+      end
+
+      post '/log-parts/:job_id/multi' do
+        assert_log_parts_authorized!
+
+        log_parts = Array(MultiJson.load(request.body.read))
+        halt 400 unless all_log_parts_valid?(log_parts)
+
+        payloads = log_parts.map do |log_part|
+          {
+            'id' => Integer(params[:job_id]),
+            'log' => Base64.decode64(log_part['content']),
+            'number' => log_part['log_part_id'],
+            'final' => log_part['final']
+          }
+        end
+
+        payloads.each do |payload|
+          Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
+        end
+
+        Travis::Logs::Sidekiq::LogParts.perform_async(payloads)
 
         status 204
       end
@@ -261,9 +272,33 @@ module Travis
         Travis::Logs.redis.ping.to_s
       end
 
-      private def all_items_valid?(items)
+      private def assert_log_parts_authorized!
+        auth_header = request.env['HTTP_AUTHORIZATION']
+        halt 403 if auth_header.nil?
+        halt 503 if maint.enabled?
+
+        if auth_header.start_with?('Bearer ')
+          halt 500, 'key is not set' if rsa_public_key.nil?
+          Thread.current[:uuid] = request.env['HTTP_X_REQUEST_ID']
+          jwt_decode!(auth_header[7..-1], params[:job_id])
+        elsif auth_header.start_with?('token ')
+          halt 500, 'authentication token is not set' if auth_token.empty?
+          halt 403 unless authorized?(request)
+        else
+          halt 403
+        end
+      end
+
+      private def all_logs_valid?(items)
         items.all? do |item|
           item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
+        end
+      end
+
+      private def all_log_parts_valid?(items)
+        items.all? do |item|
+          item.key?('@type') && item['@type'] == 'log_part' &&
+            item.key?('encoding') && item['encoding'] == 'base64'
         end
       end
 
