@@ -166,7 +166,7 @@ module Travis
         status 204
       end
 
-      post '/log-parts/:job_id/multi' do
+      post '/log-parts/multi' do
         assert_log_parts_authorized!
 
         log_parts = Array(MultiJson.load(request.body.read))
@@ -174,7 +174,7 @@ module Travis
 
         payloads = log_parts.map do |log_part|
           {
-            'id' => Integer(params[:job_id]),
+            'id' => Integer(log_part['job_id']),
             'log' => Base64.decode64(log_part['content']),
             'number' => log_part['log_part_id'],
             'final' => log_part['final']
@@ -298,7 +298,8 @@ module Travis
       private def all_log_parts_valid?(items)
         items.all? do |item|
           item.key?('@type') && item['@type'] == 'log_part' &&
-            item.key?('encoding') && item['encoding'] == 'base64'
+            item.key?('encoding') && item['encoding'] == 'base64' &&
+            item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
         end
       end
 
