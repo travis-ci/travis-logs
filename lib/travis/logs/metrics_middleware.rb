@@ -39,7 +39,7 @@ module Travis
           env['PATH_INFO'].to_s
             .sub('/', '')
             .gsub(/[[:digit:]]+/, 'id')
-            .gsub(/\.+/, '.')
+                          .gsub(/\.+/, '.')
         ].join('.')
                .gsub(/[^\.[:alnum:]]+/, '_')
                .gsub(/[\._]+$/, '')
