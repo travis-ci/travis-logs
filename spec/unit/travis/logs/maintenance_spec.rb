@@ -25,21 +25,21 @@ describe Travis::Logs::Maintenance do
 
   it 'tells when enabled' do
     allow(redis).to receive(:get).with(described_class::MAINTENANCE_KEY)
-      .and_return('huh')
+                                 .and_return('huh')
 
     expect(subject.enabled?).to be false
 
     allow(redis).to receive(:get).with(described_class::MAINTENANCE_KEY)
-      .and_return('on')
+                                 .and_return('on')
 
     expect(subject.enabled?).to be true
   end
 
   it 'restricts when enabled' do
     allow(redis).to receive(:get).with(described_class::MAINTENANCE_KEY)
-      .and_return('on')
+                                 .and_return('on')
     allow(redis).to receive(:ttl).with(described_class::MAINTENANCE_KEY)
-      .and_return(4)
+                                 .and_return(4)
 
     expect { subject.restrict! }
       .to raise_error(Travis::Logs::UnderMaintenanceError)
@@ -47,7 +47,7 @@ describe Travis::Logs::Maintenance do
 
   it 'does not restrict when disabled' do
     allow(redis).to receive(:get).with(described_class::MAINTENANCE_KEY)
-      .and_return(nil)
+                                 .and_return(nil)
 
     expect { subject.restrict! }.to_not raise_error
   end
