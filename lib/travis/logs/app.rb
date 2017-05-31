@@ -164,6 +164,7 @@ module Travis
         Travis::Logs::Sidekiq::LogParts.perform_async(payload)
 
         status 204
+        body nil
       end
 
       post '/log-parts/multi' do
@@ -188,6 +189,7 @@ module Travis
         Travis::Logs::Sidekiq::LogParts.perform_async(payloads)
 
         status 204
+        body nil
       end
 
       get '/logs/:id' do
