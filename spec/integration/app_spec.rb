@@ -14,7 +14,6 @@ describe Travis::Logs::App do
   let(:pusher) { double(:pusher) }
   let(:existence) { Travis::Logs::Existence.new }
   let(:database) { double(:database) }
-  let(:log_part_service) { double(:log_part_service) }
   let(:auth_token) { 'very-secret' }
 
   before do
@@ -187,43 +186,10 @@ describe Travis::Logs::App do
 
   describe 'PUT /log-parts/:job_id/:log_part_id' do
     before do
-      rsa_private_key = <<~EOF
-        -----BEGIN RSA PRIVATE KEY-----
-        MIIEowIBAAKCAQEA1cM1oaP1JLlB6iEdIbTAvToiydfypq+K/H3tSlRfoY1k/wIn
-        QRbF5XHBdgMJvLPYdqPzbzE5l+vThgk20RIsAV8DYd1nEH+rSnZaX3Q48JKi0A19
-        bw/5TrW7URrk/peKfqDO0f5tS+/wRnwdrJFhqpSlQkaC6aTcCM/8RoDCLG8m1+0B
-        F3QDQcjl1HL2sFeXI0F7pdW59s+1exc324TfWoWXfGDa74bsI+UDKKsUGvg+St7f
-        f5Y4NWtM1OIjqrWYt6wtNyhIC/Ru6Uboe81p6EIIq1yX2Lb961BP4EXeae9Nj/aQ
-        CzBNUsFPSKAHRdHrOhAuMgg5xmke8cAOF3SIoQIDAQABAoIBABMINV815N6nK+o3
-        lotot3xhj7Ve57jVik9euuDSUE1m9GYMAAi4iVgbX7ktHhHSBWTSxhrRTCptkcCu
-        U1YcAxUAK6Hr/4Aljc+sZ/F1vJgWxi419UQNLQpH/eyDs33Dak5J7QAfYgXP0BnG
-        dTHnI8X3RBt5gbBhwEF8mx5/2knwVd+0sMQm0g+bZMUOD7bEt0aaGk+oSQVzUL0B
-        MPRLNTkJj/7gzDjzMy2SrWpdPQ+BuTX91sq32ymGARAOssd+mum3/2R8YZsAAqfP
-        DV6uLwSYJJ1wiy9s2A9MtUuOEU1NT2kiU3iRehgzFMuvjdsFo2j9Vqh/lyuZuft8
-        5dPqmxECgYEA7vKUn14J4nORPpkV1vhsykHizhLiiY7SYfoUn2CEHCVLIARHoAGp
-        Y7QgSoOAxm+2NQO/Equ8rMtaGobcPyn8S0u3v/pZNL591B3v7fXVXkrT6dRryQqp
-        To2TdQBdqe2AtNEQAUA0XmnuVpRcKvL6wbzIbfouj/rpGlqUgDkSGJUCgYEA5QSD
-        qfJK1lWAmQqKUstVirSlfj7Ro+Ra8XorRJLc5T4k4S8lgqEGX46HpnrXwmH/zNVF
-        aK87KuupR3LuS8WWfj0DsI/IclCu0kIHj3DMOrNcFFQPXCpnvEIyDtpRue6bZ15v
-        Xya5p9lff1x1ogjkewWmLm9Lh1iZyi+XP70cEN0CgYAcmHVG2TcvnYr9Rc7CSjqi
-        vd3JsaLguXHd/dKn/CHzSFdEPp7fvDMsVmsi37fyh33zvD4KmvjaaP+gexEykfC6
-        hhY4aFpyoHVohCipfqkJPsU7j4tSpO78Ep9Z+jA7XMvxV6+lpqxdvCmkvN6G2Us/
-        EjueRbl6y5lH6R0qdyn+PQKBgA1Xh/wcm3OFI6rGzGwqYF9mSsXiDwCHSy0KOv8R
-        t0C7sBZWUs8bZm2mtgxi17MBVo+uVQ7WNpI3jHMXJP7REgVktJRSrBDM1oJ1Sk92
-        +M7qqBCfHQ33gnebO6NV4LD+T5tkCwT2EpbOuRuIXWoFLppkJ9xIq5PE+6ClyR/z
-        enEZAoGBAJajfJIEi0GFfRcw1USpZlNVy1IlKeB1CO5WOFYw9lIkFTnlWzOsJ6J6
-        pGtarhuDVtIIXpS8tlrToQSUdMlzKqwqk9g6cm+vPYdd+yGNzdWBADURqeZjzA0Q
-        oRLuY9cp8DkPGlJ2P7sxugWnMyoIUEXIVwAwWJJ/Qwd2nOUMbYKr
-        -----END RSA PRIVATE KEY-----
-EOF
-
-      @rsa_key = OpenSSL::PKey.read(rsa_private_key)
-      ENV['JWT_RSA_PUBLIC_KEY'] = @rsa_key.public_key.to_pem
-
       @job_id = 1
       @log_id = 456
 
-      allow(log_part_service).to receive(:run).with(
+      allow(Travis::Logs::Sidekiq::LogParts).to receive(:perform_async).with(
         'id' => @job_id,
         'log' => 'fafafaf',
         'number' => '1',
@@ -234,7 +200,7 @@ EOF
     context 'with valid authorization header' do
       before do
         payload = { sub: @job_id.to_s }
-        token = JWT.encode(payload, @rsa_key, 'RS512')
+        token = JWT.encode(payload, SpecHelper.rsa_key, 'RS512')
         header 'Authorization', "Bearer #{token}"
       end
 
@@ -269,13 +235,113 @@ EOF
     context 'with invalid JWT subject' do
       before do
         payload = { sub: (@job_id + 1).to_s }
-        token = JWT.encode(payload, @rsa_key, 'RS512')
+        token = JWT.encode(payload, SpecHelper.rsa_key, 'RS512')
         header 'Authorization', "Bearer #{token}"
       end
 
       it 'returns 403' do
         response = put "/log-parts/#{@job_id}/1", ''
         expect(response.status).to be == 403
+      end
+    end
+  end
+
+  describe 'POST /log-parts/multi' do
+    let :decoded_payload do
+      [
+        {
+          'id' => 1,
+          'log' => 'fafafaf',
+          'number' => '1',
+          'final' => false
+        },
+        {
+          'id' => 2,
+          'log' => 'fafafaf',
+          'number' => '1',
+          'final' => false
+        },
+        {
+          'id' => 5,
+          'log' => 'fafafaf',
+          'number' => '1',
+          'final' => false
+        }
+      ]
+    end
+
+    let :unauthorized_request_body do
+      [
+        { job_id: 1 },
+        { job_id: 2 },
+        { job_id: 5 }
+      ].map do |j|
+        j.merge(
+          :@type => 'log_part',
+          content: Base64.encode64('fafafaf'),
+          encoding: 'base64',
+          final: false,
+          number: '1'
+        )
+      end
+    end
+
+    context 'with no authorization header' do
+      it 'returns 403' do
+        response = post '/log-parts/multi'
+        expect(response.status).to be == 403
+      end
+    end
+
+    context 'with invalid authorization header' do
+      it 'returns 403' do
+        header 'Authorization', 'token sig:wat'
+        request_body = unauthorized_request_body.map do |j|
+          j.merge('tok' => 'fafafaf')
+        end
+        response = post '/log-parts/multi', MultiJson.dump(request_body)
+        expect(response.status).to be == 403
+      end
+    end
+
+    context 'with valid authorization header' do
+      before do
+        allow(Travis::Logs::Sidekiq::LogParts)
+          .to receive(:perform_async).with(decoded_payload).and_return(nil)
+      end
+
+      it 'returns 204' do
+        request_body = unauthorized_request_body.map do |j|
+          payload = { sub: j[:job_id].to_s }
+          j.merge('tok' => JWT.encode(payload, SpecHelper.rsa_key, 'RS512'))
+        end
+
+        sig = Digest::SHA1.hexdigest(request_body.map { |j| j['tok'] }.join)
+        header 'Authorization', "token sig:#{sig}"
+        response = post '/log-parts/multi', MultiJson.dump(request_body)
+        expect(response.status).to be == 204
+      end
+    end
+
+    context 'with unauthorized log part' do
+      it 'drops the unauthorized log part and returns 204' do
+        request_body = unauthorized_request_body.map do |j|
+          payload = { sub: j[:job_id].to_s }
+          if j[:job_id] == 1
+            j.merge('tok' => 'bogus')
+          else
+            j.merge('tok' => JWT.encode(payload, SpecHelper.rsa_key, 'RS512'))
+          end
+        end
+
+        expect(Travis::Logs::Sidekiq::LogParts)
+          .to receive(:perform_async)
+          .with(decoded_payload.reject { |j| j['id'] == 1 })
+
+        sig = Digest::SHA1.hexdigest(request_body.map { |j| j['tok'] }.join)
+        header 'Authorization', "token sig:#{sig}"
+        response = post '/log-parts/multi', MultiJson.dump(request_body)
+        expect(response.status).to be == 204
       end
     end
   end
