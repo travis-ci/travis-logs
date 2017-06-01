@@ -345,8 +345,7 @@ module Travis
 
       private def all_logs_valid?(items)
         items.all? do |item|
-          item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/ &&
-            item.key?('number') && item['number'].to_s =~ /^([0-9]+|last)$/
+          item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
         end
       end
 
