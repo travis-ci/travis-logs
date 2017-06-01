@@ -293,7 +293,8 @@ module Travis
 
       private def all_logs_valid?(items)
         items.all? do |item|
-          item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
+          item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/ &&
+            item.key?('number') && item['number'].to_s =~ /^([0-9]+|last)$/
         end
       end
 
@@ -301,7 +302,8 @@ module Travis
         items.all? do |item|
           item.key?('@type') && item['@type'] == 'log_part' &&
             item.key?('encoding') && item['encoding'] == 'base64' &&
-            item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
+            item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/ &&
+            item.key?('number') && item['number'].to_s =~ /^([0-9]+|last)$/
         end
       end
 
