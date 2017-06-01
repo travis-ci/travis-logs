@@ -177,7 +177,7 @@ module Travis
           {
             'id' => Integer(log_part['job_id']),
             'log' => Base64.decode64(log_part['content']),
-            'number' => log_part['log_part_id'],
+            'number' => log_part['number'],
             'final' => log_part['final']
           }
         end
@@ -186,6 +186,11 @@ module Travis
           Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
         end
 
+        Travis.logger.debug(
+          'sending payload',
+          len: payloads.length,
+          to: Travis::Logs::Sidekiq::LogParts.to_s
+        )
         Travis::Logs::Sidekiq::LogParts.perform_async(payloads)
 
         status 204
