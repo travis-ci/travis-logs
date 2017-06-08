@@ -132,7 +132,7 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.8.1)
-    sentry-raven (2.5.1)
+    sentry-raven (2.5.2)
       faraday (>= 0.7.6, < 1.0)
     sequel (4.46.0)
     sidekiq (5.0.0)
