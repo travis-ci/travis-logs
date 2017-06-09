@@ -1,11 +1,11 @@
 #!/bin/bash
 
 set -ev
-app_name="logs"
+app_name="drain"
 local_image="travislogs_$app_name" # Docker Compose removes dashes and expects the name to end with the build app name
 quay_image=quay.io/travisci/travis-logs;
 
-docker-compose build --build-arg bundle_gems__contribsys__com="$BUNDLE_GEMS__CONTRIBSYS__COM" "$app_name";
+docker-compose build "$app_name";
 docker login -u="$QUAY_ROBOT_HANDLE" -p="$QUAY_ROBOT_TOKEN" quay.io;
 docker images;
 
