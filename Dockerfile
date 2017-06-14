@@ -18,6 +18,6 @@ RUN bundle install --deployment
 COPY . /usr/src/app
 
 # Install sqitch so migrations work
-RUN env BINDIR=/usr/local/bin /usr/src/app/script/install-sqitch
+RUN apt-get install postgresql-client && env BINDIR=/usr/local/bin /usr/src/app/script/install-sqitch
 
 CMD /bin/bash
