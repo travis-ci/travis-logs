@@ -2,7 +2,7 @@ FROM ruby:2.4.1
 
 LABEL maintainer Travis CI GmbH <support+travis-app-docker-images@travis-ci.com>
 
-RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && apt-get install -y postgresql
 
 # throw errors if Gemfile has been modified since Gemfile.lock
 RUN bundle config --global frozen 1
@@ -17,7 +17,8 @@ RUN bundle install --deployment
 
 COPY . /usr/src/app
 
+RUN apt-cache search postgres
 # Install sqitch so migrations work
-RUN apt-get install postgresql-client && env BINDIR=/usr/local/bin /usr/src/app/script/install-sqitch
+RUN env BINDIR=/usr/local/bin /usr/src/app/script/install-sqitch
 
 CMD /bin/bash
