@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'digest/sha1'
+
 require 'jwt'
 require 'multi_json'
 require 'pusher'
@@ -102,7 +104,7 @@ module Travis
         request.body.rewind
 
         items = Array(MultiJson.load(request.body.read))
-        halt 400 unless all_items_valid?(items)
+        halt 400 unless all_logs_valid?(items)
 
         database.db.transaction do
           items.each do |item|
@@ -142,21 +144,9 @@ module Travis
       end
 
       put '/log-parts/:job_id/:log_part_id' do
-        auth_header = request.env['HTTP_AUTHORIZATION']
-        halt 403 if auth_header.nil?
-        halt 503 if maint.enabled?
+        assert_log_parts_authorized!
 
-        if auth_header.start_with?('Bearer ')
-          halt 500, 'key is not set' if rsa_public_key.nil?
-          Thread.current[:uuid] = request.env['HTTP_X_REQUEST_ID']
-          jwt_decode!(auth_header[7..-1], params[:job_id])
-        elsif auth_header.start_with?('token ')
-          halt 500, 'authentication token is not set' if auth_token.empty?
-          halt 403 unless authorized?(request)
-        else
-          halt 403
-        end
-
+        request.body.rewind
         data = MultiJson.load(request.body.read)
         if data['@type'] != 'log_part'
           halt 400, MultiJson.dump(error: '@type should be log_part')
@@ -166,14 +156,57 @@ module Travis
           halt 400, MultiJson.dump(error: 'invalid encoding')
         end
 
-        Travis::Logs::Sidekiq::LogParts.perform_async(
+        payload = {
           'id' => Integer(params[:job_id]),
           'log' => Base64.decode64(data['content']),
           'number' => params[:log_part_id], # NOTE: `log_part_id` may be "last"
           'final' => data['final']
-        )
+        }
+
+        Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
+        Travis::Logs::Sidekiq::LogParts.perform_async(payload)
 
         status 204
+        body nil
+      end
+
+      post '/log-parts/multi' do
+        assert_log_parts_authorized!
+
+        request.body.rewind
+        log_parts = Array(MultiJson.load(request.body.read))
+        halt 400 unless all_log_parts_valid?(log_parts)
+
+        payloads = []
+
+        log_parts.each do |log_part|
+          unless jwt_decode?(log_part['tok'].to_s, log_part['job_id'].to_s)
+            Travis.logger.warn('discarding unauthorized log part',
+                               job_id: log_part['job_id'])
+            next
+          end
+
+          payloads << {
+            'id' => Integer(log_part['job_id']),
+            'log' => Base64.decode64(log_part['content']),
+            'number' => log_part['number'],
+            'final' => log_part['final']
+          }
+        end
+
+        payloads.each do |payload|
+          Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
+        end
+
+        Travis.logger.debug(
+          'sending payload',
+          len: payloads.length,
+          to: Travis::Logs::Sidekiq::LogParts.to_s
+        )
+        Travis::Logs::Sidekiq::LogParts.perform_async(payloads)
+
+        status 204
+        body nil
       end
 
       get '/logs/:id' do
@@ -258,13 +291,74 @@ module Travis
         Travis::Logs.redis.ping.to_s
       end
 
-      private def all_items_valid?(items)
+      private def assert_log_parts_authorized!
+        auth_header = request.env['HTTP_AUTHORIZATION']
+        halt 403 if auth_header.nil?
+        halt 503 if maint.enabled?
+
+        case auth_header
+        when /^Bearer / then assert_bearer_authorized!(auth_header)
+        when /^token sig:/ then assert_log_parts_multi_payload_authorized!(
+          request, auth_header
+        )
+        when /^token / then assert_token_authorized!(request)
+        else
+          halt 403
+        end
+      end
+
+      private def assert_bearer_authorized!(auth_header)
+        halt 500, 'key is not set' if rsa_public_key.nil?
+        Thread.current[:uuid] = request.env['HTTP_X_REQUEST_ID']
+        halt 403 unless jwt_decode?(auth_header[7..-1], params[:job_id])
+      end
+
+      private def assert_log_parts_multi_payload_authorized!(
+        request, auth_header
+      )
+        # NOTE: This authorization check is little more than a signature
+        # verification, and the signature is not a security mechanism.  The
+        # decision regarding whether a given log part will be accepted is
+        # performed later on.
+        halt 403 unless log_parts_multi_payload_authorized?(
+          request, auth_header
+        )
+      end
+
+      private def assert_token_authorized!(request)
+        halt 500, 'authentication token is not set' if auth_token.empty?
+        halt 403 unless authorized?(request)
+      end
+
+      private def log_parts_multi_payload_authorized?(request, auth_header)
+        request.body.rewind
+
+        tokens = Array(
+          MultiJson.load(request.body.read)
+        ).map { |i| i['tok'].to_s }
+
+        Rack::Utils.secure_compare(
+          auth_header,
+          "token sig:#{Digest::SHA1.hexdigest(tokens.join)}"
+        )
+      end
+
+      private def all_logs_valid?(items)
         items.all? do |item|
           item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/
         end
       end
 
-      private def jwt_decode!(encoded_jwt, job_id)
+      private def all_log_parts_valid?(items)
+        items.all? do |item|
+          item.key?('@type') && item['@type'] == 'log_part' &&
+            item.key?('encoding') && item['encoding'] == 'base64' &&
+            item.key?('job_id') && item['job_id'].to_s =~ /^[0-9]+$/ &&
+            item.key?('number') && item['number'].to_s =~ /^([0-9]+|last)$/
+        end
+      end
+
+      private def jwt_decode?(encoded_jwt, job_id)
         JWT.decode(
           encoded_jwt,
           rsa_public_key,
@@ -273,8 +367,9 @@ module Travis
           verify_sub: true,
           'sub' => job_id
         )
+        true
       rescue JWT::DecodeError
-        halt 403
+        false
       end
     end
   end
