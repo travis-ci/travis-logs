@@ -17,7 +17,10 @@ RUN bundle install --deployment
 
 COPY . /usr/src/app
 
+# Sqitch expects partman
+# RUN /usr/src/app/script/install-partman
+
 # Install sqitch so migrations work
-RUN env PERL5DIR=/usr/local BINDIR=/usr/local/bin /usr/src/app/script/install-sqitch
+RUN /usr/src/app/script/install-sqitch
 
 CMD /bin/bash
