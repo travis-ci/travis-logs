@@ -3,7 +3,10 @@
 PATH="~/bin:$PATH"
 eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
 
+# Depends on PGHOST, PGPASSWORD, PGDATABASE, etc
+createdb
+
 # Use the LOGS_DATABASE_URL we use elsewhere but make it fit the DATABASE_URI format
 # sqitch expects
-sqitch deploy db:$LOGS_DATABASE_URL
-sqitch verify db:$LOGS_DATABASE_URL
+sqitch --plan-file db/sqitch-enterprise.plan deploy db:$LOGS_DATABASE_URL
+sqitch --plan-file db/sqitch-enterprise.plan verify db:$LOGS_DATABASE_URL
