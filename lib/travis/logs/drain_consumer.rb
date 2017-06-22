@@ -53,8 +53,8 @@ module Travis
 
       private def jobs_channel
         @jobs_channel ||= amqp_conn.create_channel.tap do |conn|
-          if Travis.config.amqp.prefetch
-            conn.prefetch(Travis.config.amqp.prefetch)
+          if Travis.config.amqp[:prefetch]
+            conn.prefetch(Travis.config.amqp[:prefetch])
           end
         end
       end
