@@ -1,6 +1,0 @@
-%syntax-version=1.0.0
-%project=travis-logs
-
-structure 2017-04-04T19:12:07Z Dan Buch <dan@travis-ci.org> # Import initial structure for logs tables
-vacuum_settings [structure] 2017-04-04T19:37:24Z Dan Buch <dan@travis-ci.org> # Set table-level autovacuum and database-level vacuum settings
-log_parts_created_at_not_null [structure] 2017-04-04T19:52:23Z Dan Buch <dan@travis-ci.org> # Modify log_parts.created_at to be NOT NULL with default for use with partman

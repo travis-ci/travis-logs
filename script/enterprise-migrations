@@ -1,12 +1,41 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -o errexit
 
-PATH="~/bin:$PATH"
-eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
+main() {
+  PATH="~/bin:$PATH"
+  eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
 
-# Depends on PGHOST, PGPASSWORD, PGDATABASE, etc
-createdb
+  [[ "${PGHOST}" ]] || {
+    echo "Missing \$PGHOST 🐘👻"
+    exit 1
+  }
 
-# Use the LOGS_DATABASE_URL we use elsewhere but make it fit the DATABASE_URI format
-# sqitch expects
-sqitch --plan-file db/sqitch-enterprise.plan deploy db:$LOGS_DATABASE_URL
-sqitch --plan-file db/sqitch-enterprise.plan verify db:$LOGS_DATABASE_URL
+  [[ "${PGDATABASE}" ]] || {
+    echo "Missing \$PGDATABASE"
+    exit 1
+  }
+
+  [[ "${LOGS_DATABASE_URL}" ]] || {
+    echo "Missing \$LOGS_DATABASE_URL"
+    exit 1
+  }
+
+  : "${ENTERPRISE_MIGRATE_TO:=log_parts_created_at_not_null}"
+
+  # Depends on PGHOST, PGPASSWORD, PGDATABASE, etc
+  createdb
+
+  # Use the LOGS_DATABASE_URL we use elsewhere but make it fit the DATABASE_URI format
+  # sqitch expects
+  sqitch deploy \
+    --to-change "${ENTERPRISE_MIGRATE_TO}" \
+    "db:${LOGS_DATABASE_URL}"
+  sqitch deploy \
+    --log-only --no-verify \
+    "db:${LOGS_DATABASE_URL}"
+  sqitch verify \
+    --to-change "${ENTERPRISE_MIGRATE_TO}" \
+    "db:${LOGS_DATABASE_URL}"
+}
+
+main "$@"
