@@ -2,9 +2,8 @@
 
 set -ev
 
-# Only build docker containers if we pass the build docker var, if it's master, if it's a cron job, or in an enterprise branch
+# Only build docker containers if we pass the build docker var, if it's a cron job (nightly builds), or in an enterprise branch
 if [ ! -z ${BUILD_DOCKER} ] ||
-   [ ${TRAVIS_BRANCH} = master ] ||
    [ ${TRAVIS_EVENT_TYPE} = "cron" ] ||
    [[ "${TRAVIS_BRANCH}" =~ ^enterprise ]]; then
   app_name="drain"
