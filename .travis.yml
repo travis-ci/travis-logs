@@ -23,3 +23,13 @@ before_install:
 - gem update bundler
 before_script:
 - bundle exec rake setup
+
+jobs:
+  include:
+    - stage: "Testing time"
+    - stage: ":ship: it to Quay.io"
+      sudo: required
+      dist: trusty
+      install: skip
+      before_script: skip
+      script: ./script/docker-build-and-push
