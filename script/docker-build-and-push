@@ -2,8 +2,11 @@
 
 set -ev
 
-# Only build docker containers if we pass the build docker var, it's a cron job, or in an enterprise branch
-if [ ! -z ${BUILD_DOCKER} ] || [ ${TRAVIS_EVENT_TYPE} = "cron" ] || [[ "${TRAVIS_BRANCH}" =~ ^enterprise ]]; then
+# Only build docker containers if we pass the build docker var, if it's master, if it's a cron job, or in an enterprise branch
+if [ ! -z ${BUILD_DOCKER} ] ||
+   [ ${TRAVIS_BRANCH} = master ] ||
+   [ ${TRAVIS_EVENT_TYPE} = "cron" ] ||
+   [[ "${TRAVIS_BRANCH}" =~ ^enterprise ]]; then
   app_name="drain"
   local_image="travislogs_$app_name" # Docker Compose removes dashes and expects the name to end with the build app name
   quay_image=quay.io/travisci/travis-logs;
