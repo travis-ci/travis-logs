@@ -6,7 +6,6 @@ require 'concurrent'
 require 'multi_json'
 require 'sequel'
 require 'thread'
-require 'timeout'
 
 require 'travis/logs'
 
@@ -146,52 +145,22 @@ module Travis
       private def receive(delivery_info, _properties, payload)
         return if dead?
         decoded_payload = nil
-        smart_retry do
-          decoded_payload = decode(payload)
-          if decoded_payload
-            pusher_handler.call(decoded_payload)
-            batch_buffer[delivery_info.delivery_tag] = decoded_payload
-            if batch_buffer.size >= batch_size
-              flush_mutex.synchronize { flush_batch_buffer }
-            end
-          else
-            Travis.logger.info('acking empty or undecodable payload')
-            safe_ack(delivery_info.delivery_tag)
+        decoded_payload = decode(payload)
+        if decoded_payload
+          pusher_handler.call(decoded_payload)
+          batch_buffer[delivery_info.delivery_tag] = decoded_payload
+          if batch_buffer.size >= batch_size
+            flush_mutex.synchronize { flush_batch_buffer }
           end
+        else
+          Travis.logger.info('acking empty or undecodable payload')
+          safe_ack(delivery_info.delivery_tag)
         end
       rescue => e
         log_exception(e, decoded_payload)
         jobs_channel.reject(delivery_info.delivery_tag, true)
         mark('receive.retry')
         Travis.logger.error('message requeued', stage: 'queue:receive')
-      end
-
-      private def smart_retry(retries: 2, timeout: 3, &block)
-        retry_count = 0
-        begin
-          Timeout.timeout(timeout, &block)
-        rescue Timeout::Error, Sequel::PoolTimeout
-          if retry_count < retries
-            retry_count += 1
-            Travis.logger.error(
-              'processing AMQP message timeout exceeded',
-              action: 'receive',
-              timeout_seconds: timeout,
-              retry: retry_count,
-              max_retries: retries
-            )
-            mark('timeout.retry')
-            retry
-          else
-            Travis.logger.error(
-              'failed to process AMQP message, aborting',
-              action: 'receive',
-              max_retries: retries
-            )
-            mark('timeout.error')
-            raise
-          end
-        end
       end
 
       private def decode(payload)
