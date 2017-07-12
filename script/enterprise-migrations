@@ -61,11 +61,7 @@ __logs_tables_exist() {
 
 __table_exists_sql() {
   echo "SELECT 1/count(*) FROM pg_catalog.pg_tables " \
-       "WHERE schemaname = 'public' AND tablename = '${1}'"
-}
-
-__migrate_existing() {
-  __migrate
+    "WHERE schemaname = 'public' AND tablename = '${1}'"
 }
 
 __migrate() {
