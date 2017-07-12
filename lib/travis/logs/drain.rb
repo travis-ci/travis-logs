@@ -39,7 +39,7 @@ module Travis
       def run_loop_tick
         dead = []
         consumers.each_pair do |name, consumer|
-          Travis.logger.info('checking drain consumer', name: name)
+          Travis.logger.debug('checking drain consumer', name: name)
           if consumer.dead?
             dead << name
             Travis.logger.info('dead consumer found', name: name)

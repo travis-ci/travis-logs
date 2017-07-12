@@ -104,7 +104,7 @@ module Travis
       end
 
       private def flush_batch_buffer
-        Travis.logger.info(
+        Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size
         )
         sample = {}
