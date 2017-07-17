@@ -39,10 +39,6 @@ module Travis
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
       end
 
-      def dead?
-        @dead == true
-      end
-
       private def jobs_queue
         @jobs_queue ||= jobs_channel.queue(
           "reporting.jobs.#{reporting_jobs_queue}",
@@ -72,18 +68,6 @@ module Travis
 
       private def flush_mutex
         @flush_mutex ||= Mutex.new
-      end
-
-      private def shutdown
-        jobs_channel.close
-        amqp_conn.close
-      rescue StandardError => e
-        Travis::Exceptions.handle(e)
-      ensure
-        @jobs_channel = nil
-        @amqp_conn = nil
-        @dead = true
-        sleep
       end
 
       private def build_periodic_flush_task
@@ -128,7 +112,7 @@ module Travis
           end
 
           begin
-            safe_ack(delivery_tag)
+            ack(delivery_tag)
           rescue StandardError => e
             Travis.logger.error(
               'failed to ack message',
@@ -143,7 +127,6 @@ module Travis
       end
 
       private def receive(delivery_info, _properties, payload)
-        return if dead?
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -154,7 +137,11 @@ module Travis
           end
         else
           Travis.logger.info('acking empty or undecodable payload')
-          safe_ack(delivery_info.delivery_tag)
+          begin
+            ack(delivery_info.delivery_tag)
+          rescue Bunny::Exception => e
+            log_exception(e)
+          end
         end
       rescue => e
         log_exception(e, decoded_payload)
@@ -178,14 +165,8 @@ module Travis
         nil
       end
 
-      private def safe_ack(delivery_tag)
+      private def ack(delivery_tag)
         jobs_channel.ack(delivery_tag)
-      rescue Bunny::Exception => e
-        Travis.logger.error(
-          'shutting down due to bunny exception',
-          error: e.inspect
-        )
-        shutdown
       end
 
       private def log_exception(error, payload)

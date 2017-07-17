@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 class FakeConsumer
-  def dead?
-    false
-  end
-
   def subscribe
     @subscribe = true
   end

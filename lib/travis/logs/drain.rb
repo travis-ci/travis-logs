@@ -32,27 +32,8 @@ module Travis
 
         consumers.each_pair { |_, consumer| consumer.subscribe }
 
-        return run_loop_tick if once
-        loop { run_loop_tick }
-      end
-
-      def run_loop_tick
-        dead = []
-        consumers.each_pair do |name, consumer|
-          Travis.logger.debug('checking drain consumer', name: name)
-          if consumer.dead?
-            dead << name
-            Travis.logger.info('dead consumer found', name: name)
-          end
-        end
-
-        dead.each do |name|
-          Travis.logger.info('creating new consumer', name: name)
-          consumers[name] = create_consumer
-          consumers[name].subscribe
-        end
-
-        sleep(loop_sleep_interval)
+        return if once
+        sleep
       end
 
       private def consumers
