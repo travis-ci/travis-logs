@@ -34,8 +34,11 @@ module Travis
           Thread.new {
             begin
               consumer.subscribe
-            rescue
-              puts "rescued"
+            rescue StandardError => e
+              Travis.logger.error(
+                'caught error, shutting down consumer',
+                error: e.inspect
+              )
               consumer.shutdown
             end
           }
@@ -61,8 +64,11 @@ module Travis
           Thread.new {
             begin
               consumers[name].subscribe
-            rescue
-              puts "rescued"
+            rescue StandardError => e
+              Travis.logger.error(
+                'caught error, shutting down consumer',
+                error: e.inspect
+              )
               consumers[name].shutdown
             end
           }

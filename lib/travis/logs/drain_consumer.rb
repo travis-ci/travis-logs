@@ -169,6 +169,7 @@ module Travis
         Travis.logger.error(
           'payload could not be decoded',
           error: e.inspect,
+          payload: payload.inspect,
           stage: 'queue:decode'
         )
         mark('payload.decode_error')
@@ -191,6 +192,7 @@ module Travis
           error: error.inspect,
           action: 'receive',
           queue: reporting_jobs_queue,
+          payload: payload.inspect
         )
         Travis::Exceptions.handle(error)
       rescue StandardError => e
