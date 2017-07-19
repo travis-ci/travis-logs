@@ -36,11 +36,22 @@ module Travis
 
       def subscribe
         Travis.logger.info('subscribing', queue: jobs_queue.name)
-        jobs_queue.subscribe(manual_ack: true, &method(:receive))
+        jobs_queue.subscribe(manual_ack: true, block: true, &method(:receive))
       end
 
       def dead?
         @dead == true
+      end
+
+      def shutdown
+        jobs_channel.close
+        amqp_conn.close
+      rescue StandardError => e
+        Travis::Exceptions.handle(e)
+      ensure
+        @jobs_channel = nil
+        @amqp_conn = nil
+        @dead = true
       end
 
       private def jobs_queue
@@ -72,18 +83,6 @@ module Travis
 
       private def flush_mutex
         @flush_mutex ||= Mutex.new
-      end
-
-      private def shutdown
-        jobs_channel.close
-        amqp_conn.close
-      rescue StandardError => e
-        Travis::Exceptions.handle(e)
-      ensure
-        @jobs_channel = nil
-        @amqp_conn = nil
-        @dead = true
-        sleep
       end
 
       private def build_periodic_flush_task
@@ -143,7 +142,6 @@ module Travis
       end
 
       private def receive(delivery_info, _properties, payload)
-        return if dead?
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -171,7 +169,6 @@ module Travis
         Travis.logger.error(
           'payload could not be decoded',
           error: e.inspect,
-          payload: payload.inspect,
           stage: 'queue:decode'
         )
         mark('payload.decode_error')
@@ -191,9 +188,9 @@ module Travis
       private def log_exception(error, payload)
         Travis.logger.error(
           'exception caught in queue while processing payload',
+          error: error.inspect,
           action: 'receive',
           queue: reporting_jobs_queue,
-          payload: payload.inspect
         )
         Travis::Exceptions.handle(error)
       rescue StandardError => e

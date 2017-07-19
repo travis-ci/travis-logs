@@ -9,8 +9,9 @@ module Travis
     class Config < Travis::Config
       define(
         amqp: {
-          automatic_recovery: true,
-          recover_from_connection_close: true
+          automatic_recovery: false,
+          recover_from_connection_close: false,
+          recovery_attempts: 0
         },
         channels_existence_check: true,
         lock: { strategy: :redis, ttl: 150 },

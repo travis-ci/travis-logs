@@ -30,7 +30,16 @@ module Travis
           consumers["#{n}/#{consumer_count}"] = create_consumer
         end
 
-        consumers.each_pair { |_, consumer| consumer.subscribe }
+        consumers.each_pair { |_, consumer|
+          Thread.new {
+            begin
+              consumer.subscribe
+            rescue
+              puts "rescued"
+              consumer.shutdown
+            end
+          }
+        }
 
         return run_loop_tick if once
         loop { run_loop_tick }
@@ -49,7 +58,14 @@ module Travis
         dead.each do |name|
           Travis.logger.info('creating new consumer', name: name)
           consumers[name] = create_consumer
-          consumers[name].subscribe
+          Thread.new {
+            begin
+              consumers[name].subscribe
+            rescue
+              puts "rescued"
+              consumers[name].shutdown
+            end
+          }
         end
 
         sleep(loop_sleep_interval)
