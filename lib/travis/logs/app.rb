@@ -188,6 +188,7 @@ module Travis
           end
 
           payloads << {
+            'encoding' => 'base64',
             'id' => Integer(log_part['job_id']),
             'log' => log_part['content'],
             'number' => log_part['number'],

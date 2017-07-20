@@ -251,18 +251,21 @@ describe Travis::Logs::App do
     let :decoded_payload do
       [
         {
+          'encoding' => 'base64',
           'id' => 1,
           'log' => Base64.strict_encode64('fafafaf'),
           'number' => '1',
           'final' => false
         },
         {
+          'encoding' => 'base64',
           'id' => 2,
           'log' => Base64.strict_encode64('fafafaf'),
           'number' => '1',
           'final' => false
         },
         {
+          'encoding' => 'base64',
           'id' => 5,
           'log' => Base64.strict_encode64('fafafaf'),
           'number' => '1',

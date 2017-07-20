@@ -82,7 +82,7 @@ module Travis
 
       private def ensure_entries_base64(batch)
         batch.map do |entry|
-          if entry['encoding'] == 'base64'
+          if entry['encoding'] != 'base64'
             entry['log'] = Base64.strict_encode64(entry['log'])
             entry['encoding'] = 'base64'
           end
