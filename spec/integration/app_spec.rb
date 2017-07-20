@@ -191,7 +191,7 @@ describe Travis::Logs::App do
 
       allow(Travis::Logs::Sidekiq::LogParts).to receive(:perform_async).with(
         'id' => @job_id,
-        'log' => 'fafafaf',
+        'log' => Base64.strict_encode64('fafafaf'),
         'number' => '1',
         'final' => false
       ).and_return(nil)
@@ -208,7 +208,7 @@ describe Travis::Logs::App do
         body = MultiJson.dump(
           '@type' => 'log_part',
           'final' => false,
-          'content' => Base64.encode64('fafafaf'),
+          'content' => Base64.strict_encode64('fafafaf'),
           'encoding' => 'base64'
         )
         response = put "/log-parts/#{@job_id}/1", body
@@ -251,19 +251,19 @@ describe Travis::Logs::App do
       [
         {
           'id' => 1,
-          'log' => 'fafafaf',
+          'log' => Base64.strict_encode64('fafafaf'),
           'number' => '1',
           'final' => false
         },
         {
           'id' => 2,
-          'log' => 'fafafaf',
+          'log' => Base64.strict_encode64('fafafaf'),
           'number' => '1',
           'final' => false
         },
         {
           'id' => 5,
-          'log' => 'fafafaf',
+          'log' => Base64.strict_encode64('fafafaf'),
           'number' => '1',
           'final' => false
         }
@@ -278,7 +278,7 @@ describe Travis::Logs::App do
       ].map do |j|
         j.merge(
           :@type => 'log_part',
-          content: Base64.encode64('fafafaf'),
+          content: Base64.strict_encode64('fafafaf'),
           encoding: 'base64',
           final: false,
           number: '1'

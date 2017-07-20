@@ -158,7 +158,7 @@ module Travis
 
         payload = {
           'id' => Integer(params[:job_id]),
-          'log' => Base64.decode64(data['content']),
+          'log' => data['content'],
           'number' => params[:log_part_id], # NOTE: `log_part_id` may be "last"
           'final' => data['final']
         }
@@ -188,7 +188,7 @@ module Travis
 
           payloads << {
             'id' => Integer(log_part['job_id']),
-            'log' => Base64.decode64(log_part['content']),
+            'log' => log_part['content'],
             'number' => log_part['number'],
             'final' => log_part['final']
           }
