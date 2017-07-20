@@ -35,8 +35,12 @@ module Travis
       end
 
       def subscribe
-        Travis.logger.info('subscribing', queue: jobs_queue.name)
-        jobs_queue.subscribe(manual_ack: true, &method(:receive))
+        begin
+          Travis.logger.info('subscribing', queue: jobs_queue.name)
+          jobs_queue.subscribe(manual_ack: true, &method(:receive))
+        rescue Bunny::TCPConnectionFailedForAllHosts => e
+          @dead = true
+        end
       end
 
       def dead?
@@ -59,18 +63,7 @@ module Travis
       end
 
       private def amqp_conn
-        begin
-          @amqp_conn ||= Bunny.new(Travis.config.amqp).tap(&:start)
-        rescue Bunny::TCPConnectionFailedForAllHosts => e
-          retry_interval = Travis.config.amqp[:retry_interval]
-          Travis.logger.error(
-            "failed to connect to amqp, retrying in #{retry_interval} seconds",
-            error: e.inspect
-          )
-          Travis::Exceptions.handle(e)
-          sleep retry_interval
-          retry
-        end
+        @amqp_conn ||= Bunny.new(Travis.config.amqp).tap(&:start)
       end
 
       private def logs_config
