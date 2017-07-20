@@ -34,24 +34,31 @@ module Travis
         @periodic_flush_task = build_periodic_flush_task
       end
 
+      def safe_subscribe
+        Thread.new do
+          begin
+            subscribe
+          rescue StandardError => e
+            Travis.logger.error(
+              'caught error, shutting down consumer',
+              error: e.inspect
+            )
+          ensure
+            shutdown
+          end
+        end
+      end
+
       def subscribe
+        puts "subscribe"
         Travis.logger.info('subscribing', queue: jobs_queue.name)
         jobs_queue.subscribe(manual_ack: true, block: true, &method(:receive))
       end
 
       def dead?
-        @dead == true
-      end
-
-      def shutdown
-        jobs_channel.close
-        amqp_conn.close
-      rescue StandardError => e
-        Travis::Exceptions.handle(e)
-      ensure
-        @jobs_channel = nil
-        @amqp_conn = nil
-        @dead = true
+        dead_mutex.synchronize do
+          @dead == true
+        end
       end
 
       private def jobs_queue
@@ -83,6 +90,23 @@ module Travis
 
       private def flush_mutex
         @flush_mutex ||= Mutex.new
+      end
+
+      private def dead_mutex
+        @dead_mutex ||= Mutex.new
+      end
+
+      private def shutdown
+        dead_mutex.synchronize do
+          begin
+            jobs_channel.close
+            amqp_conn.close
+          rescue StandardError => e
+            Travis::Exceptions.handle(e)
+          ensure
+            @dead = true
+          end
+        end
       end
 
       private def build_periodic_flush_task
