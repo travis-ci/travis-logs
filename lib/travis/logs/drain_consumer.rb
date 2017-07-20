@@ -59,7 +59,18 @@ module Travis
       end
 
       private def amqp_conn
-        @amqp_conn ||= Bunny.new(Travis.config.amqp).tap(&:start)
+        begin
+          @amqp_conn ||= Bunny.new(Travis.config.amqp).tap(&:start)
+        rescue Bunny::TCPConnectionFailedForAllHosts => e
+          retry_interval = Travis.config.amqp[:retry_interval]
+          Travis.logger.error(
+            "failed to connect to amqp, retrying in #{retry_interval} seconds",
+            error: e.inspect
+          )
+          Travis::Exceptions.handle(e)
+          sleep retry_interval
+          retry
+        end
       end
 
       private def logs_config
