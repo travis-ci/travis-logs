@@ -2,7 +2,11 @@
 set -o errexit
 
 main() {
-  PATH="~/bin:$PATH"
+  if [[ "${DEBUG}" ]]; then
+    set -o xtrace
+  fi
+
+  PATH="${HOME}/bin:${PATH}"
   eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
 
   [[ "${PGHOST}" ]] || {
@@ -22,9 +26,45 @@ main() {
 
   : "${ENTERPRISE_MIGRATE_TO:=log_parts_created_at_not_null}"
 
-  # Depends on PGHOST, PGPASSWORD, PGDATABASE, etc
-  createdb
+  if ! __pgdb_exists; then
+    createdb
+  fi
 
+  if __logs_tables_exist; then
+    sqitch deploy \
+      --to-change structure \
+      --log-only \
+      "db:${LOGS_DATABASE_URL}"
+  fi
+  __migrate
+}
+
+__pgdb_exists() {
+  psql -ltA | if grep -qE "^${PGDATABASE}\|"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+__logs_tables_exist() {
+  if ! psql -c "$(__table_exists_sql 'logs')" &>/dev/null; then
+    return 1
+  fi
+
+  if ! psql -c "$(__table_exists_sql 'log_parts')" &>/dev/null; then
+    return 1
+  fi
+
+  return 0
+}
+
+__table_exists_sql() {
+  echo "SELECT 1/count(*) FROM pg_catalog.pg_tables " \
+    "WHERE schemaname = 'public' AND tablename = '${1}'"
+}
+
+__migrate() {
   # Use the LOGS_DATABASE_URL we use elsewhere but make it fit the DATABASE_URI format
   # sqitch expects
   sqitch deploy \
