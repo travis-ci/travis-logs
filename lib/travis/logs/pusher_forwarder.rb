@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'pusher'
-require 'coder'
 
 # pusher requires this in a method, which sometimes causes an uninitialized
 # constant error
@@ -87,9 +86,7 @@ module Travis
       private def pusher_payload(entry)
         {
           'id' => entry['id'],
-          'chars' => Coder.clean!(
-            Base64.decode64(entry['log']).to_s.delete("\0")
-          ),
+          'chars' => Travis::Logs::ContentDecoder.decode_content(entry),
           'number' => entry['number'],
           'final' => final?(entry)
         }

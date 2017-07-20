@@ -57,11 +57,9 @@ module Travis
         entries = by_log_id.map do |log_id, entry|
           {
             log_id: log_id,
-            content: Coder.clean!(
-              Base64.decode64(entry['log']).to_s.delete("\0")
-            ),
             number: entry['number'],
-            final: final?(entry)
+            final: final?(entry),
+            content: Travis::Logs::ContentDecoder.decode_content(entry)
           }
         end
 
