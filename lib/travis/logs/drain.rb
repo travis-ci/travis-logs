@@ -30,7 +30,9 @@ module Travis
           consumers["#{n}/#{consumer_count}"] = create_consumer
         end
 
-        consumers.each_pair { |_, consumer| consumer.subscribe }
+        consumers.each_pair do |_, consumer|
+          consumer.safe_subscribe
+        end
 
         return run_loop_tick if once
         loop { run_loop_tick }
@@ -49,7 +51,7 @@ module Travis
         dead.each do |name|
           Travis.logger.info('creating new consumer', name: name)
           consumers[name] = create_consumer
-          consumers[name].subscribe
+          consumers[name].safe_subscribe
         end
 
         sleep(loop_sleep_interval)
@@ -70,13 +72,13 @@ module Travis
       private def handle_batch(batch)
         Travis.logger.debug('received batch payload')
         Travis::Logs::Sidekiq::LogParts.perform_async(
-          batch.map { |e| e['log'] = Base64.strict_encode64(e['log']) }
+          batch
         )
       end
 
       private def forward_pusher_payload(payload)
         Travis::Logs::Sidekiq::PusherForwarding.perform_async(
-          payload.tap { |p| p['log'] = Base64.strict_encode64(p['log']) }
+          payload
         )
       end
 
