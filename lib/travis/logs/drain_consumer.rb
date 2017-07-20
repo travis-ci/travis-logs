@@ -37,7 +37,7 @@ module Travis
       def subscribe
         Travis.logger.info('subscribing', queue: jobs_queue.name)
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
-      rescue Bunny::TCPConnectionFailedForAllHosts => e
+      rescue Bunny::TCPConnectionFailedForAllHosts
         @dead = true
       end
 
