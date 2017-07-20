@@ -13,7 +13,7 @@ describe Travis::Logs::ContentDecoder do
 
     let(:bytemess_entry) do
       {
-        'log' => Base64.strict_encode64("hello to the world\xfa\xca!"),
+        'log' => Base64.strict_encode64("hello to the world\xf1\xe5\x7a!"),
         'encoding' => 'base64'
       }
     end
@@ -25,7 +25,7 @@ describe Travis::Logs::ContentDecoder do
 
     it 'cleans out messy bytes' do
       expect(subject.decode_content(bytemess_entry))
-        .to eq('hello to the world!')
+        .to eq('hello to the worldz!')
     end
 
     it 'encodes to UTF-8' do
@@ -45,7 +45,7 @@ describe Travis::Logs::ContentDecoder do
 
     let(:bytemess_entry) do
       {
-        'log' => "hello to the world\xfa\xca!"
+        'log' => "hello to the world\xf1\xe5\x7a!"
       }
     end
 
@@ -56,7 +56,7 @@ describe Travis::Logs::ContentDecoder do
 
     it 'cleans out messy bytes' do
       expect(subject.decode_content(bytemess_entry))
-        .to eq('hello to the world!')
+        .to eq('hello to the worldz!')
     end
 
     it 'encodes to UTF-8' do
