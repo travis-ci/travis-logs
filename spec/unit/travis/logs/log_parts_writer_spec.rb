@@ -27,16 +27,7 @@ class FakeDatabase
 end
 
 describe Travis::Logs::LogPartsWriter do
-  let(:payload) do
-    [
-      {
-        'id' => 2,
-        'log' => Base64.strict_encode64('hello, world'),
-        'number' => 1
-      }
-    ]
-  end
-
+  let(:payload) { [{ 'id' => 2, 'log' => 'hello, world', 'number' => 1 }] }
   let(:database) { FakeDatabase.new }
 
   subject(:service) do

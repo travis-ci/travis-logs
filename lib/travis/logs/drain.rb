@@ -69,15 +69,11 @@ module Travis
 
       private def handle_batch(batch)
         Travis.logger.debug('received batch payload')
-        Travis::Logs::Sidekiq::LogParts.perform_async(
-          batch.map { |e| e['log'] = Base64.strict_encode64(e['log']) }
-        )
+        Travis::Logs::Sidekiq::LogParts.perform_async(batch)
       end
 
       private def forward_pusher_payload(payload)
-        Travis::Logs::Sidekiq::PusherForwarding.perform_async(
-          payload.tap { |p| p['log'] = Base64.strict_encode64(p['log']) }
-        )
+        Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
       end
 
       private def consumer_count

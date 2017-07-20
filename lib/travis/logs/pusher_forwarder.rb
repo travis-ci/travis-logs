@@ -87,9 +87,7 @@ module Travis
       private def pusher_payload(entry)
         {
           'id' => entry['id'],
-          'chars' => Coder.clean!(
-            Base64.decode64(entry['log']).to_s.delete("\0")
-          ),
+          'chars' => Coder.clean!(entry['log'].to_s.delete("\0")),
           'number' => entry['number'],
           'final' => final?(entry)
         }
