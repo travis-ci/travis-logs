@@ -142,6 +142,7 @@ module Travis
       end
 
       private def receive(delivery_info, _properties, payload)
+        return if dead?
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
