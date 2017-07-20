@@ -41,11 +41,11 @@ describe Travis::Logs::Drain do
 
   it 'handles batches via async log parts worker' do
     expect(Travis::Logs::Sidekiq::LogParts).to receive(:perform_async)
-    subject.send(:handle_batch, 1)
+    subject.send(:handle_batch, [])
   end
 
   it 'forwards pusher payloads via async pusher forwarding worker' do
     expect(Travis::Logs::Sidekiq::PusherForwarding).to receive(:perform_async)
-    subject.send(:forward_pusher_payload, 1)
+    subject.send(:forward_pusher_payload, 'log' => 'wat')
   end
 end

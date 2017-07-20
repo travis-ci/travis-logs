@@ -27,7 +27,24 @@ class FakeDatabase
 end
 
 describe Travis::Logs::LogPartsWriter do
-  let(:payload) { [{ 'id' => 2, 'log' => 'hello, world', 'number' => 1 }] }
+  let(:payload) do
+    [
+      {
+        'id' => 2,
+        'log' => Base64.strict_encode64(
+          "hello, world \xfa\xca\xde\x86wowbytes"
+        ),
+        'encoding' => 'base64',
+        'number' => 2
+      },
+      {
+        'id' => 2,
+        'log' => "hello, world \xfa\xca\xde\x86wowbytes",
+        'number' => 1
+      }
+    ]
+  end
+
   let(:database) { FakeDatabase.new }
 
   subject(:service) do
@@ -79,7 +96,7 @@ describe Travis::Logs::LogPartsWriter do
     end
 
     it 'marks the log.id_invalid metric' do
-      expect(meter).to receive(:mark)
+      expect(meter).to receive(:mark).at_most(2).times
       service.run(payload)
     end
   end
@@ -87,8 +104,10 @@ describe Travis::Logs::LogPartsWriter do
   it 'creates a log part' do
     service.run(payload)
 
-    expect(database.log_parts.last).to include(
-      content: 'hello, world', number: 1, final: false
-    )
+    log_part = database.log_parts.last
+    expect(log_part[:content]).to include('hello, world')
+    expect(log_part[:content]).to include('wowbytes')
+    expect(log_part[:number]).to be > 0
+    expect(log_part[:final]).to be false
   end
 end
