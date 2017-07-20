@@ -86,13 +86,10 @@ module Travis
       end
 
       private def shutdown
-        jobs_channel.close
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
       ensure
-        @jobs_channel = nil
-        @amqp_conn = nil
         @dead = true
         sleep
       end
@@ -114,6 +111,10 @@ module Travis
       end
 
       private def flush_batch_buffer
+        if dead?
+          return ensure_shutdown
+        end
+
         Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size
         )
@@ -197,6 +198,12 @@ module Travis
           error: e.inspect
         )
         shutdown
+      end
+
+      private def ensure_shutdown
+        if dead? && !amqp_conn.closed?
+          shutdown
+        end
       end
 
       private def log_exception(error, payload)
