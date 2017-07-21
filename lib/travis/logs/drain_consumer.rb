@@ -37,6 +37,8 @@ module Travis
       def subscribe
         Travis.logger.info('subscribing', queue: jobs_queue.name)
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
+      rescue Bunny::TCPConnectionFailedForAllHosts
+        @dead = true
       end
 
       def dead?
@@ -75,13 +77,10 @@ module Travis
       end
 
       private def shutdown
-        jobs_channel.close
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
       ensure
-        @jobs_channel = nil
-        @amqp_conn = nil
         @dead = true
         sleep
       end
@@ -103,6 +102,8 @@ module Travis
       end
 
       private def flush_batch_buffer
+        return ensure_shutdown if dead?
+
         Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size
         )
@@ -186,6 +187,10 @@ module Travis
           error: e.inspect
         )
         shutdown
+      end
+
+      private def ensure_shutdown
+        shutdown if dead? && !amqp_conn.closed?
       end
 
       private def log_exception(error, payload)
