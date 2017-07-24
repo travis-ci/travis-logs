@@ -35,6 +35,7 @@ module Travis
           drain_consumer_count: 10,
           drain_execution_interval: 3,
           drain_loop_sleep_interval: 10,
+          drain_receive_timeout: 300,
           drain_timeout_interval: 3,
           intervals: {
             aggregate: 60,

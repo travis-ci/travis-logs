@@ -196,7 +196,7 @@ module Travis
         return false unless @last_receive
 
         seconds_since_last_receive = Time.now - @last_receive
-        seconds_since_last_receive > 60*5
+        seconds_since_last_receive > logs_config[:drain_receive_timeout]
       end
 
       private def ensure_shutdown
