@@ -76,8 +76,11 @@ module Travis
         @flush_mutex ||= Mutex.new
       end
 
-      private def shutdown
-        Travis.logger.info('shutting down drain consumer')
+      private def shutdown(reason)
+        Travis.logger.info(
+          'shutting down drain consumer',
+          reason: reason
+        )
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
@@ -190,7 +193,7 @@ module Travis
           'shutting down due to bunny exception',
           error: e.inspect
         )
-        shutdown
+        shutdown('safe_ack')
       end
 
       private def receive_timeout?
@@ -201,7 +204,7 @@ module Travis
       end
 
       private def ensure_shutdown
-        shutdown if dead? && !amqp_conn.closed?
+        shutdown('dead') if dead? && !amqp_conn.closed?
       end
 
       private def log_exception(error, payload)
