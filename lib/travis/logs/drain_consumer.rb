@@ -147,7 +147,6 @@ module Travis
 
       private def receive(delivery_info, _properties, payload)
         return if dead?
-        @last_receive = Time.now
 
         decoded_payload = nil
         decoded_payload = decode(payload)
@@ -185,6 +184,7 @@ module Travis
 
       private def safe_ack(delivery_tag)
         jobs_channel.ack(delivery_tag)
+        @last_receive = Time.now
       rescue Bunny::Exception => e
         Travis.logger.error(
           'shutting down due to bunny exception',
