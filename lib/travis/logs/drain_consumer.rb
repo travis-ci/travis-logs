@@ -77,6 +77,7 @@ module Travis
       end
 
       private def shutdown
+        Travis.logger.info('shutting down drain consumer')
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
