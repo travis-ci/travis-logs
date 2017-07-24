@@ -82,6 +82,7 @@ module Travis
         Travis::Exceptions.handle(e)
       ensure
         @dead = true
+        @batch_buffer = nil
         sleep
       end
 
