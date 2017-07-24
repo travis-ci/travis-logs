@@ -42,7 +42,7 @@ module Travis
       end
 
       def dead?
-        @dead == true
+        @dead == true || receive_timeout?
       end
 
       private def jobs_queue
@@ -146,6 +146,8 @@ module Travis
 
       private def receive(delivery_info, _properties, payload)
         return if dead?
+        @last_receive = Time.now
+
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -188,6 +190,13 @@ module Travis
           error: e.inspect
         )
         shutdown
+      end
+
+      private def receive_timeout?
+        return false unless @last_receive
+
+        seconds_since_last_receive = Time.now - @last_receive
+        seconds_since_last_receive > 60*5
       end
 
       private def ensure_shutdown
