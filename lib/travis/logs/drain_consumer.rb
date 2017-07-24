@@ -42,7 +42,7 @@ module Travis
       end
 
       def dead?
-        @dead == true || receive_timeout?
+        @dead == true || ack_timeout?
       end
 
       private def jobs_queue
@@ -187,7 +187,7 @@ module Travis
 
       private def safe_ack(delivery_tag)
         jobs_channel.ack(delivery_tag)
-        @last_receive = Time.now
+        @last_ack = Time.now
       rescue Bunny::Exception => e
         Travis.logger.error(
           'shutting down due to bunny exception',
@@ -196,11 +196,11 @@ module Travis
         shutdown('safe_ack')
       end
 
-      private def receive_timeout?
-        return false unless @last_receive
+      private def ack_timeout?
+        return false unless @last_ack
 
-        seconds_since_last_receive = Time.now - @last_receive
-        seconds_since_last_receive > logs_config[:drain_receive_timeout]
+        seconds_since_last_ack = Time.now - @last_ack
+        seconds_since_last_ack > logs_config[:drain_ack_timeout]
       end
 
       private def ensure_shutdown
