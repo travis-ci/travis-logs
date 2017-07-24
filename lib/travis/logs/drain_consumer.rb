@@ -25,6 +25,7 @@ module Travis
       private :batch_handler
       private :pusher_handler
       private :periodic_flush_task
+      private :created_at, :last_ack
 
       def initialize(reporting_jobs_queue, batch_handler: nil,
                      pusher_handler: nil)
@@ -32,6 +33,7 @@ module Travis
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
         @periodic_flush_task = build_periodic_flush_task
+        @created_at = Time.now
       end
 
       def subscribe
@@ -197,9 +199,8 @@ module Travis
       end
 
       private def ack_timeout?
-        return false unless @last_ack
-
-        seconds_since_last_ack = Time.now - @last_ack
+        # fall back to created_at
+        seconds_since_last_ack = Time.now - (@last_ack || @created_at)
         seconds_since_last_ack > logs_config[:drain_ack_timeout]
       end
 
