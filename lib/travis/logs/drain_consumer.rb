@@ -47,6 +47,13 @@ module Travis
         @dead == true || ack_timeout?
       end
 
+      private def ack_timeout?
+        # fall back to created_at
+        # in case no messages were acked at all
+        seconds_since_last_ack = Time.now - (@last_ack || @created_at)
+        seconds_since_last_ack > logs_config[:drain_ack_timeout]
+      end
+
       private def jobs_queue
         @jobs_queue ||= jobs_channel.queue(
           "reporting.jobs.#{reporting_jobs_queue}",
@@ -196,12 +203,6 @@ module Travis
           error: e.inspect
         )
         shutdown('safe_ack')
-      end
-
-      private def ack_timeout?
-        # fall back to created_at
-        seconds_since_last_ack = Time.now - (@last_ack || @created_at)
-        seconds_since_last_ack > logs_config[:drain_ack_timeout]
       end
 
       private def ensure_shutdown
