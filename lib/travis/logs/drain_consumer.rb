@@ -25,7 +25,6 @@ module Travis
       private :batch_handler
       private :pusher_handler
       private :periodic_flush_task
-      private :created_at, :last_ack
 
       def initialize(reporting_jobs_queue, batch_handler: nil,
                      pusher_handler: nil)
