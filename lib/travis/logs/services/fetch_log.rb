@@ -20,13 +20,13 @@ module Travis
           if job_id
             if ignored_job_id?(job_id)
               return temporarily_unavailable_log(job_id: job_id)
-            elsif job_id < min_accepted_job_id
+            elsif job_id < database.job_id_min_readable
               return spoofed_archived_log(job_id: job_id)
             end
           elsif id
             if ignored_log_id?(id)
               return temporarily_unavailable_log(id: id)
-            elsif id < min_accepted_id
+            elsif id < database.log_id_min_readable
               return spoofed_archived_log(id: id)
             end
           end
@@ -57,14 +57,6 @@ module Travis
             content: content,
             removed_by_id: removed_by_id
           )
-        end
-
-        private def min_accepted_job_id
-          Travis.config.logs.archive_spoofing.min_accepted_job_id
-        end
-
-        private def min_accepted_id
-          Travis.config.logs.archive_spoofing.min_accepted_id
         end
 
         private def ignored_job_id?(job_id)

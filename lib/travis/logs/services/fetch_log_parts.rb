@@ -15,13 +15,13 @@ module Travis
           if job_id
             if ignored_job_id?(job_id)
               return temporarily_unavailable_log_parts
-            elsif job_id < min_accepted_job_id
+            elsif job_id < database.job_id_min_readable
               return []
             end
           elsif log_id
             if ignored_log_id?(log_id)
               return temporarily_unavailable_log_parts(log_id: log_id)
-            elsif log_id < min_accepted_id
+            elsif log_id < database.log_id_min_readable
               return []
             end
           end
@@ -40,14 +40,6 @@ module Travis
           log_id = database.cached_log_id_for_job_id(job_id) if log_id.nil?
           return nil if log_id.nil?
           database.log_parts(log_id, after: after, part_numbers: part_numbers)
-        end
-
-        private def min_accepted_job_id
-          Travis.config.logs.archive_spoofing.min_accepted_job_id
-        end
-
-        private def min_accepted_id
-          Travis.config.logs.archive_spoofing.min_accepted_id
         end
 
         private def ignored_job_id?(job_id)

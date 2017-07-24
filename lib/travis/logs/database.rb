@@ -72,6 +72,28 @@ module Travis
           object_id: object_id,
           max_size: db.pool.max_size
         )
+        @min_readable_cutoff_age = config[:min_readable_cutoff_age]
+      end
+
+      attr_reader :db, :min_readable_cutoff_age
+      private :min_readable_cutoff_age
+
+      def log_id_min_readable
+        min_readable_settings[:id] || 0
+      end
+
+      def job_id_min_readable
+        min_readable_settings[:job_id] || 0
+      end
+
+      private def min_readable_settings
+        cutoff = (Time.now.utc - min_readable_cutoff_age).strftime('%Y-%m-%d')
+        db[:logs]
+          .select(:id, :job_id)
+          .where { archived_at < cutoff }
+          .reverse(:archived_at)
+          .limit(1)
+          .first
       end
 
       attr_reader :db, :cache, :maint
