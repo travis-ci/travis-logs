@@ -32,6 +32,7 @@ module Travis
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
         @periodic_flush_task = build_periodic_flush_task
+        @created_at = Time.now
       end
 
       def subscribe
@@ -42,7 +43,14 @@ module Travis
       end
 
       def dead?
-        @dead == true
+        @dead == true || ack_timeout?
+      end
+
+      private def ack_timeout?
+        # fall back to created_at
+        # in case no messages were acked at all
+        seconds_since_last_ack = Time.now - (@last_ack || @created_at)
+        seconds_since_last_ack > logs_config[:drain_ack_timeout]
       end
 
       private def jobs_queue
@@ -76,12 +84,17 @@ module Travis
         @flush_mutex ||= Mutex.new
       end
 
-      private def shutdown
+      private def shutdown(reason)
+        Travis.logger.info(
+          'shutting down drain consumer',
+          reason: reason
+        )
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
       ensure
         @dead = true
+        @batch_buffer = nil
         sleep
       end
 
@@ -145,6 +158,7 @@ module Travis
 
       private def receive(delivery_info, _properties, payload)
         return if dead?
+
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -181,16 +195,17 @@ module Travis
 
       private def safe_ack(delivery_tag)
         jobs_channel.ack(delivery_tag)
+        @last_ack = Time.now
       rescue Bunny::Exception => e
         Travis.logger.error(
           'shutting down due to bunny exception',
           error: e.inspect
         )
-        shutdown
+        shutdown('safe_ack')
       end
 
       private def ensure_shutdown
-        shutdown if dead? && !amqp_conn.closed?
+        shutdown('dead') if dead? && !amqp_conn.closed?
       end
 
       private def log_exception(error, payload)
