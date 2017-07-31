@@ -114,7 +114,6 @@ module Travis
           c.environments = %w[staging production]
 
           c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
-          c.processors << Raven::Processor::RemoveStacktrace
           c.release = version
           c.silence_ready = true
         end
