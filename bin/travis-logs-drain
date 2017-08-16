@@ -6,6 +6,9 @@ $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
 require 'travis/logs'
 
+# log level override for drain dyno
+Travis.logger.level = ENV['DRAIN_LOG_LEVEL'] if ENV['DRAIN_LOG_LEVEL']
+
 $stdout.sync = true
 
 Travis.logger.info('running log parts drain')
