@@ -19,6 +19,7 @@ module Travis
         logs: {
           aggregatable_order: nil,
           aggregate_clean_skip_empty: true,
+          aggregate_partitions: false,
           aggregate_pool: {
             max_queue: 0,
             max_threads: 20,

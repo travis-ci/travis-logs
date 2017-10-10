@@ -33,10 +33,10 @@ module Travis
                          end
         end
 
-        def run
+        def run(partitions: false)
           Travis.logger.info('fetching aggregatable ids')
 
-          ids = aggregatable_ids
+          ids = aggregatable_ids(partitions: partitions)
           if ids.empty?
             Travis.logger.info('no aggregatable ids')
             return
@@ -150,7 +150,14 @@ module Travis
           end
         end
 
-        private def aggregatable_ids
+        private def aggregatable_ids(partitions: false)
+          if partitions
+            return database.aggregatable_logs_by_partition(
+              per_aggregate_limit,
+              order: aggregatable_order
+            )
+          end
+
           database.aggregatable_logs(
             intervals[:sweeper], intervals[:force],
             per_aggregate_limit,
