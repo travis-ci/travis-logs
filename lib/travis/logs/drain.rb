@@ -42,12 +42,20 @@ module Travis
           Travis.logger.debug('checking drain consumer', name: name)
           if consumer.dead?
             dead << name
-            Travis.logger.info('dead consumer found', name: name)
+            if Travis.config.enterprise
+              Travis.logger.debug('dead consumer found', name: name)
+            else
+              Travis.logger.info('dead consumer found', name: name)
+            end
           end
         end
 
         dead.each do |name|
-          Travis.logger.info('creating new consumer', name: name)
+          if Travis.config.enterprise
+            Travis.logger.debug('creating new consumer', name: name)
+          else
+            Travis.logger.info('creating new consumer', name: name)
+          end
           consumers[name] = create_consumer
           consumers[name].subscribe
         end

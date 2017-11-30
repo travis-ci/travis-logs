@@ -36,7 +36,12 @@ module Travis
       end
 
       def subscribe
-        Travis.logger.info('subscribing', queue: jobs_queue.name)
+        if Travis.config.enterprise
+          Travis.logger.debug('subscribing', queue: jobs_queue.name)
+        else
+          Travis.logger.info('subscribing', queue: jobs_queue.name)
+        end
+
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
       rescue Bunny::TCPConnectionFailedForAllHosts
         @dead = true
@@ -85,10 +90,11 @@ module Travis
       end
 
       private def shutdown(reason)
-        Travis.logger.info(
-          'shutting down drain consumer',
-          reason: reason
-        )
+        if Travis.config.enterprise
+          Travis.logger.debug('shutting down drain consumer', reason: reason)
+        else
+          Travis.logger.info('shutting down drain consumer', reason: reason)
+        end
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
