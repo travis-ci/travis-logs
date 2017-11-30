@@ -34,17 +34,11 @@ module Travis
         end
 
         def run
-          if Travis.config.enterprise
-            Travis.logger.debug('fetching aggregatable ids')
-          else
-            Travis.logger.info('fetching aggregatable ids')
-          end
+          Travis.logger.debug('fetching aggregatable ids')
 
           ids = aggregatable_ids
           if ids.empty?
-            if !Travis.config.enterprise
-              Travis.logger.info('no aggregatable ids')
-            end
+            Travis.logger.debug('no aggregatable ids')
             return
           end
 
@@ -52,7 +46,7 @@ module Travis
             'aggregating with pool config',
             pool_config.merge(action: 'aggregate')
           )
-          Travis.logger.info(
+          Travis.logger.debug(
             'starting aggregation batch',
             size: ids.length, action: 'aggregate',
             'sample#aggregatable-logs': ids.length
@@ -63,7 +57,7 @@ module Travis
           pool.shutdown
           pool.wait_for_termination
 
-          Travis.logger.info(
+          Travis.logger.debug(
             'finished aggregation batch',
             size: ids.length, action: 'aggregate'
           )
@@ -72,7 +66,7 @@ module Travis
         def run_ranges(cursor, per_page)
           cursor ||= database.min_log_part_id
 
-          Travis.logger.info('fetching aggregatable ids', cursor: cursor)
+          Travis.logger.debug('fetching aggregatable ids', cursor: cursor)
           ids = database.aggregatable_logs_page(cursor, per_page)
 
           if ids.empty?
@@ -84,7 +78,7 @@ module Travis
             'aggregating with pool config',
             pool_config.merge(action: 'aggregate')
           )
-          Travis.logger.info(
+          Travis.logger.debug(
             'starting aggregation batch',
             action: 'aggregate', 'sample#aggregatable-logs': ids.length
           )
@@ -94,7 +88,7 @@ module Travis
           pool.shutdown
           pool.wait_for_termination
 
-          Travis.logger.info('finished aggregation batch', action: 'aggregate')
+          Travis.logger.debug('finished aggregation batch', action: 'aggregate')
           cursor + per_page
         end
 
