@@ -41,8 +41,8 @@ module Travis
           end
 
           ids = aggregatable_ids
-          if ids.empty? && !Travis.config.enterprise
-            Travis.logger.info('no aggregatable ids')
+          if ids.empty?
+            Travis.logger.info('no aggregatable ids') unless Travis.config.enterprise
             return
           end
 
