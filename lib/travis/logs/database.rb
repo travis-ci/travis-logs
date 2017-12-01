@@ -198,7 +198,7 @@ module Travis
         query = db[:log_parts]
                 .select(:log_id)
                 .where { created_at <= (Time.now.utc - regular_interval) }
-                .and(final: true)
+                .where(final: true)
                 .or { created_at <= (Time.now.utc - force_interval) }
                 .limit(limit)
         query = query.order(order.to_sym) unless order.nil?

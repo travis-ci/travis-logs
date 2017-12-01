@@ -36,7 +36,8 @@ module Travis
       end
 
       def subscribe
-        Travis.logger.info('subscribing', queue: jobs_queue.name)
+        Travis.logger.debug('subscribing', queue: jobs_queue.name)
+
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
       rescue Bunny::TCPConnectionFailedForAllHosts
         @dead = true
@@ -85,10 +86,7 @@ module Travis
       end
 
       private def shutdown(reason)
-        Travis.logger.info(
-          'shutting down drain consumer',
-          reason: reason
-        )
+        Travis.logger.debug('shutting down drain consumer', reason: reason)
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
@@ -168,7 +166,7 @@ module Travis
             flush_mutex.synchronize { flush_batch_buffer }
           end
         else
-          Travis.logger.info('acking empty or undecodable payload')
+          Travis.logger.debug('acking empty or undecodable payload')
           safe_ack(delivery_info.delivery_tag)
         end
       rescue => e

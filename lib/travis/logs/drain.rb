@@ -9,7 +9,7 @@ module Travis
     class Drain
       def self.setup
         return if defined?(@setup)
-        Travis.logger.info('setting up drain dependencies')
+        Travis.logger.debug('setting up drain dependencies')
         Travis::Exceptions.setup(
           Travis.config, Travis.config.env, Travis.logger
         )
@@ -21,7 +21,7 @@ module Travis
       def run(once: false)
         self.class.setup
 
-        Travis.logger.info(
+        Travis.logger.debug(
           'setting up log parts drain consumers',
           count: consumer_count
         )
@@ -47,7 +47,7 @@ module Travis
         end
 
         dead.each do |name|
-          Travis.logger.info('creating new consumer', name: name)
+          Travis.logger.debug('creating new consumer', name: name)
           consumers[name] = create_consumer
           consumers[name].subscribe
         end
