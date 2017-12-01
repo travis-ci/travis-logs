@@ -42,7 +42,7 @@ module Travis
           Travis.logger.debug('checking drain consumer', name: name)
           if consumer.dead?
             dead << name
-            Travis.logger.debug('dead consumer found', name: name)
+            Travis.logger.info('dead consumer found', name: name)
           end
         end
 
