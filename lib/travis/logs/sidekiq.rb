@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'uri'
-
 require 'active_support/core_ext/hash/keys'
 require 'sidekiq'
+require 'travis/metrics/sidekiq'
 
 module Travis
   module Logs
@@ -33,6 +33,8 @@ module Travis
             config.server_middleware do |chain|
               chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
                         pause_time: Travis.config.logs.sidekiq_error_retry_pause
+
+              chain.add Metrics::Sidekiq
             end
           end
         end
