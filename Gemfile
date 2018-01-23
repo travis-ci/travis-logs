@@ -17,10 +17,8 @@ gem 'connection_pool'
 gem 'dalli'
 gem 'jemalloc', git: gh('joshk/jemalloc-rb')
 gem 'jwt'
-gem 'metriks', git: gh('travis-ci/metriks'), branch: 'igor-hdr-histogram'
-gem 'metriks-librato_metrics',
-    git: gh('travis-ci/metriks-librato_metrics'),
-    branch: 'igor-hdr-histogram'
+gem 'metriks', git: gh('travis-ci/metriks')
+gem 'metriks-librato_metrics', git: gh('travis-ci/metriks-librato_metrics')
 gem 'multi_json'
 gem 'oj'
 gem 'pg'
