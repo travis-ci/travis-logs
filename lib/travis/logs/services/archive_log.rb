@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'uri'
-
-require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
 require 'multi_json'
 
@@ -41,97 +38,79 @@ module Travis
         end
 
         def run
-          return unless fetch
-          mark_as_archiving
-          return if content_blank?
-          store
-          verify
-          confirm
-          Travis.logger.debug(
-            'archived log',
-            action: 'archive', id: log_id, job_id: job_id, result: 'successful'
-          )
-          queue_purge
-        ensure
-          mark_as_archiving(false)
-        end
-
-        def log
-          @log ||= begin
-            log = database.log_for_id(log_id)
-            unless log
-              Travis.logger.warn(
-                'log not found',
-                action: 'archive', id: log_id, result: 'not_found'
-              )
-              mark('log.not_found')
-            end
-            log
+          if log.nil?
+            Travis.logger.warn(
+              'log not found',
+              action: 'archive', id: log_id, result: 'not_found'
+            )
+            mark('log.not_found')
+            return
           end
-        end
-        alias fetch log
 
-        def mark_as_archiving(archiving = true)
-          database.update_archiving_status(log_id, archiving)
-        end
-
-        def content_blank?
           if content.blank?
             Travis.logger.warn(
               'content empty',
-              action: 'archive', id: log_id, result: 'empty'
+              action: 'archive', id: log_id, job_id: job_id, result: 'empty'
             )
             mark('log.empty')
-            true
-          else
-            false
+            return
           end
-        end
 
-        def store
-          retrying(:store) do
-            measure('store') do
-              storage_service.store(content, target_url)
-            end
-          end
-        end
-
-        def verify
-          retrying(:verify) do
-            measure('verify') do
-              actual = archived_content_length
-              expected = content.bytesize
-              unless actual == expected
-                Travis.logger.error(
-                  'error while verifying',
-                  action: 'archive', id: log_id, result: 'verification-failed',
-                  expected: expected, actual: actual
-                )
-                raise VerificationFailed.new(
-                  log_id, target_url, expected, actual
-                )
-              end
-            end
-          end
-        end
-
-        def confirm
-          database.mark_archive_verified(log_id)
-        end
-
-        def queue_purge
-          return unless Travis::Logs.config.logs.purge?
-          delay = Travis::Logs.config.logs.intervals.purge
-          Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
-        end
-
-        def target_url
-          "http://#{hostname}/jobs/#{job_id}/log.txt"
+          archive
         end
 
         attr_reader :storage_service, :database
         private :storage_service
         private :database
+
+        private def archive
+          database.update_archiving_status(log_id, true)
+
+          measure('store') { store }
+          measure('verify') { verify }
+
+          database.mark_archive_verified(log_id)
+
+          queue_purge if purge?
+
+          Travis.logger.debug(
+            'archived log',
+            action: 'archive', id: log_id, job_id: job_id, result: 'successful'
+          )
+        ensure
+          database.update_archiving_status(log_id, false)
+        end
+
+        private def queue_purge
+          Travis::Logs::Sidekiq::Purge.perform_at(purge_at, log_id)
+        end
+
+        private def target_url
+          "http://#{hostname}/jobs/#{job_id}/log.txt"
+        end
+
+        private def log
+          @log ||= database.log_for_id(log_id)
+        end
+
+        private def store
+          storage_service.store(content, target_url)
+        end
+
+        private def verify
+          actual = archived_content_length
+          expected = content.bytesize
+          return if actual == expected
+
+          Travis.logger.error(
+            'error while verifying',
+            action: 'archive', id: log_id, result: 'verification-failed',
+            expected: expected, actual: actual
+          )
+          raise VerificationFailed.new(
+            log_id, target_url, expected, actual
+          )
+        end
 
         private def archived_content_length
           storage_service.content_length(target_url)
@@ -148,40 +127,20 @@ module Travis
         attr_writer :content
         private :content
 
+        private def config
+          Travis::Logs.config.to_h
+        end
+
         private def hostname
-          Travis.config.s3.hostname
+          config[:s3][:hostname]
         end
 
-        private def retrying(header, times: retry_times)
-          yield
-        rescue => e
-          count ||= 0
-          count += 1
-          if times > count
-            Travis.logger.debug(
-              'error while archiving',
-              action: 'archive', retrying: header,
-              error: MultiJson.dump(e.backtrace), type: e.class.name
-            )
-            Travis.logger.warn(
-              'error while archiving',
-              action: 'archive', retrying: header,
-              reason: e.message, id: log_id, job_id: job_id
-            )
-            sleep count * 1
-            retry
-          else
-            Travis.logger.error(
-              'error while archiving',
-              action: 'archive', retrying: header, exceeded: times,
-              error: e.backtrace.first, type: e.class.name
-            )
-            raise
-          end
+        private def purge?
+          config[:logs][:purge]
         end
 
-        private def retry_times
-          @retry_times ||= 5
+        private def purge_at
+          config[:logs][:intervals][:purge].hours.from_now
         end
       end
     end
