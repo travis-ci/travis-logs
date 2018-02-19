@@ -157,10 +157,11 @@ module Travis
         end
 
         payload = {
+          'encoding' => 'base64',
+          'final' => data['final'],
           'id' => Integer(params[:job_id]),
-          'log' => Base64.decode64(data['content']),
-          'number' => params[:log_part_id], # NOTE: `log_part_id` may be "last"
-          'final' => data['final']
+          'log' => data['content'],
+          'number' => params[:log_part_id] # NOTE: `log_part_id` may be "last"
         }
 
         Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
@@ -187,8 +188,9 @@ module Travis
           end
 
           payloads << {
+            'encoding' => 'base64',
             'id' => Integer(log_part['job_id']),
-            'log' => Base64.decode64(log_part['content']),
+            'log' => log_part['content'],
             'number' => log_part['number'],
             'final' => log_part['final']
           }

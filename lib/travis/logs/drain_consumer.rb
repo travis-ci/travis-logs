@@ -32,15 +32,26 @@ module Travis
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
         @periodic_flush_task = build_periodic_flush_task
+        @created_at = Time.now
       end
 
       def subscribe
-        Travis.logger.info('subscribing', queue: jobs_queue.name)
+        Travis.logger.debug('subscribing', queue: jobs_queue.name)
+
         jobs_queue.subscribe(manual_ack: true, &method(:receive))
+      rescue Bunny::TCPConnectionFailedForAllHosts
+        @dead = true
       end
 
       def dead?
-        @dead == true
+        @dead == true || ack_timeout?
+      end
+
+      private def ack_timeout?
+        # fall back to created_at
+        # in case no messages were acked at all
+        seconds_since_last_ack = Time.now - (@last_ack || @created_at)
+        seconds_since_last_ack > logs_config[:drain_ack_timeout]
       end
 
       private def jobs_queue
@@ -78,15 +89,14 @@ module Travis
         @flush_mutex ||= Mutex.new
       end
 
-      private def shutdown
-        jobs_channel.close
+      private def shutdown(reason)
+        Travis.logger.debug('shutting down drain consumer', reason: reason)
         amqp_conn.close
       rescue StandardError => e
         Travis::Exceptions.handle(e)
       ensure
-        @jobs_channel = nil
-        @amqp_conn = nil
         @dead = true
+        @batch_buffer = nil
         sleep
       end
 
@@ -107,6 +117,8 @@ module Travis
       end
 
       private def flush_batch_buffer
+        return ensure_shutdown if dead?
+
         Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size
         )
@@ -148,6 +160,7 @@ module Travis
 
       private def receive(delivery_info, _properties, payload)
         return if dead?
+
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -157,7 +170,7 @@ module Travis
             flush_mutex.synchronize { flush_batch_buffer }
           end
         else
-          Travis.logger.info('acking empty or undecodable payload')
+          Travis.logger.debug('acking empty or undecodable payload')
           safe_ack(delivery_info.delivery_tag)
         end
       rescue => e
@@ -184,12 +197,17 @@ module Travis
 
       private def safe_ack(delivery_tag)
         jobs_channel.ack(delivery_tag)
+        @last_ack = Time.now
       rescue Bunny::Exception => e
         Travis.logger.error(
           'shutting down due to bunny exception',
           error: e.inspect
         )
-        shutdown
+        shutdown('safe_ack')
+      end
+
+      private def ensure_shutdown
+        shutdown('dead') if dead? && !amqp_conn.closed?
       end
 
       private def log_exception(error, payload)

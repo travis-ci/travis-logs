@@ -29,7 +29,7 @@ describe 'aggregation' do
     lps = Travis::Logs::LogPartsWriter.new
 
     job_count.times do |n|
-      job_id = 17_321 + n
+      job_id = Random.rand(20_000) + n
 
       entries = []
       parts_count.times do |log_part_n|
@@ -55,5 +55,24 @@ describe 'aggregation' do
     expect(db[:log_parts].count).to be > 0
     2.times { Travis::Logs::Services::AggregateLogs.run }
     expect(db[:log_parts].count).to eql(0)
+  end
+
+  describe 'without parts' do
+    before do
+      db[:log_parts].delete
+    end
+
+    it 'doesn\'t update aggregated_at nor content' do
+      expect(db[:log_parts].count).to eql(0)
+
+      log = db[:logs].first
+      expect(log[:content]).to be_nil
+
+      Travis::Logs.database_connection.aggregate(log[:id])
+
+      log = db[:logs].where(id: log[:id]).first
+      expect(log[:content]).to be_nil
+      expect(log[:aggregated_at]).to be_nil
+    end
   end
 end

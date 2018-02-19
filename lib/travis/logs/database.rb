@@ -198,7 +198,7 @@ module Travis
         query = db[:log_parts]
                 .select(:log_id)
                 .where { created_at <= (Time.now.utc - regular_interval) }
-                .and(final: true)
+                .where(final: true)
                 .or { created_at <= (Time.now.utc - force_interval) }
                 .limit(limit)
         query = query.order(order.to_sym) unless order.nil?
@@ -234,17 +234,25 @@ module Travis
       SQL
 
       AGGREGATE_UPDATE_SQL = <<-SQL.split.join(' ').freeze
+        WITH log_to_update AS (
+          SELECT logs.id AS id
+          FROM logs
+          INNER JOIN log_parts ON log_parts.log_id = logs.id
+          WHERE logs.id = ?
+          GROUP BY logs.id
+        )
         UPDATE logs
            SET aggregated_at = ?,
                content = (
-                 COALESCE(content, '') || (#{AGGREGATE_PARTS_SELECT_SQL})
+                 COALESCE(content, '') || COALESCE((#{AGGREGATE_PARTS_SELECT_SQL}), '')
                )
-         WHERE logs.id = ?
+         FROM log_to_update
+         WHERE logs.id = log_to_update.id
       SQL
 
       def aggregate(log_id)
         maint.restrict!
-        db[AGGREGATE_UPDATE_SQL, Time.now.utc, log_id, log_id].update
+        db[AGGREGATE_UPDATE_SQL, log_id, Time.now.utc, log_id].update
       end
 
       def aggregated_on_demand(log_id)

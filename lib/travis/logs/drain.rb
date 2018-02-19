@@ -9,7 +9,7 @@ module Travis
     class Drain
       def self.setup
         return if defined?(@setup)
-        Travis.logger.info('setting up drain dependencies')
+        Travis.logger.debug('setting up drain dependencies')
         Travis::Exceptions.setup(
           Travis.config, Travis.config.env, Travis.logger
         )
@@ -21,7 +21,7 @@ module Travis
       def run(once: false)
         self.class.setup
 
-        Travis.logger.info(
+        Travis.logger.debug(
           'setting up log parts drain consumers',
           count: consumer_count
         )
@@ -42,12 +42,12 @@ module Travis
           Travis.logger.debug('checking drain consumer', name: name)
           if consumer.dead?
             dead << name
-            Travis.logger.info('dead consumer found', name: name)
+            Travis.logger.debug('dead consumer found', name: name)
           end
         end
 
         dead.each do |name|
-          Travis.logger.info('creating new consumer', name: name)
+          Travis.logger.debug('creating new consumer', name: name)
           consumers[name] = create_consumer
           consumers[name].subscribe
         end
@@ -69,11 +69,25 @@ module Travis
 
       private def handle_batch(batch)
         Travis.logger.debug('received batch payload')
-        Travis::Logs::Sidekiq::LogParts.perform_async(batch)
+        Travis::Logs::Sidekiq::LogParts.perform_async(
+          ensure_entries_base64(batch)
+        )
       end
 
       private def forward_pusher_payload(payload)
-        Travis::Logs::Sidekiq::PusherForwarding.perform_async(payload)
+        Travis::Logs::Sidekiq::PusherForwarding.perform_async(
+          ensure_entries_base64([payload])
+        )
+      end
+
+      private def ensure_entries_base64(batch)
+        batch.map do |entry|
+          if entry['encoding'] != 'base64'
+            entry['log'] = Base64.strict_encode64(entry['log'])
+            entry['encoding'] = 'base64'
+          end
+          entry
+        end
       end
 
       private def consumer_count

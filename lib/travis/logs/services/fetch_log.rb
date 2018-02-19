@@ -44,12 +44,15 @@ module Travis
           result = database.log_for_id(id) if id
           return nil if result.nil?
 
-          content = result[:content]
+          content       = result[:content]
+          aggregated_at = result[:aggregated_at]
 
-          if aggregate_on_demand && result[:aggregated_at].nil?
+          if aggregate_on_demand && (aggregated_at.nil? || content.nil?)
             content = [
               content, database.aggregated_on_demand(result[:id])
             ].join('')
+
+            content = nil if content.strip.empty?
           end
 
           removed_by_id = result.delete(:removed_by)

@@ -20,6 +20,7 @@ module Travis
     autoload :Aggregate, 'travis/logs/aggregate'
     autoload :App, 'travis/logs/app'
     autoload :Config, 'travis/logs/config'
+    autoload :ContentDecoder, 'travis/logs/content_decoder'
     autoload :Database, 'travis/logs/database'
     autoload :Drain, 'travis/logs/drain'
     autoload :DrainConsumer, 'travis/logs/drain_consumer'
@@ -113,7 +114,6 @@ module Travis
           c.environments = %w[staging production]
 
           c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
-          c.processors << Raven::Processor::RemoveStacktrace
           c.release = version
           c.silence_ready = true
         end
