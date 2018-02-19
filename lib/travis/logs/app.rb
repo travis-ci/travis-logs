@@ -72,7 +72,7 @@ module Travis
         json uptime: Time.now.utc - boot_time,
              greeting: 'hello, human 👋!',
              pong: redis_ping,
-             now: readonly_database.now,
+             now: database.now,
              version: Travis::Logs.version
       end
 
@@ -274,10 +274,6 @@ module Travis
 
       private def database
         @database ||= Travis::Logs.database_connection
-      end
-
-      private def readonly_database
-        @readonly_database ||= Travis::Logs.readonly_database_connection
       end
 
       private def maint

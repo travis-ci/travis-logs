@@ -56,12 +56,6 @@ module Travis
         @database_connection ||= Travis::Logs::Database.connect
       end
 
-      def readonly_database_connection
-        @readonly_database_connection ||= Travis::Logs::Database.connect(
-          config: config.logs_readonly_database.to_h
-        )
-      end
-
       def redis
         @redis ||= Travis::Logs::RedisPool.new(redis_config)
       end

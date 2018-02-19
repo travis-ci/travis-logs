@@ -57,13 +57,6 @@ module Travis
             "postgres://localhost/travis_logs_#{env}"
           )
         },
-        logs_readonly_database: {
-          sql_logging: false,
-          url: ENV.fetch(
-            'LOGS_READONLY_DATABASE_URL',
-            "postgres://localhost/travis_logs_#{env}"
-          )
-        },
         memcached: {
           servers: ENV.fetch('MEMCACHIER_SERVERS', ''),
           username: ENV.fetch('MEMCACHIER_USERNAME', ''),
