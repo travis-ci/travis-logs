@@ -29,6 +29,6 @@ jobs:
     - stage: ":ship: it to Quay.io"
       sudo: required
       dist: trusty
-      install: skip
-      before_script: skip
+      install: echo skip
+      before_script: echo skip
       script: ./script/docker-build-and-push
