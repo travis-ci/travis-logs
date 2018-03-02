@@ -53,7 +53,11 @@ module Travis
         payload = Array(payload)
 
         measure do
-          log_parts_normalizer.run(payload).each { |_, entry| notify(entry) }
+          # rubocop:disable Performance/HashEachMethods
+          log_parts_normalizer.run(payload).each do |_, entry|
+            notify(entry)
+          end
+          # rubocop:enable Performance/HashEachMethods
         end
       end
 
@@ -63,11 +67,9 @@ module Travis
             mark('pusher.send')
           else
             mark('pusher.ignore')
-
             return if existence_check?
           end
         end
-
         measure('pusher') do
           pusher_client.push(pusher_payload(entry))
         end

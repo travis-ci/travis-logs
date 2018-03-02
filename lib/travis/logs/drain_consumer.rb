@@ -5,8 +5,6 @@ require 'coder'
 require 'concurrent'
 require 'multi_json'
 require 'sequel'
-require 'thread'
-
 require 'travis/logs'
 
 module Travis
@@ -118,20 +116,16 @@ module Travis
 
       private def flush_batch_buffer
         return ensure_shutdown if dead?
-
         Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size
         )
         sample = {}
         payload = []
-
         batch_buffer.each_pair do |delivery_tag, entry|
           sample[delivery_tag] = entry
         end
-
         sample.each_pair do |delivery_tag, entry|
           payload.push(entry)
-
           begin
             batch_buffer.delete_pair(delivery_tag, entry)
           rescue StandardError => e
@@ -142,7 +136,6 @@ module Travis
             payload.pop
             next
           end
-
           begin
             safe_ack(delivery_tag)
           rescue StandardError => e
@@ -154,13 +147,11 @@ module Travis
             batch_buffer[delivery_tag] = entry
           end
         end
-
         batch_handler.call(payload) unless payload.empty?
       end
 
       private def receive(delivery_info, _properties, payload)
         return if dead?
-
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -173,7 +164,7 @@ module Travis
           Travis.logger.debug('acking empty or undecodable payload')
           safe_ack(delivery_info.delivery_tag)
         end
-      rescue => e
+      rescue StandardError => e
         log_exception(e, decoded_payload)
         jobs_channel.reject(delivery_info.delivery_tag, true)
         mark('receive.retry')
