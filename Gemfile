@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '2.4.2' if ENV.key?('DYNO')
+ruby '2.5.0' if ENV.key?('DYNO')
 
 def gh(slug)
   "https://github.com/#{slug}.git"
@@ -20,7 +20,6 @@ gem 'jwt'
 gem 'metriks', git: gh('travis-ci/metriks')
 gem 'metriks-librato_metrics', git: gh('travis-ci/metriks-librato_metrics')
 gem 'multi_json'
-gem 'oj'
 gem 'pg'
 gem 'pry'
 gem 'puma'

@@ -22,7 +22,7 @@ Travis::Exceptions.setup(
 class SpecHelper
   class << self
     def rsa_private_key
-      @rsa_private_key ||= <<~EOF
+      @rsa_private_key ||= <<~RSAKEY
         -----BEGIN RSA PRIVATE KEY-----
         MIIEowIBAAKCAQEA1cM1oaP1JLlB6iEdIbTAvToiydfypq+K/H3tSlRfoY1k/wIn
         QRbF5XHBdgMJvLPYdqPzbzE5l+vThgk20RIsAV8DYd1nEH+rSnZaX3Q48JKi0A19
@@ -50,7 +50,7 @@ class SpecHelper
         pGtarhuDVtIIXpS8tlrToQSUdMlzKqwqk9g6cm+vPYdd+yGNzdWBADURqeZjzA0Q
         oRLuY9cp8DkPGlJ2P7sxugWnMyoIUEXIVwAwWJJ/Qwd2nOUMbYKr
         -----END RSA PRIVATE KEY-----
-      EOF
+      RSAKEY
     end
 
     def rsa_key

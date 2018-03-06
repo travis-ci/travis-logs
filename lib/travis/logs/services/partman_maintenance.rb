@@ -32,14 +32,12 @@ module Travis
           sleep(initial_sleep)
           cancel_conflicting_backends
           terminate_conflicting_backends!
-
           table_names.each do |table_name|
             measure(table_name) do
               Travis.logger.info(
                 'running partman.run_maintenance',
                 table: table_name
               )
-
               db[<<~SQL].to_a
                 SELECT partman.run_maintenance(
                   '#{table_name}',

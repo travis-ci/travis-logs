@@ -132,4 +132,4 @@ operation lasts about 1 minute.
 
 See LICENSE file.
 
-Copyright (c) 2011-2017 Travis CI GmbH
+Copyright (c) 2018 Travis CI GmbH

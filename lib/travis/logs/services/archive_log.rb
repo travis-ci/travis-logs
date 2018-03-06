@@ -154,7 +154,7 @@ module Travis
 
         private def retrying(header, times: retry_times)
           yield
-        rescue => e
+        rescue StandardError => e
           count ||= 0
           count += 1
           if times > count

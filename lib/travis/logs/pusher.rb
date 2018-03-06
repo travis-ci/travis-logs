@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'oj'
 require 'pusher'
 require 'multi_json'
 

@@ -66,7 +66,7 @@ describe Travis::Logs::Services::AggregateLogs do
     it 'does not vacuum log parts' do
       begin
         service.run
-      rescue # rubocop:disable Lint/HandleExceptions
+      rescue StandardError # rubocop:disable Lint/HandleExceptions
       end
 
       expect(database).not_to have_received(:delete_log_parts)
@@ -81,7 +81,7 @@ describe Travis::Logs::Services::AggregateLogs do
     it 'does not vacuum log parts' do
       begin
         service.run
-      rescue # rubocop:disable Lint/HandleExceptions
+      rescue StandardError # rubocop:disable Lint/HandleExceptions
       end
 
       expect(database).not_to have_received(:delete_log_parts)

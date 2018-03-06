@@ -53,7 +53,6 @@ module Travis
             false
           end
         end
-
         entries = by_log_id.map do |log_id, entry|
           {
             log_id: log_id,
@@ -62,9 +61,7 @@ module Travis
             content: Travis::Logs::ContentDecoder.decode_content(entry)
           }
         end
-
         database.create_log_parts(entries)
-
         by_log_id.each do |log_id, entry|
           aggregate_async(log_id, entry) if final?(entry)
         end

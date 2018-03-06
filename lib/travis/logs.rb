@@ -81,10 +81,8 @@ module Travis
             size: config.logs.cache_size_bytes
           )
         end
-
         require 'connection_pool'
         require 'active_support/cache/dalli_store'
-
         ActiveSupport::Cache::DalliStore.new(
           config.memcached[:servers].to_s.split(','),
           username: config.memcached[:username],
@@ -103,10 +101,8 @@ module Travis
         Travis::Exceptions.setup(config, config.env, logger)
         Raven.configure do |c|
           c.dsn = config.sentry.dsn unless config.sentry.dsn.to_s.empty?
-
           c.current_environment = config.env.to_s
           c.environments = %w[staging production]
-
           c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
           c.release = version
           c.silence_ready = true

@@ -99,7 +99,7 @@ module Travis
             measure('check_content_length') do
               storage_service.content_length(log_url)
             end
-          rescue
+          rescue StandardError
             mark('check_content_length.failed')
           end
         end
@@ -115,7 +115,6 @@ module Travis
               mark('log.not_found')
             end
           end
-
           @log
         end
 

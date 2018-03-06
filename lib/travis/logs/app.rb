@@ -293,7 +293,6 @@ module Travis
         auth_header = request.env['HTTP_AUTHORIZATION']
         halt 403 if auth_header.nil?
         halt 503 if maint.enabled?
-
         case auth_header
         when /^Bearer / then assert_bearer_authorized!(auth_header)
         when /^token sig:/ then assert_log_parts_multi_payload_authorized!(
@@ -330,11 +329,9 @@ module Travis
 
       private def log_parts_multi_payload_authorized?(request, auth_header)
         request.body.rewind
-
         tokens = Array(
           MultiJson.load(request.body.read)
         ).map { |i| i['tok'].to_s }
-
         Rack::Utils.secure_compare(
           auth_header,
           "token sig:#{Digest::SHA1.hexdigest(tokens.join)}"
@@ -363,9 +360,11 @@ module Travis
           true,
           algorithm: 'RS512',
           verify_sub: true,
-          'sub' => job_id
+          sub: job_id
         )
         true
+      rescue JWT::InvalidSubError
+        false
       rescue JWT::DecodeError
         false
       end

@@ -136,9 +136,7 @@ module Travis
 
         private def queue_archiving(log_id)
           return unless archive?
-
           log = database.log_for_id(log_id)
-
           if log
             Travis::Logs::Sidekiq::Archive.perform_async(log[:id])
           else
