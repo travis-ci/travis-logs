@@ -97,7 +97,6 @@ module Travis
       ensure
         @dead = true
         @batch_buffer = nil
-        sleep
       end
 
       private def build_periodic_flush_task
