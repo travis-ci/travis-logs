@@ -49,7 +49,7 @@ module Travis
             end
           end
         end
-        
+
         private def run_analyze
           table_names.each do |table_name|
             measure(table_name) do
