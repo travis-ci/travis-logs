@@ -25,6 +25,7 @@ module Travis
 
         def run
           maint.with_maintenance_on { run_maintenance }
+          run_analyze
         end
 
         private def run_maintenance
@@ -41,8 +42,23 @@ module Travis
               db[<<~SQL].to_a
                 SELECT partman.run_maintenance(
                   '#{table_name}',
-                  p_debug := true
+                  p_debug := true,
+                  p_analyze := false
                 )
+              SQL
+            end
+          end
+        end
+        
+        private def run_analyze
+          table_names.each do |table_name|
+            measure(table_name) do
+              Travis.logger.info(
+                'running analyze',
+                table: table_name
+              )
+              db[<<~SQL].to_a
+                ANALYZE #{table_name}
               SQL
             end
           end
