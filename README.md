@@ -93,6 +93,21 @@ The schema and migrations for travis-logs are managed with
 [sqitch](http://sqitch.org/).  All of the deploy, verify, and revert scripts may
 be found in the `./db/` directory.
 
+To install sqitch locally, you can run:
+
+```
+$ script/install-sqitch
+```
+
+To run sqitch, you can run:
+
+```
+$ script/sqitch-heroku LOGS_DATABASE_URL travis-logs-staging status
+```
+
+For more information on how to use sqitch and how to add migrations, you can
+take a look at the [sqitch tutorial](https://metacpan.org/pod/sqitchtutorial).
+
 ### Data lifecycle
 
 The process types above use PostgreSQL for various operations, with a structure
