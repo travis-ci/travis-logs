@@ -51,6 +51,7 @@ module Travis
 
       post '/pusher/existence' do
         webhook = pusher.webhook(request)
+        p [params, webhook.valid?, webhook.events]
         if webhook.valid?
           webhook.events.each do |event|
             case event['name']

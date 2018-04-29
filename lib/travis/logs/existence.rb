@@ -17,11 +17,14 @@ module Travis
       end
 
       def occupied!(channel_name)
+        puts "Occupied: #{key(channel_name)}"
         redis.setex(key(channel_name), expiry, 1)
       end
 
       def occupied?(channel_name)
-        !redis.get(key(channel_name)).nil?
+        res = !redis.get(key(channel_name)).nil?
+        puts "Occupied? #{key(channel_name)}: #{res}"
+        res
       end
 
       def vacant?(channel_name)
@@ -29,6 +32,7 @@ module Travis
       end
 
       def vacant!(channel_name)
+        puts "Vacated: #{key(channel_name)}"
         redis.del(key(channel_name))
       end
 
