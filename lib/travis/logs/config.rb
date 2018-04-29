@@ -67,7 +67,7 @@ module Travis
           app_id: '',
           key: '',
           secret: '',
-          secure: !!ENV['PUSHER_SECURE']
+          secure: !ENV['PUSHER_SECURE'].nil?
         },
         redis: { url: '' },
         s3: {
