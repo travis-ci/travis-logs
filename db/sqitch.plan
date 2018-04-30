@@ -5,3 +5,4 @@ structure 2017-04-04T19:12:07Z Dan Buch <dan@travis-ci.org> # Import initial str
 vacuum_settings [structure] 2017-04-04T19:37:24Z Dan Buch <dan@travis-ci.org> # Set table-level autovacuum and database-level vacuum settings
 log_parts_created_at_not_null [structure] 2017-04-04T19:52:23Z Dan Buch <dan@travis-ci.org> # Modify log_parts.created_at to be NOT NULL with default for use with partman
 partman [log_parts_created_at_not_null] 2017-04-04T20:24:49Z Dan Buch <dan@travis-ci.org> # Enable and configure partman for log_parts
+partman_remove_constraint 2018-04-27T11:41:39Z Igor Wiedler <igor@travis-ci.org> # Remove partman constraint exclusion on log_id column
