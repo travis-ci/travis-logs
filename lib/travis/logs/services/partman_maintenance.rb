@@ -34,7 +34,7 @@ module Travis
           cancel_conflicting_backends
           terminate_conflicting_backends!
           table_names.each do |table_name|
-            measure(table_name) do
+            measure("maintenance.#{table_name}") do
               Travis.logger.info(
                 'running partman.run_maintenance',
                 table: table_name
@@ -52,7 +52,7 @@ module Travis
 
         private def run_analyze
           table_names.each do |table_name|
-            measure(table_name) do
+            measure("analyze.#{table_name}") do
               Travis.logger.info(
                 'running analyze',
                 table: table_name
