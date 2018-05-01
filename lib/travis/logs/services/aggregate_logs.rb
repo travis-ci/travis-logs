@@ -104,8 +104,6 @@ module Travis
             'aggregating',
             action: 'aggregate', log_id: log_id, result: 'successful'
           )
-        rescue StandardError => e
-          Travis::Exceptions.handle(e)
         end
 
         attr_reader :database, :pool_config
