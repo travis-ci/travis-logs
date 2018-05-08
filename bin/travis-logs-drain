@@ -11,6 +11,6 @@ Travis.logger.level = ENV['DRAIN_LOG_LEVEL'] if ENV['DRAIN_LOG_LEVEL']
 
 $stdout.sync = true
 
-require "rbtrace"
+require 'rbtrace'
 Travis.logger.info('running log parts drain')
 Travis::Logs::Drain.new.run
