@@ -28,6 +28,7 @@ gem 'pusher'
 gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rake'
+gem 'rbtrace', require: false
 gem 'redis-namespace'
 gem 'redlock'
 gem 'rspec', group: :test
@@ -44,4 +45,3 @@ gem 'travis-exceptions', git: gh('travis-ci/travis-exceptions')
 gem 'travis-lock', git: gh('travis-ci/travis-lock')
 gem 'travis-logger', git: gh('travis-ci/travis-logger')
 gem 'travis-metrics', git: gh('travis-ci/travis-metrics')
-gem 'rbtrace', require: false
