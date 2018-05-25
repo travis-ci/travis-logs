@@ -9,7 +9,7 @@ def setup_env_pgdatabase
 end
 
 def setup_env_logs_database_url
-  ENV['LOGS_DATABASE_URL'] = "postgres://localhost:5432/#{dbname}"
+  ENV['DATABASE_URL'] = "postgres://localhost:5432/#{dbname}"
 end
 
 def dbname
@@ -38,7 +38,7 @@ describe 'enterprise-migrations' do
     %w[
       PGHOST
       PGDATABASE
-      LOGS_DATABASE_URL
+      DATABASE_URL
     ].each do |k|
       ENV[k] = nil
     end
@@ -66,7 +66,7 @@ describe 'enterprise-migrations' do
     end
   end
 
-  context 'without LOGS_DATABASE_URL' do
+  context 'without DATABASE_URL' do
     before :each do
       setup_env_pghost
       setup_env_pgdatabase

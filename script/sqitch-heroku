@@ -24,8 +24,8 @@ Usage: ${prog} <dbvar> <appname> <sqitch-arg> [sqitch-arg,...]
 
 Examples:
 
-  ${prog} LOGS_DATABASE_URL travis-logs-staging status
-  ${prog} LOGS_DATABASE_URL travis-logs-production verify
+  ${prog} DATABASE_URL travis-logs-staging status
+  ${prog} DATABASE_URL travis-logs-production verify
 
 EOF
 }

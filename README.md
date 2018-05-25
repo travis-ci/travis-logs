@@ -102,7 +102,7 @@ $ script/install-sqitch
 To run sqitch, you can run:
 
 ```
-$ script/sqitch-heroku LOGS_DATABASE_URL travis-logs-staging status
+$ script/sqitch-heroku DATABASE_URL travis-logs-staging status
 ```
 
 For more information on how to use sqitch and how to add migrations, you can

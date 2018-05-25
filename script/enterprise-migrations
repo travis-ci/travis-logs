@@ -19,8 +19,8 @@ main() {
     exit 1
   }
 
-  [[ "${LOGS_DATABASE_URL}" ]] || {
-    echo "Missing \$LOGS_DATABASE_URL"
+  [[ "${DATABASE_URL}" ]] || {
+    echo "Missing \$DATABASE_URL"
     exit 1
   }
 
@@ -34,7 +34,7 @@ main() {
     sqitch deploy \
       --to-change structure \
       --log-only \
-      "db:${LOGS_DATABASE_URL}"
+      "db:${DATABASE_URL}"
   fi
   __migrate
 }
@@ -65,17 +65,17 @@ __table_exists_sql() {
 }
 
 __migrate() {
-  # Use the LOGS_DATABASE_URL we use elsewhere but make it fit the DATABASE_URI format
+  # Use the DATABASE_URL we use elsewhere but make it fit the DATABASE_URI format
   # sqitch expects
   sqitch deploy \
     --to-change "${ENTERPRISE_MIGRATE_TO}" \
-    "db:${LOGS_DATABASE_URL}"
+    "db:${DATABASE_URL}"
   sqitch deploy \
     --log-only --no-verify \
-    "db:${LOGS_DATABASE_URL}"
+    "db:${DATABASE_URL}"
   sqitch verify \
     --to-change "${ENTERPRISE_MIGRATE_TO}" \
-    "db:${LOGS_DATABASE_URL}"
+    "db:${DATABASE_URL}"
 }
 
 main "$@"
