@@ -634,8 +634,8 @@ GEM
       multi_json (~> 1.0)
       pusher-signature (~> 0.1.8)
     pusher-signature (0.1.8)
-    rack (1.6.9)
-    rack-protection (1.5.4)
+    rack (1.6.10)
+    rack-protection (1.5.5)
       rack
     rack-ssl (1.4.1)
       rack
@@ -744,4 +744,4 @@ DEPENDENCIES
   travis-metrics!
 
 BUNDLED WITH
-   1.16.1
+   1.16.2
