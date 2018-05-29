@@ -58,7 +58,7 @@ GEM
       tzinfo (~> 1.1)
     amq-protocol (2.3.0)
     ast (2.4.0)
-    atomic (1.1.100)
+    atomic (1.1.101)
     avl_tree (1.2.1)
       atomic (~> 1.1)
     aws-partitions (1.68.0)
