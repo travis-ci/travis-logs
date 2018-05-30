@@ -53,7 +53,7 @@ module Travis
         logs_database: {
           sql_logging: false,
           url: ENV.fetch(
-            'LOGS_DATABASE_URL',
+            'DATABASE_URL',
             "postgres://localhost/travis_logs_#{env}"
           )
         },
