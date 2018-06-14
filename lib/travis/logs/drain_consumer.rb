@@ -60,9 +60,9 @@ module Travis
       end
 
       private def jobs_channel
-        @jobs_channel ||= amqp_conn.create_channel.tap do |conn|
+        @jobs_channel ||= amqp_conn.create_channel.tap do |channel|
           if Travis.config.amqp[:prefetch]
-            conn.prefetch(Travis.config.amqp[:prefetch])
+            channel.prefetch(Travis.config.amqp[:prefetch])
           end
         end
       end
@@ -125,28 +125,21 @@ module Travis
         end
         sample.each_pair do |delivery_tag, entry|
           payload.push(entry)
-          begin
-            batch_buffer.delete_pair(delivery_tag, entry)
-          rescue StandardError => e
-            Travis.logger.error(
-              'failed to delete pair from buffer',
-              error: e.inspect
-            )
-            payload.pop
-            next
-          end
-          begin
-            safe_ack(delivery_tag)
-          rescue StandardError => e
-            Travis.logger.error(
-              'failed to ack message',
-              error: e.inspect
-            )
-            payload.pop
-            batch_buffer[delivery_tag] = entry
-          end
+          batch_buffer.delete_pair(delivery_tag, entry)
         end
         batch_handler.call(payload) unless payload.empty?
+        begin
+          max_delivery_tag = sample.keys.max
+          safe_ack(max_delivery_tag, true)
+        rescue StandardError => e
+          sample.each_pair do |delivery_tag, entry|
+            batch_buffer[delivery_tag] = entry
+          end
+          Travis.logger.error(
+            'failed to ack message',
+            error: e.inspect
+          )
+        end
       end
 
       private def receive(delivery_info, _properties, payload)
@@ -161,7 +154,7 @@ module Travis
           end
         else
           Travis.logger.debug('acking empty or undecodable payload')
-          safe_ack(delivery_info.delivery_tag)
+          safe_ack(delivery_info.delivery_tag, false)
         end
       rescue StandardError => e
         log_exception(e, decoded_payload)
@@ -185,8 +178,8 @@ module Travis
         nil
       end
 
-      private def safe_ack(delivery_tag)
-        jobs_channel.ack(delivery_tag)
+      private def safe_ack(delivery_tag, multiple)
+        jobs_channel.ack(delivery_tag, multiple)
         @last_ack = Time.now
       rescue Bunny::Exception => e
         Travis.logger.error(
