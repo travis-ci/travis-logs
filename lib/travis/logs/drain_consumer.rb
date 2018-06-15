@@ -119,7 +119,8 @@ module Travis
         return ensure_shutdown if dead?
         return if batch_buffer.empty?
         Travis.logger.debug(
-          'flushing batch buffer', size: batch_buffer.size
+          'flushing batch buffer', size: batch_buffer.size,
+                                   consumer: object_id
         )
         sample = {}
         payload = []
@@ -136,7 +137,7 @@ module Travis
           Travis.logger.debug(
             'Ack-ing batch',
             max_delivery_tag: max_delivery_tag,
-            batch: sample.keys
+            batch: sample
           )
           safe_ack(max_delivery_tag, true)
         rescue StandardError => e
