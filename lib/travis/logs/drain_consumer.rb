@@ -117,6 +117,7 @@ module Travis
 
       private def flush_batch_buffer
         return ensure_shutdown if dead?
+        return if batch_buffer.empty?
         Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size
         )
@@ -129,7 +130,7 @@ module Travis
           payload.push(entry)
           batch_buffer.delete_pair(delivery_tag, entry)
         end
-        batch_handler.call(payload) unless payload.empty?
+        batch_handler.call(payload)
         begin
           max_delivery_tag = sample.keys.max
           Travis.logger.debug(
