@@ -123,13 +123,18 @@ module Travis
         batch_buffer.each_pair do |delivery_tag, entry|
           sample[delivery_tag] = entry
         end
-        sample.each_pair do |delivery_tag, entry|
+        sample.each_pair do |delivery_tag, entry|  
           payload.push(entry)
           batch_buffer.delete_pair(delivery_tag, entry)
         end
         batch_handler.call(payload) unless payload.empty?
         begin
           max_delivery_tag = sample.keys.max
+          Travis.logger.debug(
+            'Ack-ing batch',
+            max_delivery_tag: max_delivery_tag,
+            batch: sample.keys
+          )
           safe_ack(max_delivery_tag, true)
         rescue StandardError => e
           sample.each_pair do |delivery_tag, entry|
@@ -150,6 +155,7 @@ module Travis
           pusher_handler.call(decoded_payload)
           batch_buffer[delivery_info.delivery_tag] = decoded_payload
           if batch_buffer.size >= batch_size
+            Travis.logger.debug('Batch size reached. Triggering flush')
             flush_mutex.synchronize { flush_batch_buffer }
           end
         else
