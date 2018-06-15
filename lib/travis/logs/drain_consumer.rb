@@ -135,9 +135,9 @@ module Travis
         begin
           max_delivery_tag = sample.keys.max
           Travis.logger.debug(
-            'Ack-ing batch',
+            'ack-ing batched messages',
             max_delivery_tag: max_delivery_tag,
-            batch: sample
+            consumer: object_id
           )
           safe_ack(max_delivery_tag, true)
         rescue StandardError => e
@@ -159,7 +159,7 @@ module Travis
           pusher_handler.call(decoded_payload)
           batch_buffer[delivery_info.delivery_tag] = decoded_payload
           if batch_buffer.size >= batch_size
-            Travis.logger.debug('Batch size reached. Triggering flush')
+            Travis.logger.debug('batch size reached - triggering flush')
             flush_mutex.synchronize { flush_batch_buffer }
           end
         else
