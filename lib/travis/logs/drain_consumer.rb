@@ -123,7 +123,7 @@ module Travis
         batch_buffer.each_pair do |delivery_tag, entry|
           sample[delivery_tag] = entry
         end
-        sample.each_pair do |delivery_tag, entry|  
+        sample.each_pair do |delivery_tag, entry|
           payload.push(entry)
           batch_buffer.delete_pair(delivery_tag, entry)
         end
