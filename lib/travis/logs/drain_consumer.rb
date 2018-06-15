@@ -18,17 +18,27 @@ module Travis
         METRIKS_PREFIX
       end
 
+      attr_reader :batch_buffer, :flush_mutex
       attr_reader :reporting_jobs_queue, :batch_handler
       attr_reader :pusher_handler, :periodic_flush_task
+      private :batch_buffer
+      private :flush_mutex
       private :batch_handler
       private :pusher_handler
       private :periodic_flush_task
 
       def initialize(reporting_jobs_queue, batch_handler: nil,
                      pusher_handler: nil)
+        @batch_buffer = Concurrent::Map.new
+        @flush_mutex = Mutex.new
         @reporting_jobs_queue = reporting_jobs_queue
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
+
+        # initialize queue before building periodic flush task
+        # to protect against race conditions
+        jobs_queue
+
         @periodic_flush_task = build_periodic_flush_task
         @created_at = Time.now
       end
@@ -77,14 +87,6 @@ module Travis
 
       private def logs_config
         @logs_config ||= Travis.config.logs.to_h
-      end
-
-      private def batch_buffer
-        @batch_buffer ||= Concurrent::Map.new
-      end
-
-      private def flush_mutex
-        @flush_mutex ||= Mutex.new
       end
 
       private def shutdown(reason)
