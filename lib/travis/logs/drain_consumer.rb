@@ -18,17 +18,27 @@ module Travis
         METRIKS_PREFIX
       end
 
+      attr_reader :batch_buffer, :flush_mutex
       attr_reader :reporting_jobs_queue, :batch_handler
       attr_reader :pusher_handler, :periodic_flush_task
+      private :batch_buffer
+      private :flush_mutex
       private :batch_handler
       private :pusher_handler
       private :periodic_flush_task
 
       def initialize(reporting_jobs_queue, batch_handler: nil,
                      pusher_handler: nil)
+        @batch_buffer = Concurrent::Map.new
+        @flush_mutex = Mutex.new
         @reporting_jobs_queue = reporting_jobs_queue
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
+
+        # initialize queue before building periodic flush task
+        # to protect against race conditions
+        jobs_queue
+
         @periodic_flush_task = build_periodic_flush_task
         @created_at = Time.now
       end
@@ -72,9 +82,9 @@ module Travis
       end
 
       private def jobs_channel
-        @jobs_channel ||= amqp_conn.create_channel.tap do |conn|
+        @jobs_channel ||= amqp_conn.create_channel.tap do |channel|
           if Travis.config.amqp[:prefetch]
-            conn.prefetch(Travis.config.amqp[:prefetch])
+            channel.prefetch(Travis.config.amqp[:prefetch])
           end
         end
       end
@@ -89,14 +99,6 @@ module Travis
 
       private def logs_config
         @logs_config ||= Travis.config.logs.to_h
-      end
-
-      private def batch_buffer
-        @batch_buffer ||= Concurrent::Map.new
-      end
-
-      private def flush_mutex
-        @flush_mutex ||= Mutex.new
       end
 
       private def shutdown(reason)
@@ -127,8 +129,10 @@ module Travis
 
       private def flush_batch_buffer
         return ensure_shutdown if dead?
+        return if batch_buffer.empty?
         Travis.logger.debug(
-          'flushing batch buffer', size: batch_buffer.size
+          'flushing batch buffer', size: batch_buffer.size,
+                                   consumer: object_id
         )
         sample = {}
         payload = []
@@ -137,28 +141,26 @@ module Travis
         end
         sample.each_pair do |delivery_tag, entry|
           payload.push(entry)
-          begin
-            batch_buffer.delete_pair(delivery_tag, entry)
-          rescue StandardError => e
-            Travis.logger.error(
-              'failed to delete pair from buffer',
-              error: e.inspect
-            )
-            payload.pop
-            next
-          end
-          begin
-            safe_ack(delivery_tag)
-          rescue StandardError => e
-            Travis.logger.error(
-              'failed to ack message',
-              error: e.inspect
-            )
-            payload.pop
+          batch_buffer.delete_pair(delivery_tag, entry)
+        end
+        batch_handler.call(payload)
+        begin
+          max_delivery_tag = sample.keys.max
+          Travis.logger.debug(
+            'ack-ing batched messages',
+            max_delivery_tag: max_delivery_tag,
+            consumer: object_id
+          )
+          safe_ack(max_delivery_tag, true)
+        rescue StandardError => e
+          sample.each_pair do |delivery_tag, entry|
             batch_buffer[delivery_tag] = entry
           end
+          Travis.logger.error(
+            'failed to ack message',
+            error: e.inspect
+          )
         end
-        batch_handler.call(payload) unless payload.empty?
       end
 
       private def receive(delivery_info, _properties, payload)
@@ -169,11 +171,12 @@ module Travis
           pusher_handler.call(decoded_payload)
           batch_buffer[delivery_info.delivery_tag] = decoded_payload
           if batch_buffer.size >= batch_size
+            Travis.logger.debug('batch size reached - triggering flush')
             flush_mutex.synchronize { flush_batch_buffer }
           end
         else
           Travis.logger.debug('acking empty or undecodable payload')
-          safe_ack(delivery_info.delivery_tag)
+          safe_ack(delivery_info.delivery_tag, false)
         end
       rescue StandardError => e
         log_exception(e, decoded_payload)
@@ -197,8 +200,8 @@ module Travis
         nil
       end
 
-      private def safe_ack(delivery_tag)
-        jobs_channel.ack(delivery_tag)
+      private def safe_ack(delivery_tag, multiple)
+        jobs_channel.ack(delivery_tag, multiple)
         @last_ack = Time.now
       rescue Bunny::Exception => e
         Travis.logger.error(
