@@ -1,4 +1,5 @@
 drain: bundle exec je bin/travis-logs-drain
+drain_sharded: TRAVIS_LOGS_DRAIN_RABBITMQ_SHARDING=true bundle exec je bin/travis-logs-drain
 web: bin/travis-logs-pgbouncer-exec bin/travis-logs-server
 worker_critical: bin/travis-logs-pgbouncer-exec bin/travis-logs-sidekiq -c ${TRAVIS_LOGS_WORKER_CRITICAL_CONCURRENCY:-5} -q logs.pusher_forwarding,1
 worker_high: bin/travis-logs-pgbouncer-exec bin/travis-logs-sidekiq -c ${TRAVIS_LOGS_WORKER_HIGH_CONCURRENCY:-5} -q aggregate,1 -q log_parts,1

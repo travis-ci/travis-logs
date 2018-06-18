@@ -37,6 +37,7 @@ module Travis
           drain_execution_interval: 3,
           drain_loop_sleep_interval: 10,
           drain_timeout_interval: 3,
+          drain_rabbitmq_sharding: false,
           intervals: {
             aggregate: 60,
             force: 3 * 60 * 60,

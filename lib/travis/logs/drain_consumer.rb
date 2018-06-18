@@ -63,9 +63,21 @@ module Travis
       end
 
       private def jobs_queue
+        return jobs_queue_sharded if logs_config[:drain_rabbitmq_sharding]
+        jobs_queue_single
+      end
+
+      private def jobs_queue_single
         @jobs_queue ||= jobs_channel.queue(
           "reporting.jobs.#{reporting_jobs_queue}",
           durable: true, exclusive: false
+        )
+      end
+
+      private def jobs_queue_sharded
+        @jobs_queue ||= jobs_channel.queue(
+          "reporting.jobs.#{reporting_jobs_queue}",
+          durable: true, exclusive: false, no_declare: true
         )
       end
 
