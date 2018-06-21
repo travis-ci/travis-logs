@@ -61,7 +61,6 @@ module Travis
 
       private def create_consumer
         Travis::Logs::DrainConsumer.new(
-          rabbitmq_sharding? ? 'logs_sharded' : 'logs',
           batch_handler: ->(batch) { handle_batch(batch) },
           pusher_handler: ->(payload) { forward_pusher_payload(payload) }
         )
@@ -96,10 +95,6 @@ module Travis
 
       private def loop_sleep_interval
         Travis.config.logs.drain_loop_sleep_interval
-      end
-
-      private def rabbitmq_sharding?
-        Travis.config.logs.drain_rabbitmq_sharding
       end
     end
   end
