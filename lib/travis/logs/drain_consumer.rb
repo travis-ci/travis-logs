@@ -27,11 +27,9 @@ module Travis
       private :pusher_handler
       private :periodic_flush_task
 
-      def initialize(reporting_jobs_queue, batch_handler: nil,
-                     pusher_handler: nil)
+      def initialize(batch_handler: nil, pusher_handler: nil)
         @batch_buffer = Concurrent::Map.new
         @flush_mutex = Mutex.new
-        @reporting_jobs_queue = reporting_jobs_queue
         @batch_handler = batch_handler
         @pusher_handler = pusher_handler
 
@@ -69,14 +67,14 @@ module Travis
 
       private def jobs_queue_single
         @jobs_queue ||= jobs_channel.queue(
-          "reporting.jobs.#{reporting_jobs_queue}",
+          'reporting.jobs.logs',
           durable: true, exclusive: false
         )
       end
 
       private def jobs_queue_sharded
         @jobs_queue ||= jobs_channel.queue(
-          "reporting.jobs.#{reporting_jobs_queue}",
+          'reporting.jobs.logs_sharded',
           durable: true, exclusive: false, no_declare: true
         )
       end

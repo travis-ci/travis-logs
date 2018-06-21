@@ -27,7 +27,6 @@ describe 'receive_logs' do
     pusher_payloads = []
 
     dq = Travis::Logs::DrainConsumer.new(
-      'logs',
       batch_handler: ->(b) { batches << b },
       pusher_handler: ->(p) { pusher_payloads << p }
     )
