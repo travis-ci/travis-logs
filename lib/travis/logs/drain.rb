@@ -30,7 +30,12 @@ module Travis
           consumers["#{n}/#{consumer_count}"] = create_consumer
         end
 
-        consumers.each_pair { |_, consumer| consumer.subscribe }
+        consumers.each_pair do |_, consumer|
+          consumer.subscribe
+          # delay is needed to ensure a balanced distribution of consumers to
+          # sharded queues
+          sleep(rand(1..3))
+        end
 
         return run_loop_tick if once
         loop { run_loop_tick }
@@ -50,6 +55,9 @@ module Travis
           Travis.logger.debug('creating new consumer', name: name)
           consumers[name] = create_consumer
           consumers[name].subscribe
+          # delay is needed to ensure a balanced distribution of consumers to
+          # sharded queues
+          sleep(rand(1..3))
         end
 
         sleep(loop_sleep_interval)
