@@ -11,8 +11,8 @@ module Travis
       def self.setup
         Aws.config.update(
           region: Travis.config.s3.region || 'us-east-1',
-          proxy_uri: Travis.config.s3.proxy_uri,
           endpoint: Travis.config.s3.endpoint,
+          ssl_verify_peer: false,
           force_path_style: Travis.config.s3.force_path_style,
           credentials: Aws::Credentials.new(
             Travis.config.s3.access_key_id,
@@ -44,7 +44,12 @@ module Travis
       end
 
       private def bucket(uri)
-        s3.bucket(uri.host)
+        if Travis.config.enterprise
+          s3.bucket("log-archive").create unless s3.bucket("log-archive").exists?
+          s3.bucket("log-archive")
+        else
+          s3.bucket(uri.host)
+        end
       end
 
       private def acl
