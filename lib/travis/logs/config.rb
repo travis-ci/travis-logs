@@ -71,6 +71,7 @@ module Travis
         },
         redis: { url: '' },
         s3: {
+          force_path_style: false,
           access_key_id: '',
           acl: '',
           hostname: '',
