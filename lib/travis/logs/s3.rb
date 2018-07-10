@@ -10,7 +10,10 @@ module Travis
     class S3
       def self.setup
         Aws.config.update(
-          region: 'us-east-1',
+          region: Travis.config.s3.region || 'us-east-1',
+          proxy_uri: Travis.config.s3.proxy_uri,
+          endpoint: Travis.config.s3.endpoint,
+          force_path_style: Travis.config.s3.force_path_style,
           credentials: Aws::Credentials.new(
             Travis.config.s3.access_key_id,
             Travis.config.s3.secret_access_key
