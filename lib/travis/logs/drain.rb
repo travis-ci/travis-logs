@@ -34,7 +34,7 @@ module Travis
           consumer.subscribe
           # delay is needed to ensure a balanced distribution of consumers to
           # sharded queues
-          sleep(rand(1..3))
+          sleep(rand(1..3)) if rabbitmq_sharding?
         end
 
         return run_loop_tick if once
@@ -57,7 +57,7 @@ module Travis
           consumers[name].subscribe
           # delay is needed to ensure a balanced distribution of consumers to
           # sharded queues
-          sleep(rand(1..3))
+          sleep(rand(1..3)) if rabbitmq_sharding?
         end
 
         sleep(loop_sleep_interval)
