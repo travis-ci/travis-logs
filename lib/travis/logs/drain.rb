@@ -104,6 +104,10 @@ module Travis
       private def loop_sleep_interval
         Travis.config.logs.drain_loop_sleep_interval
       end
+
+      private def rabbitmq_sharding?
+        Travis.config.logs.drain_rabbitmq_sharding
+      end
     end
   end
 end
