@@ -7,7 +7,6 @@ require 'travis/metrics'
 module Travis
   module Logs
     class Drain
-
       MAX_RESTART_INTERVAL = ENV['MAX_CONSUMER_RESTART_INTERVAL']&.to_i || 5
 
       def self.setup
