@@ -7,8 +7,8 @@ require 'travis/metrics'
 module Travis
   module Logs
     class Drain
-      MIN_RESTART_INTERVAL = ENV['MIN_CONSUMER_RESTART_INTERVAL']&.to_i || 1
-      MAX_RESTART_INTERVAL = ENV['MAX_CONSUMER_RESTART_INTERVAL']&.to_i || 5
+      MIN_RESTART_INTERVAL = ENV['MIN_CONSUMER_RESTART_INTERVAL']&.to_f || 1.0
+      MAX_RESTART_INTERVAL = ENV['MAX_CONSUMER_RESTART_INTERVAL']&.to_f || 5.0
 
       def self.setup
         return if defined?(@setup)
