@@ -14,8 +14,8 @@ module Travis
 
       def push(payload)
         pusher_channel(payload).trigger('job:log', pusher_payload(payload))
-        if payload['received_at']
-          elapsed = Time.now - Time.parse(payload['received_at'])
+        if payload['queued_at']
+          elapsed = Time.now - Time.parse(payload['queued_at'])
           puts "time_to_first_log_line #{elapsed}"
         end
       end

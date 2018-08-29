@@ -92,7 +92,7 @@ module Travis
           'number' => entry['number'],
           'final' => final?(entry)
         }
-        payload['received_at'] = entry['received_at'] if entry['received_at']
+        payload['queued_at'] = entry['queued_at'] if entry['queued_at']
         payload
       end
 
