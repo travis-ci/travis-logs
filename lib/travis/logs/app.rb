@@ -289,6 +289,7 @@ module Travis
       private def setup
         Travis::Metrics.setup(Travis.config.metrics, Travis.logger)
         Travis::Logs::Sidekiq.setup
+        Travis::Logs::OpenCensus.setup
       end
 
       private def redis_ping
