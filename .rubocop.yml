@@ -37,3 +37,7 @@ Metrics/PerceivedComplexity:
 
 Style/GuardClause:
   Enabled: false
+
+AllCops:
+  Exclude:
+    - 'lib/travis/logs/app/opencensus.rb'
