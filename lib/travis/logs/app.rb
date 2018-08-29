@@ -26,10 +26,7 @@ module Travis
         use Rack::SSL
         use Travis::Logs::MetricsMiddleware
         use Raven::Rack
-
-        if Travis::Logs::OpenCensus.enabled?
-          use Travis::Logs::OpenCensus
-        end
+        use Travis::Logs::OpenCensus if Travis::Logs::OpenCensus.enabled?
       end
 
       configure do
