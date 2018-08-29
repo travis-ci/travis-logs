@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'opencensus'
 require 'opencensus/stackdriver'
+require 'sequel'
 
 module Travis
   module Logs
