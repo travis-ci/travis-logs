@@ -14,6 +14,8 @@ require 'sinatra/param'
 require 'travis/logs'
 require 'travis/metrics'
 
+require 'travis/logs/app/opencensus'
+
 module Travis
   module Logs
     class App < Sinatra::Base
@@ -24,6 +26,10 @@ module Travis
         use Rack::SSL
         use Travis::Logs::MetricsMiddleware
         use Raven::Rack
+
+        if Travis::Logs::OpenCensus.enabled?
+          use Travis::Logs::OpenCensus
+        end
       end
 
       configure do
