@@ -2,7 +2,7 @@
 require 'opencensus'
 require 'opencensus/stackdriver'
 
-class Travis
+module Travis
   class Logs
     class OpenCensus
       module Sequel
