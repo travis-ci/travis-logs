@@ -8,7 +8,7 @@ module Travis
     class OpenCensus
       module Sequel
         def log_connection_yield(sql, conn, args=nil)
-          OpenCensus::Trace.in_span "sql" do |span|
+          ::OpenCensus::Trace.in_span "sql" do |span|
             span.put_attribute "sql", sql
             super
           end
