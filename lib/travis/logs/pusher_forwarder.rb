@@ -86,12 +86,14 @@ module Travis
       end
 
       private def pusher_payload(entry)
-        {
+        payload = {
           'id' => entry['id'],
           'chars' => Travis::Logs::ContentDecoder.decode_content(entry),
           'number' => entry['number'],
           'final' => final?(entry)
         }
+        payload['received_at'] = entry['received_at'] if entry['received_at']
+        payload
       end
 
       private def channel_occupied?(name)
