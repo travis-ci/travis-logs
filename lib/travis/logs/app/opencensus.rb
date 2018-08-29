@@ -56,7 +56,7 @@ module Travis
       end
 
       def self.setup_notifications
-        ::Sequel::Database.include Travis::Logs::OpenCensus::Sequel
+        ::Sequel::Database.prepend Travis::Logs::OpenCensus::Sequel
       end
 
       ##
