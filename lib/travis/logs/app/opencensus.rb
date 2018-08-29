@@ -47,8 +47,12 @@ module Travis
 
         sampling_rate = ENV['OPENCENSUS_SAMPLING_RATE']&.to_f || 1
         ::OpenCensus.configure do |c|
+          sampler = ::OpenCensus::Trace::Samplers::Probability.new(
+            sampling_rate
+          )
+
           c.trace.exporter = ::OpenCensus::Trace::Exporters::Stackdriver.new
-          c.trace.default_sampler = ::OpenCensus::Trace::Samplers::Probability.new sampling_rate
+          c.trace.default_sampler = sampler
           c.trace.default_max_attributes = 16
         end
 
