@@ -3,7 +3,7 @@ require 'opencensus'
 require 'opencensus/stackdriver'
 
 module Travis
-  class Logs
+  module Logs
     class OpenCensus
       module Sequel
         def log_connection_yield(sql, conn, args=nil)
