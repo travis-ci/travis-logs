@@ -8,9 +8,15 @@ module Travis
     class OpenCensus
       module Sequel
         def log_connection_yield(sql, conn, args=nil)
-          ::OpenCensus::Trace.in_span "sql" do |span|
-            span.put_attribute "sql", sql
-            super
+          ActiveSupport::Notifications.instrument('sql.sequel', sql: sql) do
+            return super
+          end
+        end
+      end
+      module Redis
+        def logging(commands, &block)
+          ActiveSupport::Notifications.instrument('command.redis', commands: commands) do
+            return super(commands, &block)
           end
         end
       end
@@ -60,7 +66,29 @@ module Travis
       end
 
       def self.setup_notifications
+        ActiveSupport::Notifications.subscribe('sql.sequel') do |*args|
+          event = ActiveSupport::Notifications::Event.new(*args)
+          handle_notification_event event
+        end
+        ActiveSupport::Notifications.subscribe('command.redis') do |*args|
+          event = ActiveSupport::Notifications::Event.new(*args)
+          handle_notification_event event
+        end
+
         ::Sequel::Database.prepend Travis::Logs::OpenCensus::Sequel
+        ::Redis::Client.prepend Travis::Logs::OpenCensus::Redis
+      end
+
+      def self.handle_notification_event event
+        span_context = ::OpenCensus::Trace.span_context
+        if span_context
+          span = span_context.start_span event.name, skip_frames: 2
+          span.start_time = event.time
+          span.end_time = event.end
+          event.payload.each do |k, v|
+            span.put_attribute "#{k}", v.to_s
+          end
+        end
       end
 
       ##
