@@ -14,6 +14,7 @@ Metrics/LineLength:
   Max: 80
   Exclude:
   - 'spec/**/*'
+  - 'lib/travis/logs/app/opencensus.rb'
 
 Metrics/MethodLength:
   Max: 40
