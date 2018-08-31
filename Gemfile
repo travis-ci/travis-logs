@@ -20,6 +20,8 @@ gem 'jwt'
 gem 'metriks', git: gh('travis-ci/metriks')
 gem 'metriks-librato_metrics', git: gh('travis-ci/metriks-librato_metrics')
 gem 'multi_json'
+gem 'opencensus'
+gem 'opencensus-stackdriver'
 gem 'pg'
 gem 'pry'
 gem 'puma'

@@ -14,6 +14,8 @@ require 'sinatra/param'
 require 'travis/logs'
 require 'travis/metrics'
 
+require 'travis/logs/app/opencensus'
+
 module Travis
   module Logs
     class App < Sinatra::Base
@@ -24,6 +26,7 @@ module Travis
         use Rack::SSL
         use Travis::Logs::MetricsMiddleware
         use Raven::Rack
+        use Travis::Logs::OpenCensus if Travis::Logs::OpenCensus.enabled?
       end
 
       configure do
@@ -283,6 +286,7 @@ module Travis
       private def setup
         Travis::Metrics.setup(Travis.config.metrics, Travis.logger)
         Travis::Logs::Sidekiq.setup
+        Travis::Logs::OpenCensus.setup
       end
 
       private def redis_ping

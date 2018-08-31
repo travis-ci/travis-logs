@@ -14,6 +14,10 @@ module Travis
 
       def push(payload)
         pusher_channel(payload).trigger('job:log', pusher_payload(payload))
+        if payload['queued_at']
+          elapsed = Time.now - Time.parse(payload['queued_at'])
+          Metriks.timer('logs.time_to_first_log_line.pusher').update(elapsed)
+        end
       end
 
       def pusher_channel_name(payload)
