@@ -9,14 +9,14 @@ module Travis
       module Sequel
         def log_connection_yield(sql, conn, args=nil)
           ActiveSupport::Notifications.instrument('sql.sequel', sql: sql) do
-            return super
+            super
           end
         end
       end
       module Redis
         def logging(commands, &block)
           ActiveSupport::Notifications.instrument('command.redis', commands: commands) do
-            return super(commands, &block)
+            super(commands, &block)
           end
         end
       end
@@ -111,7 +111,7 @@ module Travis
         trace_context: context,
         same_process_as_parent: false do |span_context|
           begin
-            span_context.in_span get_path(env) do |span|
+            ::OpenCensus::Trace.in_span get_path(env) do |span|
               start_request span, env
               @app.call(env).tap do |response|
                 finish_request span, response
