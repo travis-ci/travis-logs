@@ -9,14 +9,14 @@ module Travis
       module Sequel
         def log_connection_yield(sql, conn, args=nil)
           ActiveSupport::Notifications.instrument('sql.sequel', sql: sql) do
-            return super
+            super
           end
         end
       end
       module Redis
         def logging(commands, &block)
           ActiveSupport::Notifications.instrument('command.redis', commands: commands) do
-            return super(commands, &block)
+            super(commands, &block)
           end
         end
       end
