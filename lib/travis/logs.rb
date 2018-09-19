@@ -5,6 +5,7 @@ require 'forwardable'
 require 'active_support'
 require 'raven'
 require 'raven/processor/removestacktrace'
+require 'rbtrace'
 require 'sidekiq/redis_connection'
 
 require 'travis/exceptions'
