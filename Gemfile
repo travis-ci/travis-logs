@@ -29,6 +29,7 @@ gem 'pusher'
 gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rake'
+gem 'rbtrace'
 gem 'redis-namespace'
 gem 'redlock'
 gem 'rspec', group: :test

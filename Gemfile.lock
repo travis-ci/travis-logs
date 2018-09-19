@@ -610,6 +610,7 @@ GEM
     docile (1.1.5)
     faraday (0.14.0)
       multipart-post (>= 1.2, < 3)
+    ffi (1.9.25)
     google-cloud-core (1.2.3)
       google-cloud-env (~> 1.0)
     google-cloud-env (1.0.2)
@@ -652,6 +653,7 @@ GEM
     memoist (0.16.0)
     method_source (0.9.0)
     minitest (5.11.3)
+    msgpack (1.2.4)
     multi_json (1.13.1)
     multipart-post (2.0.0)
     opencensus (0.3.1)
@@ -659,6 +661,7 @@ GEM
       concurrent-ruby (~> 1.0)
       google-cloud-trace (~> 0.31)
       opencensus (~> 0.3)
+    optimist (3.0.0)
     os (1.0.0)
     parallel (1.12.1)
     parser (2.5.0.2)
@@ -684,6 +687,10 @@ GEM
       rack (>= 1.0, < 3)
     rainbow (3.0.0)
     rake (12.3.0)
+    rbtrace (0.4.11)
+      ffi (>= 1.0.6)
+      msgpack (>= 0.4.3)
+      optimist (>= 3.0.0)
     redis (4.0.1)
     redis-namespace (1.6.0)
       redis (>= 3.0.4)
@@ -777,6 +784,7 @@ DEPENDENCIES
   rack-ssl
   rack-test
   rake
+  rbtrace
   redis-namespace
   redlock
   rspec
