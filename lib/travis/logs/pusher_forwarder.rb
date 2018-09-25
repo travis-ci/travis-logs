@@ -56,8 +56,8 @@ module Travis
           # rubocop:disable Performance/HashEachMethods
           normalized = log_parts_normalizer.run(payload)
 
-          Travis::Honeycomb::Context.increment('logs.parts.count', normalized.size)
-          Travis::Honeycomb::Context.increment('logs.parts.bytes', normalized.map { |entry|
+          Travis::Honeycomb.context.increment('logs.parts.count', normalized.size)
+          Travis::Honeycomb.context.increment('logs.parts.bytes', normalized.map { |entry|
             entry['log'].bytesize
           })
 
@@ -72,10 +72,10 @@ module Travis
         if existence_check_metrics? || existence_check?
           if channel_occupied?(channel_name(entry))
             mark('pusher.send')
-            Travis::Honeycomb::Context.increment('logs.pusher.send')
+            Travis::Honeycomb.context.increment('logs.pusher.send')
           else
             mark('pusher.ignore')
-            Travis::Honeycomb::Context.increment('logs.pusher.ignore')
+            Travis::Honeycomb.context.increment('logs.pusher.ignore')
             return if existence_check?
           end
         end

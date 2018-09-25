@@ -40,8 +40,8 @@ module Travis
         measure do
           normalized = log_parts_normalizer.run(payload)
 
-          Travis::Honeycomb::Context.increment('logs.parts.count', normalized.size)
-          Travis::Honeycomb::Context.increment('logs.parts.bytes', normalized.map { |entry|
+          Travis::Honeycomb.context.increment('logs.parts.count', normalized.size)
+          Travis::Honeycomb.context.increment('logs.parts.bytes', normalized.map { |entry|
             entry['log'].bytesize
           }.reduce(&:+))
 

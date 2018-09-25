@@ -42,7 +42,6 @@ module Travis
 
           job = job.deep_dup
 
-
           event = event.merge({
             sidekiq_job:  job,
 
