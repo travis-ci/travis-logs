@@ -10,7 +10,7 @@ module Travis
         def call(worker, job, queue)
           Travis::Honeycomb.clear
 
-          unless Travis::Honeycomb.sidekiq.enabled?
+          unless Travis::Honeycomb.enabled?
             yield
             return
           end
@@ -65,7 +65,7 @@ module Travis
           # remove nil and blank values
           event = event.reject { |k,v| v.nil? || v == '' }
 
-          Travis::Honeycomb.sidekiq.send(event)
+          Travis::Honeycomb.send(event)
         end
       end
     end
