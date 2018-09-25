@@ -15,6 +15,7 @@ Metrics/LineLength:
   Exclude:
   - 'spec/**/*'
   - 'lib/travis/logs/app/opencensus.rb'
+  - 'lib/travis/logs/sidekiq/honeycomb.rb'
 
 Metrics/MethodLength:
   Max: 40

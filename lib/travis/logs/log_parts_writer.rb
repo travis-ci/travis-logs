@@ -40,10 +40,12 @@ module Travis
         measure do
           normalized = log_parts_normalizer.run(payload)
 
+          # rubocop:disable Metrics/LineLength
           Travis::Honeycomb.context.increment('logs.parts.count', normalized.size)
           Travis::Honeycomb.context.increment('logs.parts.bytes', normalized.map { |entry|
             entry['log'].bytesize
           }.reduce(&:+))
+          # rubocop:enable Metrics/LineLength
 
           create_parts(
             normalized
