@@ -11,6 +11,7 @@ require 'sidekiq/redis_connection'
 require 'travis/exceptions'
 require 'travis/logger'
 require 'travis/metrics'
+require 'travis/honeycomb'
 
 module Travis
   extend Forwardable
@@ -95,6 +96,7 @@ module Travis
       def setup
         setup_exceptions
         setup_metrics
+        setup_honeycomb
         setup_s3
       end
 
@@ -112,6 +114,13 @@ module Travis
 
       private def setup_metrics
         Travis::Metrics.setup(config.metrics, logger)
+      end
+
+      private def setup_honeycomb
+        Travis::Honeycomb::Context.add_permanent('app', 'logs')
+        Travis::Honeycomb::Context.add_permanent('dyno', ENV['DYNO'])
+        Travis::Honeycomb::Context.add_permanent('site', ENV['TRAVIS_SITE'])
+        Travis::Honeycomb.setup
       end
 
       private def setup_s3
