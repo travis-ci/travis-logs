@@ -42,16 +42,9 @@ module Travis
 
           job = job.deep_dup
 
-          job_args = nil
-          if job['args'].kind_of?(Array)
-            # convert args list to string-indexed map
-            job_args = (0..job['args'].length-1).map(&:to_s).to_a.zip(job['args']).to_h
-            job.delete('args')
-          end
 
           event = event.merge({
             sidekiq_job:  job,
-            sidekiq_args: job_args,
 
             sidekiq_job_duration_ms: request_time * 1000,
             sidekiq_job_queue_ms:    queue_time * 1000,

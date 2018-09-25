@@ -81,6 +81,11 @@ module Travis
         @data[field] = value
       end
 
+      def increment(field, value = 1)
+        @data[field] ||= 0
+        @data[field] += value
+      end
+
       def data
         (self.class.permanent || {}).merge(@data)
       end

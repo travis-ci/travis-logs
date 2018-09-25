@@ -14,6 +14,7 @@ module Travis
         sidekiq_options queue: 'archive', retry: 3
 
         def perform(log_id)
+          Travis::Honeycomb::Context.add('log_id', log_id)
           Travis::Logs::Services::ArchiveLog.new(log_id).run
         end
       end

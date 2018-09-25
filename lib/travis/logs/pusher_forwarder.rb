@@ -54,7 +54,14 @@ module Travis
 
         measure do
           # rubocop:disable Performance/HashEachMethods
-          log_parts_normalizer.run(payload).each do |_, entry|
+          normalized = log_parts_normalizer.run(payload)
+
+          Travis::Honeycomb::Context.increment('logs.parts.count', normalized.size)
+          Travis::Honeycomb::Context.increment('logs.parts.bytes', normalized.map { |entry|
+            entry['log'].bytesize
+          })
+
+          normalized.each do |_, entry|
             notify(entry)
           end
           # rubocop:enable Performance/HashEachMethods
@@ -65,8 +72,10 @@ module Travis
         if existence_check_metrics? || existence_check?
           if channel_occupied?(channel_name(entry))
             mark('pusher.send')
+            Travis::Honeycomb::Context.increment('logs.pusher.send')
           else
             mark('pusher.ignore')
+            Travis::Honeycomb::Context.increment('logs.pusher.ignore')
             return if existence_check?
           end
         end
