@@ -11,7 +11,7 @@ Style/GuardClause:
   - 'lib/travis/logs/services/fetch*.rb'
 
 Metrics/LineLength:
-  Max: 80
+  Max: 160
   Exclude:
   - 'spec/**/*'
   - 'lib/travis/logs/app/opencensus.rb'
@@ -27,9 +27,6 @@ Metrics/BlockLength:
   Max: 30
   Exclude:
   - 'spec/**/*'
-
-Metrics/AbcSize:
-  Max: 30
 
 Metrics/CyclomaticComplexity:
   Max: 15
