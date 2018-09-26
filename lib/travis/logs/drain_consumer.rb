@@ -165,9 +165,13 @@ module Travis
         return if dead?
 
         delivery = delivery_info.to_hash.dup
-        delivery[:delivery_tag] = delivery[:delivery_tag].to_s
+        delivery.delete(:delivery_tag)
         delivery.delete(:consumer)
         delivery.delete(:channel)
+        delivery[:delivery_tag] = {
+          tag:     delivery_info.delivery_tag.tag,
+          version: delivery_info.delivery_tag.version
+        }
 
         Travis::Honeycomb.context.clear
         Travis::Honeycomb.context.add('controller', self.class.name)
