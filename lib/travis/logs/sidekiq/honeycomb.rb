@@ -41,6 +41,7 @@ module Travis
           event = event.merge(Travis::Honeycomb.context.data)
 
           job = job.deep_dup
+          job.delete('args')
 
           event = event.merge({
             sidekiq_job:  job,
