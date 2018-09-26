@@ -5,7 +5,6 @@ require 'coder'
 require 'concurrent'
 require 'multi_json'
 require 'sequel'
-require 'time'
 require 'travis/logs'
 
 module Travis
@@ -180,7 +179,7 @@ module Travis
         Travis::Honeycomb.context.add('rabbitmq.delivery', delivery)
 
         if properties.timestamp
-          queue_time = request_started_at - Time.parse(properties.timestamp)
+          queue_time = request_started_at - properties.timestamp
           Travis::Honeycomb.context.add('request_queue_ms', queue_time * 1000)
         end
 
