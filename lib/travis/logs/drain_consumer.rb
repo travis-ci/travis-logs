@@ -5,6 +5,7 @@ require 'coder'
 require 'concurrent'
 require 'multi_json'
 require 'sequel'
+require 'time'
 require 'travis/logs'
 
 module Travis
@@ -177,6 +178,11 @@ module Travis
         Travis::Honeycomb.context.add('rabbitmq.bytes', payload.bytesize)
         Travis::Honeycomb.context.add('rabbitmq.properties', properties.to_hash)
         Travis::Honeycomb.context.add('rabbitmq.delivery', delivery)
+
+        if properties.timestamp
+          queued_at = Time.parse(properties.timestamp)
+          Travis::Honeycomb.context.add('request_queue_ms', request_started_at - queued_at)
+        end
 
         decoded_payload = nil
         decoded_payload = decode(payload)
