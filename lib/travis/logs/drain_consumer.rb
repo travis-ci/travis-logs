@@ -180,8 +180,8 @@ module Travis
         Travis::Honeycomb.context.add('rabbitmq.delivery', delivery)
 
         if properties.timestamp
-          queued_at = Time.parse(properties.timestamp)
-          Travis::Honeycomb.context.add('request_queue_ms', request_started_at - queued_at)
+          queue_time = request_started_at - Time.parse(properties.timestamp)
+          Travis::Honeycomb.context.add('request_queue_ms', queue_time * 1000)
         end
 
         decoded_payload = nil
