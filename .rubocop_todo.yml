@@ -68,10 +68,6 @@ Lint/UnusedMethodArgument:
   Exclude:
     - 'lib/travis/logs/sidekiq/honeycomb.rb'
 
-# Offense count: 27
-Metrics/AbcSize:
-  Max: 58
-
 # Offense count: 1
 # Configuration parameters: CountKeywordArgs.
 Metrics/ParameterLists:

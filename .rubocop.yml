@@ -36,3 +36,6 @@ Metrics/PerceivedComplexity:
 
 Style/GuardClause:
   Enabled: false
+
+Metrics/AbcSize:
+  Max: 100
