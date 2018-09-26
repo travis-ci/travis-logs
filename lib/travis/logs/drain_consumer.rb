@@ -165,6 +165,7 @@ module Travis
         return if dead?
 
         Travis::Honeycomb.context.clear
+        Travis::Honeycomb.context.add('controller', self.class.name)
         Travis::Honeycomb.context.add('rabbitmq.bytes', payload.bytesize)
         Travis::Honeycomb.context.add('rabbitmq.properties', properties.to_hash)
         Travis::Honeycomb.context.add('rabbitmq.delivery', delivery_info.to_hash)
@@ -201,10 +202,7 @@ module Travis
         event = {}
         event = event.merge(Travis::Honeycomb.context.data)
         event = event.merge({
-          sidekiq_job:  job,
-
-          sidekiq_job_duration_ms: request_time * 1000,
-          sidekiq_job_queue_ms:    queue_time * 1000,
+          request_duration_ms: request_time * 1000,
 
           exception_class:         e&.class&.name,
           exception_message:       e&.message,

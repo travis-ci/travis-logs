@@ -44,6 +44,10 @@ module Travis
           job.delete('args')
 
           event = event.merge({
+            controller:          job['class'],
+            request_duration_ms: request_time * 1000,
+            request_queue_ms:    queue_time * 1000,
+
             sidekiq_job:  job,
 
             sidekiq_job_duration_ms: request_time * 1000,
