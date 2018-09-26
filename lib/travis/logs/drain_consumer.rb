@@ -164,11 +164,16 @@ module Travis
       private def receive(delivery_info, properties, payload)
         return if dead?
 
+        delivery = delivery_info.to_hash.dup
+        delivery[:delivery_tag] = delivery[:delivery_tag].to_s
+        delivery.delete(:consumer)
+        delivery.delete(:channel)
+
         Travis::Honeycomb.context.clear
         Travis::Honeycomb.context.add('controller', self.class.name)
         Travis::Honeycomb.context.add('rabbitmq.bytes', payload.bytesize)
         Travis::Honeycomb.context.add('rabbitmq.properties', properties.to_hash)
-        Travis::Honeycomb.context.add('rabbitmq.delivery', delivery_info.to_hash)
+        Travis::Honeycomb.context.add('rabbitmq.delivery', delivery)
         request_started_at = Time.now
 
         decoded_payload = nil
