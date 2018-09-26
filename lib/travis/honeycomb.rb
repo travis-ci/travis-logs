@@ -75,6 +75,7 @@ module Travis
 
       def clear
         @data = {}
+        @override = false
       end
 
       def add(field, value)
@@ -92,10 +93,6 @@ module Travis
 
       def override!
         @override = true
-      end
-
-      def clear
-        @override = false
       end
     end
   end
