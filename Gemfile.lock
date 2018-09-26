@@ -751,6 +751,7 @@ GEM
       sinatra (~> 1.3)
     stackdriver-core (1.3.0)
       google-cloud-core (~> 1.2)
+    stackprof (0.2.12)
     thread_safe (0.3.6)
     tilt (2.0.8)
     travis-config (1.1.3)
@@ -796,6 +797,7 @@ DEPENDENCIES
   sinatra
   sinatra-contrib
   sinatra-param
+  stackprof
   travis-config
   travis-exceptions!
   travis-lock!
@@ -803,4 +805,4 @@ DEPENDENCIES
   travis-metrics!
 
 BUNDLED WITH
-   1.16.4
+   1.16.5
