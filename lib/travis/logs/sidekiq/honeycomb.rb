@@ -53,10 +53,13 @@ module Travis
             sidekiq_job_duration_ms: request_time * 1000,
             sidekiq_job_queue_ms:    queue_time * 1000,
 
-            exception_class:         e&.class&.name,
-            exception_message:       e&.message,
-            exception_cause_class:   e&.cause&.class&.name,
-            exception_cause_message: e&.cause&.message,
+            exception_class:     e&.class&.name,
+            exception_message:   e&.message,
+            exception_backtrace: e&.backtrace,
+
+            exception_cause_class:     e&.cause&.class&.name,
+            exception_cause_message:   e&.cause&.message,
+            exception_cause_backtrace: e&.cause&.backtrace,
           })
 
           # remove nil and blank values

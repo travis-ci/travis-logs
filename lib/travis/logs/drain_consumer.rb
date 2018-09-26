@@ -217,11 +217,15 @@ module Travis
         event = event.merge({
           request_duration_ms: request_time * 1000,
 
-          exception_class:         e&.class&.name,
-          exception_message:       e&.message,
-          exception_cause_class:   e&.cause&.class&.name,
-          exception_cause_message: e&.cause&.message,
+          exception_class:     e&.class&.name,
+          exception_message:   e&.message,
+          exception_backtrace: e&.backtrace,
+
+          exception_cause_class:     e&.cause&.class&.name,
+          exception_cause_message:   e&.cause&.message,
+          exception_cause_backtrace: e&.cause&.backtrace,
         })
+        event = event.reject { |k,v| v.nil? || v == '' }
         Travis::Honeycomb.send(event)
       end
 
