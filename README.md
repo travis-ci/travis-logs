@@ -25,10 +25,11 @@ such as a `DATABASE_URL` that points to a valid PostgreSQL server.  See the
 Some of the process types listed in [`./Procfile`](./Procfile) depend on other
 process types, while others are independent:
 
-### `drain` process
+### `drain` and `drain_sharded` process
 
 The `drain` process is responsible for consuming log parts messages via AMQP and
 batching them together as enqueued jobs in the `log_parts` sidekiq queue.
+`drain_sharded` is the same, yet connects differently to AMQP.
 
 ### `web` process
 

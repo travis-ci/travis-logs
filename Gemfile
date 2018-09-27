@@ -42,6 +42,7 @@ gem 'simplecov', require: false, group: :test
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'sinatra-param'
+gem 'stackprof'
 gem 'travis-config'
 gem 'travis-exceptions', git: gh('travis-ci/travis-exceptions')
 gem 'travis-lock', git: gh('travis-ci/travis-lock')
