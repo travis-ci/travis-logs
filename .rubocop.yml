@@ -11,10 +11,11 @@ Style/GuardClause:
   - 'lib/travis/logs/services/fetch*.rb'
 
 Metrics/LineLength:
-  Max: 80
+  Max: 160
   Exclude:
   - 'spec/**/*'
   - 'lib/travis/logs/app/opencensus.rb'
+  - 'lib/travis/logs/sidekiq/honeycomb.rb'
 
 Metrics/MethodLength:
   Max: 40
@@ -27,9 +28,6 @@ Metrics/BlockLength:
   Exclude:
   - 'spec/**/*'
 
-Metrics/AbcSize:
-  Max: 30
-
 Metrics/CyclomaticComplexity:
   Max: 15
 
@@ -38,3 +36,6 @@ Metrics/PerceivedComplexity:
 
 Style/GuardClause:
   Enabled: false
+
+Metrics/AbcSize:
+  Max: 100

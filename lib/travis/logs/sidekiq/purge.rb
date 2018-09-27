@@ -13,6 +13,7 @@ module Travis
         sidekiq_options queue: 'purge_log', retry: 3
 
         def perform(log_id)
+          Travis::Honeycomb.context.add('log_id', log_id)
           Travis::Logs::Services::PurgeLog.new(log_id).run
         end
       end
