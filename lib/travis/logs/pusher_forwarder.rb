@@ -102,6 +102,7 @@ module Travis
           'final' => final?(entry)
         }
         payload['queued_at'] = entry['queued_at'] if entry['queued_at']
+        payload['meta'] = entry['meta'] if entry['meta']
         payload
       end
 
