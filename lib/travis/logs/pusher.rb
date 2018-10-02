@@ -15,8 +15,16 @@ module Travis
       def push(payload)
         pusher_channel(payload).trigger('job:log', pusher_payload(payload))
         if payload['queued_at']
+          # TODO: deprecate this code path in favour of 'meta' below
+          # https://github.com/travis-ci/reliability/issues/190
           elapsed = Time.now - Time.parse(payload['queued_at'])
           Metriks.timer('logs.time_to_first_log_line.pusher').update(elapsed)
+        elsif payload['meta']
+          meta = payload['meta']
+          elapsed = Time.now - Time.parse(meta['queued_at'])
+          Metriks.timer('logs.time_to_first_log_line.pusher').update(elapsed)
+          Metriks.timer("logs.time_to_first_log_line.infra.#{meta['infra']}.pusher").update(elapsed)
+          Metriks.timer("logs.time_to_first_log_line.queue.#{meta['queue']}.pusher").update(elapsed)
         end
       end
 
