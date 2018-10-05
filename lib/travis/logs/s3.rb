@@ -11,7 +11,6 @@ module Travis
       def self.setup
         Aws.config.update(
           region: Travis.config.s3.region || 'us-east-1',
-          proxy_uri: Travis.config.s3.proxy_uri,
           endpoint: Travis.config.s3.endpoint,
           force_path_style: Travis.config.s3.force_path_style,
           credentials: Aws::Credentials.new(
