@@ -44,7 +44,9 @@ module Travis
       def subscribe
         Travis.logger.debug('subscribing', queue: jobs_queue.name)
 
-        jobs_queue.subscribe(manual_ack: true, &method(:receive))
+        jobs_queue.subscribe(manual_ack: true) do |*args|
+          Travis::Honeycomb::RabbitMQ.call(class.name, *args, &method(:receive))
+        end
       rescue Bunny::TCPConnectionFailedForAllHosts
         @dead = true
       end
@@ -164,25 +166,6 @@ module Travis
       private def receive(delivery_info, properties, payload)
         return if dead?
 
-        request_started_at = Time.now
-
-        delivery = delivery_info.to_hash.dup
-        delivery.delete(:delivery_tag)
-        delivery.delete(:consumer)
-        delivery.delete(:channel)
-        delivery[:delivery_tag] = delivery_info.delivery_tag
-
-        Travis::Honeycomb.context.clear
-        Travis::Honeycomb.context.add('controller', self.class.name)
-        Travis::Honeycomb.context.add('rabbitmq.bytes', payload.bytesize)
-        Travis::Honeycomb.context.add('rabbitmq.properties', properties.to_hash)
-        Travis::Honeycomb.context.add('rabbitmq.delivery', delivery)
-
-        if properties.timestamp
-          queue_time = request_started_at - properties.timestamp
-          Travis::Honeycomb.context.add('request_queue_ms', queue_time * 1000)
-        end
-
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -190,45 +173,21 @@ module Travis
           batch_buffer[delivery_info.delivery_tag] = decoded_payload
           if batch_buffer.size >= batch_size
             Travis.logger.debug('batch size reached - triggering flush')
-            Travis::Honeycomb.context.add('logs.drain.flush_batch', 1)
+            Travis::Honeycomb.context.set('logs.drain.flush_batch', 1)
             flush_mutex.synchronize { flush_batch_buffer }
           end
         else
           Travis.logger.debug('acking empty or undecodable payload')
           safe_ack(delivery_info.delivery_tag, false)
         end
-
-        honeycomb(Time.now - request_started_at)
       rescue StandardError => e
         log_exception(e, decoded_payload)
         jobs_channel.reject(delivery_info.delivery_tag, true)
         mark('receive.retry')
         Travis.logger.error('message requeued', stage: 'queue:receive')
-
-        honeycomb(Time.now - request_started_at, e)
       end
 
-      private def honeycomb(request_time, e = nil)
-        return unless Travis::Honeycomb.enabled?
-
-        event = {}
-        event = event.merge(Travis::Honeycomb.context.data)
-        event = event.merge({
-          request_duration_ms: request_time * 1000,
-
-          exception_class:     e&.class&.name,
-          exception_message:   e&.message,
-          exception_backtrace: e&.backtrace,
-
-          exception_cause_class:     e&.cause&.class&.name,
-          exception_cause_message:   e&.cause&.message,
-          exception_cause_backtrace: e&.cause&.backtrace,
-        })
-        event = event.reject { |k,v| v.nil? || v == '' }
-        Travis::Honeycomb.send(event)
-      end
-
-      private def decode(payload)
+    private def decode(payload)
         return payload if payload.is_a?(Hash)
         payload = Coder.clean(payload)
         MultiJson.load(payload)

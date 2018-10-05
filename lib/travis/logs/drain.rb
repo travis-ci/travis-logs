@@ -19,10 +19,11 @@ module Travis
         Travis::Metrics.setup(Travis.config.metrics, Travis.logger)
         Travis::Logs::Sidekiq.setup
 
-        Travis::Honeycomb::Context.add_permanent('app', 'logs')
-        Travis::Honeycomb::Context.add_permanent('dyno', ENV['DYNO'])
-        Travis::Honeycomb::Context.add_permanent('site', ENV['TRAVIS_SITE'])
-        Travis::Honeycomb.setup
+        Travis::Honeycomb.setup(
+          app: 'logs',
+          dyno: ENV['DYNO'],
+          site: ENV['TRAVIS_SITE']
+        )
 
         @setup = true
       end

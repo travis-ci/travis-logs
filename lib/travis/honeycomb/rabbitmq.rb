@@ -1,0 +1,81 @@
+# frozen_string_literal: true
+
+require 'active_support/core_ext/object/deep_dup'
+
+module Travis
+  module Honeycomb
+    module RabbitMQ
+      class << self
+        def call(worker_name, delivery_info, properties, payload)
+          unless Travis::Honeycomb.enabled?
+            yield
+            return
+          end
+
+          Travis::Honeycomb.context.clear
+
+          queue_time = nil
+          if properties.timestamp
+            queue_time = request_started_at - properties.timestamp
+          end
+
+          request_started_at = Time.now
+          begin
+            yield
+
+            request_ended_at = Time.now
+            request_time = request_ended_at - request_started_at
+
+            honeycomb(worker_name, delivery_info, properties, payload, request_time, queue_time)
+          rescue => e
+            request_ended_at = Time.now
+            request_time = request_ended_at - request_started_at
+
+            honeycomb(worker_name, delivery_info, properties, payload, request_time, queue_time, e)
+
+            raise
+          end
+        end
+
+        private def honeycomb(worker_name, delivery_info, properties, payload, request_time, queue_time, e = nil)
+          event = {}
+
+          event = event.merge(Travis::Honeycomb.context.data)
+
+          delivery = delivery_info.to_hash.dup
+          delivery.delete(:delivery_tag)
+          delivery.delete(:consumer)
+          delivery.delete(:channel)
+          delivery[:delivery_tag] = delivery_info.delivery_tag
+
+          event = event.merge({
+            rabbitmq: {
+              bytes:      payload.bytesize,
+              properties: properties.to_hash,
+              delivery:   delivery,
+            },
+
+            request_type:        'rabbitmq',
+            request_shape:       worker_name,
+            request_duration_ms: request_time * 1000,
+            request_queue_ms:    queue_time * 1000,
+
+            exception_class:     e&.class&.name,
+            exception_message:   e&.message,
+            exception_backtrace: e&.backtrace,
+
+            prev_exception_class:     e&.cause&.class&.name,
+            prev_exception_message:   e&.cause&.message,
+            prev_exception_backtrace: e&.cause&.backtrace,
+            })
+
+            # remove nil and blank values
+            event = event.reject { |k,v| v.nil? || v == '' }
+
+            Travis::Honeycomb.send(event)
+          end
+        end
+      end
+    end
+  end
+end
