@@ -45,6 +45,8 @@ module Travis
             queue: job['queue'],
           },
 
+          # TODO: request_id
+          # TODO: add request_shape and request_id as tags
           request_type:        'sidekiq',
           request_shape:       job['class'],
           request_duration_ms: request_time * 1000,
