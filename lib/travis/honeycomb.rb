@@ -5,6 +5,7 @@ require 'thread'
 
 require 'travis/honeycomb/context'
 require 'travis/honeycomb/sidekiq'
+require 'travis/honeycomb/rabbitmq'
 
 module Travis
   module Honeycomb
