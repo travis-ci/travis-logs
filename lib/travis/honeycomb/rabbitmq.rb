@@ -8,7 +8,7 @@ module Travis
       class << self
         def call(worker_name, delivery_info, properties, payload)
           unless Travis::Honeycomb.enabled?
-            yield
+            yield delivery_info, properties, payload
             return
           end
 
@@ -21,7 +21,7 @@ module Travis
 
           request_started_at = Time.now
           begin
-            yield
+            yield delivery_info, properties, payload
 
             request_ended_at = Time.now
             request_time = request_ended_at - request_started_at
