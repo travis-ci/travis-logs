@@ -67,13 +67,12 @@ module Travis
             prev_exception_class:     e&.cause&.class&.name,
             prev_exception_message:   e&.cause&.message,
             prev_exception_backtrace: e&.cause&.backtrace,
-            })
+          })
 
-            # remove nil and blank values
-            event = event.reject { |k,v| v.nil? || v == '' }
+          # remove nil and blank values
+          event = event.reject { |k,v| v.nil? || v == '' }
 
-            Travis::Honeycomb.send(event)
-          end
+          Travis::Honeycomb.send(event)
         end
       end
     end

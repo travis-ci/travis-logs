@@ -45,7 +45,7 @@ module Travis
         Travis.logger.debug('subscribing', queue: jobs_queue.name)
 
         jobs_queue.subscribe(manual_ack: true) do |*args|
-          Travis::Honeycomb::RabbitMQ.call(class.name, *args, &method(:receive))
+          Travis::Honeycomb::RabbitMQ.call(self.class.name, *args, &method(:receive))
         end
       rescue Bunny::TCPConnectionFailedForAllHosts
         @dead = true
