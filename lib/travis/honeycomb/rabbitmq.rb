@@ -14,6 +14,11 @@ module Travis
 
           Travis::Honeycomb.context.clear
 
+          Travis::Honeycomb.context.tags(
+            request_type:  'rabbitmq',
+            request_shape: worker_name,
+          )
+
           queue_time = nil
           if properties.timestamp
             queue_time = Time.now - properties.timestamp
@@ -55,8 +60,6 @@ module Travis
               delivery:   delivery,
             },
 
-            request_type:        'rabbitmq',
-            request_shape:       worker_name,
             request_duration_ms: request_time * 1000,
             request_queue_ms:    queue_time * 1000,
 

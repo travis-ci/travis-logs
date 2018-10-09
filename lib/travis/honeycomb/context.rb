@@ -28,6 +28,10 @@ module Travis
         @tags[key] = value
       end
 
+      def tags(h)
+        @tags.merge!(h)
+      end
+
       def set(key, value)
         @data[key] = value
       end
