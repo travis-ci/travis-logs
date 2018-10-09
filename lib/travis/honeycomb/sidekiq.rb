@@ -4,7 +4,7 @@ require 'active_support/core_ext/object/deep_dup'
 
 module Travis
   module Honeycomb
-    module Sidekiq
+    class Sidekiq
       def call(worker, job, queue)
         unless Travis::Honeycomb.enabled?
           yield
