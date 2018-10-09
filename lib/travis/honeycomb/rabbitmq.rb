@@ -16,7 +16,7 @@ module Travis
 
           queue_time = nil
           if properties.timestamp
-            queue_time = request_started_at - properties.timestamp
+            queue_time = Time.now - properties.timestamp
           end
 
           request_started_at = Time.now
