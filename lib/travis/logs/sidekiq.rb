@@ -36,7 +36,7 @@ module Travis
                         pause_time: Travis.config.logs.sidekiq_error_retry_pause
 
               chain.add Metrics::Sidekiq
-              chain.add Travis::Logs::Sidekiq::Honeycomb
+              chain.add Travis::Honeycomb::Sidekiq
             end
           end
         end
