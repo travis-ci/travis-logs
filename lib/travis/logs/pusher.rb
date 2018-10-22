@@ -25,6 +25,7 @@ module Travis
           Metriks.timer('logs.time_to_first_log_line.pusher').update(elapsed)
           Metriks.timer("logs.time_to_first_log_line.infra.#{meta['infra']}.pusher").update(elapsed)
           Metriks.timer("logs.time_to_first_log_line.queue.#{meta['queue']}.pusher").update(elapsed)
+          Travis::Honeycomb.always_sample!
           Travis::Honeycomb.context.merge({
             time_to_first_log_line_pusher_ms: elapsed * 1000,
             infra: meta['infra'],
