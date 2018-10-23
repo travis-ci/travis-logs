@@ -51,7 +51,7 @@ module Travis
 
           # NOTE: if we have multiple payloads per batch, then we might
           #       only store the metadata for the last one in honeycomb.
-          normalized.each_value do |entry|
+          normalized.map do |_, entry|
             next unless entry['meta']
             meta = entry['meta']
             elapsed = Time.now - Time.parse(meta['queued_at'])
