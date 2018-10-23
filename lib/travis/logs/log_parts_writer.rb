@@ -53,7 +53,7 @@ module Travis
           #       only store the metadata for the last one in honeycomb.
           normalized.each_value do |entry|
             next unless entry['meta']
-            meta = payload['meta']
+            meta = entry['meta']
             elapsed = Time.now - Time.parse(meta['queued_at'])
             Metriks.timer('logs.time_to_first_log_line.log_parts').update(elapsed)
             Metriks.timer("logs.time_to_first_log_line.infra.#{meta['infra']}.log_parts").update(elapsed)
