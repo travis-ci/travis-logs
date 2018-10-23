@@ -29,7 +29,8 @@ module Travis
           Travis::Honeycomb.context.merge(
             time_to_first_log_line_pusher_ms: elapsed * 1000,
             infra: meta['infra'],
-            queue: meta['queue']
+            queue: meta['queue'],
+            repo:  meta['repo']
           )
         end
       end
