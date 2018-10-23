@@ -45,9 +45,29 @@ module Travis
             entry['log'].bytesize
           }.reduce(&:+))
 
-          create_parts(
+          parts = create_parts(
             normalized
           )
+
+          # NOTE: if we have multiple payloads per batch, then we might
+          #       only store the metadata for the last one in honeycomb.
+          normalized.map do |_, entry|
+            next unless entry['meta']
+            meta = entry['meta']
+            elapsed = Time.now - Time.parse(meta['queued_at'])
+            Metriks.timer('logs.time_to_first_log_line.log_parts').update(elapsed)
+            Metriks.timer("logs.time_to_first_log_line.infra.#{meta['infra']}.log_parts").update(elapsed)
+            Metriks.timer("logs.time_to_first_log_line.queue.#{meta['queue']}.log_parts").update(elapsed)
+            Travis::Honeycomb.always_sample!
+            Travis::Honeycomb.context.merge(
+              time_to_first_log_line_log_parts_ms: elapsed * 1000,
+              infra: meta['infra'],
+              queue: meta['queue'],
+              repo:  meta['repo']
+            )
+          end
+
+          parts
         end
       end
 
