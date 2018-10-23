@@ -45,9 +45,13 @@ module Travis
             entry['log'].bytesize
           }.reduce(&:+))
 
+          parts = create_parts(
+            normalized
+          )
+
           # NOTE: if we have multiple payloads per batch, then we might
           #       only store the metadata for the last one in honeycomb.
-          normalized.map do |_, entry|
+          normalized.each do |_, entry|
             if entry['meta']
               meta = payload['meta']
               elapsed = Time.now - Time.parse(meta['queued_at'])
@@ -64,9 +68,7 @@ module Travis
             end
           end
 
-          create_parts(
-            normalized
-          )
+          parts
         end
       end
 
