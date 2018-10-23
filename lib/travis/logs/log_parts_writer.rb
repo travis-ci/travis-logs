@@ -51,21 +51,20 @@ module Travis
 
           # NOTE: if we have multiple payloads per batch, then we might
           #       only store the metadata for the last one in honeycomb.
-          normalized.each do |_, entry|
-            if entry['meta']
-              meta = payload['meta']
-              elapsed = Time.now - Time.parse(meta['queued_at'])
-              Metriks.timer('logs.time_to_first_log_line.log_parts').update(elapsed)
-              Metriks.timer("logs.time_to_first_log_line.infra.#{meta['infra']}.log_parts").update(elapsed)
-              Metriks.timer("logs.time_to_first_log_line.queue.#{meta['queue']}.log_parts").update(elapsed)
-              Travis::Honeycomb.always_sample!
-              Travis::Honeycomb.context.merge(
-                time_to_first_log_line_log_parts_ms: elapsed * 1000,
-                infra: meta['infra'],
-                queue: meta['queue'],
-                repo:  meta['repo']
-              )
-            end
+          normalized.each_value do |entry|
+            next unless entry['meta']
+            meta = payload['meta']
+            elapsed = Time.now - Time.parse(meta['queued_at'])
+            Metriks.timer('logs.time_to_first_log_line.log_parts').update(elapsed)
+            Metriks.timer("logs.time_to_first_log_line.infra.#{meta['infra']}.log_parts").update(elapsed)
+            Metriks.timer("logs.time_to_first_log_line.queue.#{meta['queue']}.log_parts").update(elapsed)
+            Travis::Honeycomb.always_sample!
+            Travis::Honeycomb.context.merge(
+              time_to_first_log_line_log_parts_ms: elapsed * 1000,
+              infra: meta['infra'],
+              queue: meta['queue'],
+              repo:  meta['repo']
+            )
           end
 
           parts
