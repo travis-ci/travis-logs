@@ -2,7 +2,9 @@
 
 source 'https://rubygems.org'
 
-ruby '2.5.1' if ENV.key?('DYNO')
+if ENV.key?('DYNO')
+  ruby File.read(File.expand_path('.ruby-version', __dir__)).strip
+end
 
 def gh(slug)
   "https://github.com/#{slug}.git"
