@@ -26,24 +26,28 @@ module Travis
         @s3 = Aws::S3::Resource.new
       end
 
-      def store(data, url)
-        object(URI(url)).put(
+      def store(data, path)
+        object(path).put(
           body: data,
           content_type: 'text/plain',
           acl: acl
         )
       end
 
-      def content_length(url)
-        object(URI(url)).content_length
+      def content_length(path)
+        object(path).content_length
       end
 
-      private def object(uri)
-        bucket(uri).object(uri.path[1..-1])
+      private def object(path)
+        bucket.object(path)
       end
 
-      private def bucket(uri)
-        s3.bucket(uri.host)
+      private def bucket
+        s3.bucket(bucket_name)
+      end
+
+      private def bucket_name
+        @bucket_name ||= Travis.config.s3.bucket_name
       end
 
       private def acl

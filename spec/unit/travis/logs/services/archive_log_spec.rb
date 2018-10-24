@@ -49,7 +49,7 @@ describe Travis::Logs::Services::ArchiveLog do
   it 'pushes the log to S3' do
     service.run
 
-    expect(storage_service.objects["http://archive-test.travis-ci.org/jobs/#{log[:job_id]}/log.txt"]).to eq(log[:content])
+    expect(storage_service.objects["/jobs/#{log[:job_id]}/log.txt"]).to eq(log[:content])
   end
 
   it 'marks the log as archiving, then unmarks' do

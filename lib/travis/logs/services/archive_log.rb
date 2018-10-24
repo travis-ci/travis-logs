@@ -19,9 +19,9 @@ module Travis
         end
 
         class VerificationFailed < StandardError
-          def initialize(log_id, target_url, expected, actual)
+          def initialize(log_id, target_path, expected, actual)
             super(
-              "Expected #{target_url} (from log id: #{log_id}) " \
+              "Expected #{target_path} (from log id: #{log_id}) " \
               "to have the content length #{expected.inspect}, but " \
               "had #{actual.inspect}"
             )
@@ -95,7 +95,7 @@ module Travis
         def store
           retrying(:store) do
             measure('store') do
-              storage_service.store(content, target_url)
+              storage_service.store(content, target_path)
             end
           end
         end
@@ -112,7 +112,7 @@ module Travis
                   expected: expected, actual: actual
                 )
                 raise VerificationFailed.new(
-                  log_id, target_url, expected, actual
+                  log_id, target_path, expected, actual
                 )
               end
             end
@@ -129,8 +129,8 @@ module Travis
           Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
         end
 
-        def target_url
-          "http://#{hostname}/jobs/#{job_id}/log.txt"
+        def target_path
+          "/jobs/#{job_id}/log.txt"
         end
 
         attr_reader :storage_service, :database
@@ -138,7 +138,7 @@ module Travis
         private :database
 
         private def archived_content_length
-          storage_service.content_length(target_url)
+          storage_service.content_length(target_path)
         end
 
         private def content
