@@ -142,7 +142,7 @@ module Travis
           log = database.log_for_id(log_id)
 
           if log
-            Travis.logger.debug "Found log id=#{log.id}"
+            Travis.logger.debug "Found log log=#{log.inspect}"
             Travis::Logs::Sidekiq::Archive.perform_async(log[:id])
           else
             mark('log.record_not_found')
