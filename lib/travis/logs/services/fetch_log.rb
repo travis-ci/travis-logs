@@ -13,9 +13,7 @@ module Travis
 
         def run(job_id: nil, id: nil, aggregate_on_demand: true)
           return nil if job_id.nil? && id.nil?
-          if job_id && id
-            raise ArgumentError, 'only one of job_id or id allowed'
-          end
+          raise ArgumentError, 'only one of job_id or id allowed' if job_id && id
 
           if job_id
             if ignored_job_id?(job_id)
@@ -43,6 +41,7 @@ module Travis
           result = database.log_for_job_id(job_id) if job_id
           result = database.log_for_id(id) if id
           return nil if result.nil?
+
           content       = result[:content]
           aggregated_at = result[:aggregated_at]
           if aggregate_on_demand && (aggregated_at.nil? || content.nil?)

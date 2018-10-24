@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require 'libhoney'
-require 'thread'
-
 require 'travis/honeycomb/context'
 require 'travis/honeycomb/sidekiq'
 require 'travis/honeycomb/rabbitmq'
@@ -22,7 +20,7 @@ module Travis
         return unless enabled?
 
         honey_setup
-        tags.each do |k,v|
+        tags.each do |k, v|
           Context.tag(k, v)
         end
       end
@@ -58,7 +56,7 @@ module Travis
         @honey ||= Libhoney::Client.new(
           writekey:    ENV['HONEYCOMB_WRITEKEY'],
           dataset:     ENV['HONEYCOMB_DATASET'],
-          sample_rate: ENV['HONEYCOMB_SAMPLE_RATE']&.to_i || 1,
+          sample_rate: ENV['HONEYCOMB_SAMPLE_RATE']&.to_i || 1
         )
       end
     end

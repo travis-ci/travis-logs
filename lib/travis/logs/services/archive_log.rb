@@ -42,8 +42,10 @@ module Travis
 
         def run
           return unless fetch
+
           mark_as_archiving
           return if content_blank?
+
           store
           verify
           confirm
@@ -121,6 +123,7 @@ module Travis
 
         def queue_purge
           return unless Travis::Logs.config.logs.purge?
+
           delay = Travis::Logs.config.logs.intervals.purge
           Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
         end

@@ -64,6 +64,7 @@ module Travis
 
       private def jobs_queue
         return jobs_queue_sharded if logs_config[:drain_rabbitmq_sharding]
+
         jobs_queue_single
       end
 
@@ -83,9 +84,7 @@ module Travis
 
       private def jobs_channel
         @jobs_channel ||= amqp_conn.create_channel.tap do |channel|
-          if Travis.config.amqp[:prefetch]
-            channel.prefetch(Travis.config.amqp[:prefetch])
-          end
+          channel.prefetch(Travis.config.amqp[:prefetch]) if Travis.config.amqp[:prefetch]
         end
       end
 
@@ -130,6 +129,7 @@ module Travis
       private def flush_batch_buffer
         return ensure_shutdown if dead?
         return if batch_buffer.empty?
+
         Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size,
                                    consumer: object_id
@@ -163,7 +163,7 @@ module Travis
         end
       end
 
-      private def receive(delivery_info, properties, payload)
+      private def receive(delivery_info, _properties, payload)
         return if dead?
 
         decoded_payload = nil
@@ -187,20 +187,21 @@ module Travis
         Travis.logger.error('message requeued', stage: 'queue:receive')
       end
 
-    private def decode(payload)
+      private def decode(payload)
         return payload if payload.is_a?(Hash)
+
         payload = Coder.clean(payload)
         MultiJson.load(payload)
-      rescue StandardError => e
-        Travis.logger.error(
-          'payload could not be decoded',
-          error: e.inspect,
-          payload: payload.inspect,
-          stage: 'queue:decode'
-        )
-        mark('payload.decode_error')
-        nil
-      end
+        rescue StandardError => e
+          Travis.logger.error(
+            'payload could not be decoded',
+            error: e.inspect,
+            payload: payload.inspect,
+            stage: 'queue:decode'
+          )
+          mark('payload.decode_error')
+          nil
+        end
 
       private def safe_ack(delivery_tag, multiple)
         jobs_channel.ack(delivery_tag, multiple)

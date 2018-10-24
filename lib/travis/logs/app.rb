@@ -40,9 +40,7 @@ module Travis
         @auth_token = auth_token.strip
         @boot_time = Time.now.utc.freeze
 
-        unless rsa_public_key_string.strip.empty?
-          @rsa_public_key = OpenSSL::PKey::RSA.new(rsa_public_key_string)
-        end
+        @rsa_public_key = OpenSSL::PKey::RSA.new(rsa_public_key_string) unless rsa_public_key_string.strip.empty?
 
         setup
       end
@@ -151,13 +149,9 @@ module Travis
 
         request.body.rewind
         data = MultiJson.load(request.body.read)
-        if data['@type'] != 'log_part'
-          halt 400, MultiJson.dump(error: '@type should be log_part')
-        end
+        halt 400, MultiJson.dump(error: '@type should be log_part') if data['@type'] != 'log_part'
 
-        if data['encoding'] != 'base64'
-          halt 400, MultiJson.dump(error: 'invalid encoding')
-        end
+        halt 400, MultiJson.dump(error: 'invalid encoding') if data['encoding'] != 'base64'
 
         payload = {
           'encoding' => 'base64',

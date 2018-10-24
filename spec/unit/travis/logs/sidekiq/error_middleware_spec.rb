@@ -27,6 +27,7 @@ describe Travis::Logs::Sidekiq::ErrorMiddleware do
       subject.call('worky', 'flah', 'booms') do
         state[:times] += 1
         raise ArgumentError, ':boom:' if state[:times] > 1
+
         raise Travis::Logs::UnderMaintenanceError, 0.01
       end
     end.to raise_error(ArgumentError)

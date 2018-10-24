@@ -44,6 +44,7 @@ module Travis
                .gsub(/[^\.[:alnum:]]+/, '_')
                .gsub(/[\._]+$/, '')
         return name if KNOWN_TIMER_NAMES.include?(name)
+
         'unk.unk'
       end
     end

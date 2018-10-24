@@ -29,6 +29,7 @@ module Travis
 
       def restrict!
         return unless enabled?
+
         raise Travis::Logs::UnderMaintenanceError, redis.ttl(MAINTENANCE_KEY)
       end
     end

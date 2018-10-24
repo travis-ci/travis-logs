@@ -103,6 +103,7 @@ module Travis
           i = 1
           loop do
             break if yield
+
             sleep(i**i)
             i += 1
             break if i >= loops

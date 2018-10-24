@@ -119,6 +119,7 @@ module Travis
         private def log_empty?(log_id)
           content = (database.log_for_id(log_id) || {})[:content]
           return false unless content.nil? || content.empty?
+
           Travis.logger.warn(
             'aggregating',
             action: 'aggregate', log_id: log_id, result: 'empty'
@@ -134,6 +135,7 @@ module Travis
 
         private def queue_archiving(log_id)
           return unless archive?
+
           log = database.log_for_id(log_id)
           if log
             Travis::Logs::Sidekiq::Archive.perform_async(log[:id])
