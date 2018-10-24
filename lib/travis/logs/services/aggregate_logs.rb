@@ -137,9 +137,12 @@ module Travis
         private def queue_archiving(log_id)
           return unless archive?
 
+          Travis.logger.debug 'Queuing archiving because archive? is true'
+
           log = database.log_for_id(log_id)
 
           if log
+            Travis.logger.debug "Found log id=#{log.id}"
             Travis::Logs::Sidekiq::Archive.perform_async(log[:id])
           else
             mark('log.record_not_found')

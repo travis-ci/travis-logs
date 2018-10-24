@@ -42,10 +42,14 @@ module Travis
 
         def run
           return unless fetch
+          Travis.logger.debug 'Marking as archiving'
           mark_as_archiving
           return if content_blank?
+          Travis.logger.debug 'Content is not blank'
           store
+          Travis.logger.debug 'Archive stored'
           verify
+          Travis.logger.debug 'Archive verified'
           confirm
           Travis.logger.debug(
             'archived log',
