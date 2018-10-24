@@ -7,7 +7,7 @@ describe 'aggregation' do
 
   def lorem_ipsum_words
     @lorem_ipsum_words ||= File.read(
-      File.expand_path('../../lorem_ipsum', __FILE__)
+      File.expand_path('../lorem_ipsum', __dir__)
     ).split
   end
 

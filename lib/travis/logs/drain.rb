@@ -12,6 +12,7 @@ module Travis
 
       def self.setup
         return if defined?(@setup)
+
         Travis.logger.debug('setting up drain dependencies')
         Travis::Exceptions.setup(
           Travis.config, Travis.config.env, Travis.logger
@@ -49,6 +50,7 @@ module Travis
         end
 
         return run_loop_tick if once
+
         loop { run_loop_tick }
       end
 

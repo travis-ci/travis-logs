@@ -41,9 +41,9 @@ module Travis
           normalized = log_parts_normalizer.run(payload)
 
           Travis::Honeycomb.context.increment('logs.parts.count', normalized.size)
-          Travis::Honeycomb.context.increment('logs.parts.bytes', normalized.map { |_, entry|
+          Travis::Honeycomb.context.increment('logs.parts.bytes', normalized.map do |_, entry|
             entry['log'].bytesize
-          }.reduce(&:+))
+          end.reduce(&:+))
 
           parts = create_parts(
             normalized
@@ -53,6 +53,7 @@ module Travis
           #       only store the metadata for the last one in honeycomb.
           normalized.map do |_, entry|
             next unless entry['meta']
+
             meta = entry['meta']
             elapsed = Time.now - Time.parse(meta['queued_at'])
             Metriks.timer('logs.time_to_first_log_line.log_parts').update(elapsed)

@@ -25,7 +25,7 @@ end
 
 describe 'enterprise-migrations' do
   before :all do
-    Dir.chdir(File.expand_path('../../../', __FILE__))
+    Dir.chdir(File.expand_path('../..', __dir__))
   end
 
   after :all do

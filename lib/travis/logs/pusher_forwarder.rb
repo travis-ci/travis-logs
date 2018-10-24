@@ -53,18 +53,16 @@ module Travis
         payload = Array(payload)
 
         measure do
-          # rubocop:disable Performance/HashEachMethods
           normalized = log_parts_normalizer.run(payload)
 
           Travis::Honeycomb.context.increment('logs.parts.count', normalized.size)
-          Travis::Honeycomb.context.increment('logs.parts.bytes', normalized.map { |_, entry|
+          Travis::Honeycomb.context.increment('logs.parts.bytes', normalized.map do |_, entry|
             entry['log'].bytesize
-          }.reduce(&:+))
+          end.reduce(&:+))
 
           normalized.each do |_, entry|
             notify(entry)
           end
-          # rubocop:enable Performance/HashEachMethods
         end
       end
 

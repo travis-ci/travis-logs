@@ -38,6 +38,7 @@ module Travis
 
         private def normalize_number(entry)
           return entry.merge('number' => INT_MAX) if entry['number'] == 'last'
+
           entry.merge('number' => Integer(entry['number']))
         end
       end

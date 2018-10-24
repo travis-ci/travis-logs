@@ -42,9 +42,8 @@ module Travis
         end
 
         private def sidekiq_logger
-          if Travis.config.log_level.to_s == 'debug'
-            return ::Logger.new($stdout)
-          end
+          return ::Logger.new($stdout) if Travis.config.log_level.to_s == 'debug'
+
           nil
         end
       end

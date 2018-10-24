@@ -39,6 +39,7 @@ module Travis
         )
           log_id = database.cached_log_id_for_job_id(job_id) if log_id.nil?
           return nil if log_id.nil?
+
           database.log_parts(log_id, after: after, part_numbers: part_numbers)
         end
 
