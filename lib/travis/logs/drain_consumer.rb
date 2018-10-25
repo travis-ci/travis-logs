@@ -57,7 +57,8 @@ module Travis
       private def jobs_queue
         @jobs_queue ||= jobs_channel.queue(
           "reporting.jobs.#{reporting_jobs_queue}",
-          durable: true, exclusive: false
+          # TODO: revert this before release!!!
+          durable: true, exclusive: false, no_declare: true
         )
       end
 
