@@ -130,7 +130,7 @@ module Travis
         end
 
         def target_path
-          "/jobs/#{job_id}/log.txt"
+          "jobs/#{job_id}/log.txt"
         end
 
         attr_reader :storage_service, :database
