@@ -61,7 +61,8 @@ module Travis
 
       private def create_consumer
         Travis::Logs::DrainConsumer.new(
-          'logs',
+          # TODO: revert this before release!!!!
+          'logs_sharded',
           batch_handler: ->(batch) { handle_batch(batch) },
           pusher_handler: ->(payload) { forward_pusher_payload(payload) }
         )
