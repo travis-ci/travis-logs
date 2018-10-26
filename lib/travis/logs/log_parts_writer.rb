@@ -59,7 +59,7 @@ module Travis
             Metriks.timer('logs.time_to_first_log_line.log_parts').update(elapsed)
             Metriks.timer("logs.time_to_first_log_line.infra.#{meta['infra']}.log_parts").update(elapsed)
             Metriks.timer("logs.time_to_first_log_line.queue.#{meta['queue']}.log_parts").update(elapsed)
-            Travis::Honeycomb.sample_rate = ENV['HONEYCOMB_SAMPLE_RATE_TTFLL_LOG_PARTS']&.to_i || 1
+            Travis::Honeycomb.context.sample_rate = ENV['HONEYCOMB_SAMPLE_RATE_TTFLL_LOG_PARTS']&.to_i || 1
             Travis::Honeycomb.context.merge(
               time_to_first_log_line_log_parts_ms: elapsed * 1000,
               infra: meta['infra'],
