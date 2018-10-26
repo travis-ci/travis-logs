@@ -12,16 +12,20 @@ module Travis
         end
       end
 
+      attr_accessor :sample_rate
+
       def initialize
         @tags = {}
         @data = {}
         @always_sample = false
+        @sample_rate = nil
       end
 
       def clear
         @tags = {}
         @data = {}
         @always_sample = false
+        @sample_rate = nil
       end
 
       def tag(key, value)
