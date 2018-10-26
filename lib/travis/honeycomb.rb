@@ -46,10 +46,10 @@ module Travis
 
         if context.always_sample?
           ev.sample_rate = 1
-          ev.send_presampled
-        else
-          ev.send
+        elsif context.sample_rate
+          ev.sample_rate = context.sample_rate
         end
+        ev.send
       end
 
       def honey
