@@ -15,6 +15,7 @@ module Travis
                         unique: :until_and_while_executing
 
         def perform(log_id)
+          Travis::Honeycomb.context.set('log_id', log_id)
           aggregate_logs_service.aggregate_log(log_id)
         end
 

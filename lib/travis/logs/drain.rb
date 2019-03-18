@@ -7,17 +7,25 @@ require 'travis/metrics'
 module Travis
   module Logs
     class Drain
-      MIN_RESTART_INTERVAL = ENV['MIN_CONSUMER_RESTART_INTERVAL']&.to_f || 1.0
-      MAX_RESTART_INTERVAL = ENV['MAX_CONSUMER_RESTART_INTERVAL']&.to_f || 5.0
+      RESTART_INTERVAL_MIN = ENV['CONSUMER_RESTART_INTERVAL_MIN']&.to_f || 1.0
+      RESTART_INTERVAL_MAX = ENV['CONSUMER_RESTART_INTERVAL_MAX']&.to_f || 5.0
 
       def self.setup
         return if defined?(@setup)
+
         Travis.logger.debug('setting up drain dependencies')
         Travis::Exceptions.setup(
           Travis.config, Travis.config.env, Travis.logger
         )
         Travis::Metrics.setup(Travis.config.metrics, Travis.logger)
         Travis::Logs::Sidekiq.setup
+
+        Travis::Honeycomb.setup(
+          app: 'logs',
+          dyno: ENV['DYNO'],
+          site: ENV['TRAVIS_SITE']
+        )
+
         @setup = true
       end
 
@@ -37,11 +45,12 @@ module Travis
           consumer.subscribe
           # delay is needed to ensure a balanced distribution of consumers to
           # sharded queues
-          interval = rand(MIN_RESTART_INTERVAL..MAX_RESTART_INTERVAL)
+          interval = rand(RESTART_INTERVAL_MIN..RESTART_INTERVAL_MAX)
           sleep(interval) if rabbitmq_sharding?
         end
 
         return run_loop_tick if once
+
         loop { run_loop_tick }
       end
 
@@ -61,7 +70,8 @@ module Travis
           consumers[name].subscribe
           # delay is needed to ensure a balanced distribution of consumers to
           # sharded queues
-          sleep(rand(1..MAX_RESTART_INTERVAL)) if rabbitmq_sharding?
+          interval = rand(RESTART_INTERVAL_MIN..RESTART_INTERVAL_MAX)
+          sleep(interval) if rabbitmq_sharding?
         end
 
         sleep(loop_sleep_interval)

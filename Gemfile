@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '2.5.1' if ENV.key?('DYNO')
+ruby '2.5.3' if ENV.key?('DYNO')
 
 def gh(slug)
   "https://github.com/#{slug}.git"
@@ -17,6 +17,7 @@ gem 'connection_pool'
 gem 'dalli'
 gem 'jemalloc', git: gh('joshk/jemalloc-rb')
 gem 'jwt'
+gem 'libhoney'
 gem 'metriks', git: gh('travis-ci/metriks')
 gem 'metriks-librato_metrics', git: gh('travis-ci/metriks-librato_metrics')
 gem 'multi_json'
@@ -29,6 +30,7 @@ gem 'pusher'
 gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rake'
+gem 'rbtrace'
 gem 'redis-namespace'
 gem 'redlock'
 gem 'rspec', group: :test
@@ -40,6 +42,7 @@ gem 'simplecov', require: false, group: :test
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'sinatra-param'
+gem 'stackprof'
 gem 'travis-config'
 gem 'travis-exceptions', git: gh('travis-ci/travis-exceptions')
 gem 'travis-lock', git: gh('travis-ci/travis-lock')

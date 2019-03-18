@@ -32,8 +32,9 @@ describe 'receive_logs' do
     )
     dq.subscribe
 
-    delivery_info = double('delivery_info', delivery_tag: 'yey')
-    queue.call(delivery_info, nil, '{"id":123,"log":"hello, world","number":1}')
+    delivery_info = double('delivery_info', delivery_tag: 'yey', to_hash: {})
+    properties = Bunny::MessageProperties.new({})
+    queue.call(delivery_info, properties, '{"id":123,"log":"hello, world","number":1}')
 
     expect(batches.length).to be > 0
     expect(pusher_payloads.length).to be > 0

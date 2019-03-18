@@ -5,11 +5,13 @@ require 'forwardable'
 require 'active_support'
 require 'raven'
 require 'raven/processor/removestacktrace'
+require 'rbtrace'
 require 'sidekiq/redis_connection'
 
 require 'travis/exceptions'
 require 'travis/logger'
 require 'travis/metrics'
+require 'travis/honeycomb'
 
 module Travis
   extend Forwardable
@@ -94,6 +96,7 @@ module Travis
       def setup
         setup_exceptions
         setup_metrics
+        setup_honeycomb
         setup_s3
       end
 
@@ -111,6 +114,14 @@ module Travis
 
       private def setup_metrics
         Travis::Metrics.setup(config.metrics, logger)
+      end
+
+      private def setup_honeycomb
+        Travis::Honeycomb.setup(
+          app: 'logs',
+          dyno: ENV['DYNO'],
+          site: ENV['TRAVIS_SITE']
+        )
       end
 
       private def setup_s3

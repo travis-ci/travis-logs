@@ -44,7 +44,9 @@ module Travis
       def subscribe
         Travis.logger.debug('subscribing', queue: jobs_queue.name)
 
-        jobs_queue.subscribe(manual_ack: true, &method(:receive))
+        jobs_queue.subscribe(manual_ack: true) do |*args|
+          Travis::Honeycomb::RabbitMQ.call(self.class.name, *args, &method(:receive))
+        end
       rescue Bunny::TCPConnectionFailedForAllHosts
         @dead = true
       end
@@ -62,6 +64,7 @@ module Travis
 
       private def jobs_queue
         return jobs_queue_sharded if logs_config[:drain_rabbitmq_sharding]
+
         jobs_queue_single
       end
 
@@ -81,9 +84,7 @@ module Travis
 
       private def jobs_channel
         @jobs_channel ||= amqp_conn.create_channel.tap do |channel|
-          if Travis.config.amqp[:prefetch]
-            channel.prefetch(Travis.config.amqp[:prefetch])
-          end
+          channel.prefetch(Travis.config.amqp[:prefetch]) if Travis.config.amqp[:prefetch]
         end
       end
 
@@ -128,6 +129,7 @@ module Travis
       private def flush_batch_buffer
         return ensure_shutdown if dead?
         return if batch_buffer.empty?
+
         Travis.logger.debug(
           'flushing batch buffer', size: batch_buffer.size,
                                    consumer: object_id
@@ -163,6 +165,7 @@ module Travis
 
       private def receive(delivery_info, _properties, payload)
         return if dead?
+
         decoded_payload = nil
         decoded_payload = decode(payload)
         if decoded_payload
@@ -170,6 +173,7 @@ module Travis
           batch_buffer[delivery_info.delivery_tag] = decoded_payload
           if batch_buffer.size >= batch_size
             Travis.logger.debug('batch size reached - triggering flush')
+            Travis::Honeycomb.context.set('logs.drain.flush_batch', 1)
             flush_mutex.synchronize { flush_batch_buffer }
           end
         else
@@ -185,18 +189,19 @@ module Travis
 
       private def decode(payload)
         return payload if payload.is_a?(Hash)
+
         payload = Coder.clean(payload)
         MultiJson.load(payload)
-      rescue StandardError => e
-        Travis.logger.error(
-          'payload could not be decoded',
-          error: e.inspect,
-          payload: payload.inspect,
-          stage: 'queue:decode'
-        )
-        mark('payload.decode_error')
-        nil
-      end
+        rescue StandardError => e
+          Travis.logger.error(
+            'payload could not be decoded',
+            error: e.inspect,
+            payload: payload.inspect,
+            stage: 'queue:decode'
+          )
+          mark('payload.decode_error')
+          nil
+        end
 
       private def safe_ack(delivery_tag, multiple)
         jobs_channel.ack(delivery_tag, multiple)

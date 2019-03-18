@@ -11,6 +11,7 @@ module Travis
       autoload :Aggregate, 'travis/logs/sidekiq/aggregate'
       autoload :Archive, 'travis/logs/sidekiq/archive'
       autoload :ErrorMiddleware, 'travis/logs/sidekiq/error_middleware'
+      autoload :Honeycomb, 'travis/logs/sidekiq/honeycomb'
       autoload :LogParts, 'travis/logs/sidekiq/log_parts'
       autoload :PartmanMaintenance, 'travis/logs/sidekiq/partman_maintenance'
       autoload :Purge, 'travis/logs/sidekiq/purge'
@@ -35,14 +36,14 @@ module Travis
                         pause_time: Travis.config.logs.sidekiq_error_retry_pause
 
               chain.add Metrics::Sidekiq
+              chain.add Travis::Honeycomb::Sidekiq
             end
           end
         end
 
         private def sidekiq_logger
-          if Travis.config.log_level.to_s == 'debug'
-            return ::Logger.new($stdout)
-          end
+          return ::Logger.new($stdout) if Travis.config.log_level.to_s == 'debug'
+
           nil
         end
       end
