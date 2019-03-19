@@ -35,12 +35,12 @@ env:
 
 stages:
 - name: "Testing time"
-- name: ":ship: it to Quay.io"
+- name: "Ship to Quay.io"
+  if: type = cron OR branch =~ /^enterprise/ OR env(BUILD_DOCKER) IS present  
 
 jobs:
   include:
-    - stage: "Testing time"
-    - stage: ":ship: it to Quay.io"
-      language: bash
-      script: ./script/docker-build-and-push
-      if: type = cron OR branch =~ /^enterprise/ OR env(BUILD_DOCKER) IS present
+  - stage: "Testing time"
+  - stage: "Ship to Quay.io"
+    language: bash
+    script: ./script/docker-build-and-push
