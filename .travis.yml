@@ -30,20 +30,16 @@ before_script:
 
 # temp env var to build a new docker image
 env: 
-  - BUILD_DOCKER: true
+- BUILD_DOCKER: true
 
 stages:
   - name: ":ship: it to Quay.io"
-    if: |
-      type = cron OR \
-      branch =~ /^enterprise/ OR \
-      env(BUILD_DOCKER) IS present
+    if: type = cron OR branch =~ /^enterprise/ OR env(BUILD_DOCKER) IS present
 
 jobs:
   include:
     - stage: "Testing time"
     - stage: ":ship: it to Quay.io"
-      dist: trusty
       install: echo skip
       before_script: echo skip
       script: ./script/docker-build-and-push
