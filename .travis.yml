@@ -10,24 +10,6 @@ cache:
   - ${HOME}/perl5
   - ${HOME}/.cache
 
-services:
-- redis
-- rabbitmq
-
-addons:
-  postgresql: 9.6
-  apt:
-    packages:
-    - postgresql-server-dev-9.6
-
-before_install:
-- script/install-sqitch
-- script/install-partman
-- eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
-
-before_script:
-- bundle exec rake setup
-
 # temp env var to build a new docker image
 env:
   global:
@@ -41,6 +23,20 @@ stages:
 jobs:
   include:
   - stage: "Testing time"
+    services:
+    - redis
+    - rabbitmq
+    addons:
+      postgresql: 9.6
+      apt:
+        packages:
+        - postgresql-server-dev-9.6
+    before_install:
+    - script/install-sqitch
+    - script/install-partman
+    - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
+    before_script:
+    - bundle exec rake setup
   - stage: "Ship to Quay.io"
     language: bash
     script: ./script/docker-build-and-push
