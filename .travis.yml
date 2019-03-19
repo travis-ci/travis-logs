@@ -34,13 +34,13 @@ env:
   - BUILD_DOCKER: true
 
 stages:
-  - name: "Testing time"
-  - name: ":ship: it to Quay.io"
+- name: "Testing time"
+- name: ":ship: it to Quay.io"
 
 jobs:
   include:
     - stage: "Testing time"
     - stage: ":ship: it to Quay.io"
-      install: echo skip
-      before_script: echo skip
+      language: bash
       script: ./script/docker-build-and-push
+      if: type = cron OR branch =~ /^enterprise/ OR env(BUILD_DOCKER) IS present
