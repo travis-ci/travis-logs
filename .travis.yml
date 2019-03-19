@@ -29,8 +29,9 @@ before_script:
 - bundle exec rake setup
 
 # temp env var to build a new docker image
-env: 
-- BUILD_DOCKER: true
+env:
+  global:
+  - BUILD_DOCKER: true
 
 stages:
   - name: ":ship: it to Quay.io"
