@@ -34,6 +34,7 @@ env:
   - BUILD_DOCKER: true
 
 stages:
+  - name: "Testing time"
   - name: ":ship: it to Quay.io"
     if: type = cron OR branch =~ /^enterprise/ OR env(BUILD_DOCKER) IS present
 
