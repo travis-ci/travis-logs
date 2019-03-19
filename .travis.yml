@@ -2,7 +2,7 @@ language: ruby
 
 rvm: 2.5.4
 
-dist: trusty
+dist: xenial
 
 cache:
   bundler: true
@@ -24,7 +24,6 @@ before_install:
 - script/install-sqitch
 - script/install-partman
 - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
-- gem update bundler
 
 before_script:
 - bundle exec rake setup
@@ -37,7 +36,7 @@ stages:
   - name: ":ship: it to Quay.io"
     if: |
       type = cron OR \
-      branch =~ ^enterprise OR \
+      branch =~ /^enterprise/ OR \
       env(BUILD_DOCKER) IS present
 
 jobs:
