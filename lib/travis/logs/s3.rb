@@ -9,19 +9,29 @@ module Travis
   module Logs
     class S3
       def self.setup
-        Aws.config.update(
-          region: 'us-east-1',
-          credentials: Aws::Credentials.new(
-            Travis.config.s3.access_key_id,
-            Travis.config.s3.secret_access_key
-          )
+        self.org_credentials = self.setup_credentials(:org)
+        self.com_credentials = self.setup_credentials(:com)
+      end
+
+      def self.setup_credentials(:org)
+        Aws::Credentials.new(
+          Travis.config.s3.org_access_key_id,
+          Travis.config.s3.org_secret_access_key
         )
       end
 
-      attr_reader :s3
+      def self.setup_credentials(:com)
+        Aws::Credentials.new(
+          Travis.config.s3.com_access_key_id,
+          Travis.config.s3.com_secret_access_key
+        )
+      end
+
+      attr_reader :org_s3, :com_s3
 
       def initialize
-        @s3 = Aws::S3::Resource.new
+        @org_s3 = Aws::S3::Resource.new(region: 'us-east-1', credentials: self.org_credentials)
+        @com_s3 = Aws::S3::Resource.new(region: 'us-east-1', credentials: self.com_credentials)
       end
 
       def store(data, url)
@@ -41,7 +51,15 @@ module Travis
       end
 
       private def bucket(uri)
-        s3.bucket(uri.host)
+        s3_resource.bucket(uri.host)
+      end
+
+      private def s3_resource
+        # logic to decide which s3 bucket we use here.
+        # Something like this:
+        # If we are deployed on com, and if a log's repo has been migrated
+        # and the job has not been restarted, use org. Otherwise, use com.
+        # If we are deployed on org, use org.
       end
 
       private def acl
