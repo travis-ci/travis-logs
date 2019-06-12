@@ -2,28 +2,27 @@
 
 set -ev
 
-# Only build docker containers if we pass the build docker var, if it's a cron job (nightly builds), or in an enterprise branch
-if [ ! -z ${BUILD_DOCKER} ] ||
-   [ ${TRAVIS_EVENT_TYPE} = "cron" ] ||
-   [[ "${TRAVIS_BRANCH}" =~ ^enterprise ]]; then
-  app_name="drain"
-  local_image="travislogs_$app_name" # Docker Compose removes dashes and expects the name to end with the build app name
-  quay_image=quay.io/travisci/travis-logs;
+quay_image=quay.io/travisci/travis-logs;
+local_image=travis-logs
 
-  docker-compose build "$app_name";
-  docker login -u="$QUAY_ROBOT_HANDLE" -p="$QUAY_ROBOT_TOKEN" quay.io;
-  docker images;
+branch=$(echo $TRAVIS_BRANCH | sed -e 's/\//-/g')
+commit=${TRAVIS_COMMIT:0:7}
 
-  docker tag $local_image $quay_image:$TRAVIS_BRANCH;
-  docker push $quay_image:$TRAVIS_BRANCH;
+docker build . -t $local_image
 
-  docker tag $local_image $quay_image:${TRAVIS_COMMIT:0:7};
-  docker push $quay_image:${TRAVIS_COMMIT:0:7};
+docker login -u="$QUAY_ROBOT_HANDLE" -p="$QUAY_ROBOT_TOKEN" quay.io;
 
-  if [ ${TRAVIS_BRANCH} = "master" ]; then
-    docker tag $local_image $quay_image:latest;
-    docker push $quay_image:$TRAVIS_BRANCH;
-  fi
+docker images;
+
+docker tag $local_image $quay_image:$branch;
+docker push $quay_image:$branch;
+
+docker tag $local_image $quay_image:$commit;
+docker push $quay_image:$commit;
+
+if [ ${branch} = "master" ]; then
+  docker tag $local_image $quay_image:latest;
+  docker push $quay_image:$branch;
 fi
 
 exit 0;
