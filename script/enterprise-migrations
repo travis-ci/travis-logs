@@ -19,11 +19,6 @@ main() {
     exit 1
   }
 
-  [[ "${PGUSER}" ]] || {
-    echo "Missing \$PGUSER"
-    exit 1
-  }
-
   [[ "${DATABASE_URL}" ]] || {
     echo "Missing \$DATABASE_URL"
     exit 1
@@ -45,7 +40,7 @@ main() {
 }
 
 __pgdb_exists() {
-  psql -ltA -U ${PGUSER} | if grep -qE "^${PGDATABASE}\|"; then
+  psql -ltA | if grep -qE "^${PGDATABASE}\|"; then
     return 0
   else
     return 1
