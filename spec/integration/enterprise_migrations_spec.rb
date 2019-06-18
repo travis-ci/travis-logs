@@ -4,10 +4,6 @@ def setup_env_pghost
   ENV['PGHOST'] = 'localhost'
 end
 
-def setup_env_pguser
-  ENV['PGUSER'] = 'pguser'
-end
-
 def setup_env_pgdatabase
   ENV['PGDATABASE'] = dbname
 end
@@ -51,7 +47,6 @@ describe 'enterprise-migrations' do
   context 'without PGHOST' do
     before :each do
       setup_env_pgdatabase
-      setup_env_pguser
       setup_env_logs_database_url
     end
 
@@ -62,7 +57,6 @@ describe 'enterprise-migrations' do
 
   context 'without PGDATABASE' do
     before :each do
-      setup_env_pguser
       setup_env_pghost
       setup_env_logs_database_url
     end
@@ -75,20 +69,7 @@ describe 'enterprise-migrations' do
   context 'without DATABASE_URL' do
     before :each do
       setup_env_pghost
-      setup_env_pguser
       setup_env_pgdatabase
-    end
-
-    it 'refuses to run' do
-      expect(shhrun('script/enterprise-migrations')).to be false
-    end
-  end
-
-  context 'without PGUSER' do
-    before :each do
-      setup_env_pghost
-      setup_env_pgdatabase
-      setup_env_logs_database_url
     end
 
     it 'refuses to run' do
@@ -99,7 +80,6 @@ describe 'enterprise-migrations' do
   context 'with required env vars' do
     before :each do
       setup_env_pghost
-      setup_env_pguser
       setup_env_pgdatabase
       setup_env_logs_database_url
     end
