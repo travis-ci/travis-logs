@@ -72,44 +72,44 @@ module Travis
               Travis::Honeycomb.send(event) # but this is not the right client…
             end
           end
+        end
 
-          def log
-            @log ||= begin
-              log = database.log_for_id(log_id)
-              unless log
-                Travis.logger.warn(
-                  'log not found',
-                  action: 'archive', id: log_id, result: 'not_found'
-                )
-                mark('log.not_found')
-              end
-              log
+        def log
+          @log ||= begin
+            log = database.log_for_id(log_id)
+            unless log
+              Travis.logger.warn(
+                'log not found',
+                action: 'archive', id: log_id, result: 'not_found'
+              )
+              mark('log.not_found')
             end
+            log
           end
-          alias fetch log
+        end
+        alias fetch log
 
-          private
+        private
 
-          def content
-            @content ||= log[:content]
-          end
+        def content
+          @content ||= log[:content]
+        end
 
-          attr_writer :content
-          private :content
+        attr_writer :content
+        private :content
 
-          def parse_marker_data(str)
-            # given a comma-delimited string with each being an equal-delimited
-            # key-value paris, build a hash with the key-value pairs thus specified
-            # with symbols as keys
-            # e.g., 'a=b,c=d' => '{:a=>"b", :c=> "d"}'
-            str.split(',').map {|s| s.split('=',2)}.to_h.transform_keys(&:to_sym)
-          end
+        def parse_marker_data(str)
+          # given a comma-delimited string with each being an equal-delimited
+          # key-value paris, build a hash with the key-value pairs thus specified
+          # with symbols as keys
+          # e.g., 'a=b,c=d' => '{:a=>"b", :c=> "d"}'
+          str.split(',').map {|s| s.split('=',2)}.to_h.transform_keys(&:to_sym)
+        end
 
-          def parsable_log_ids
-            ids = []
+        def parsable_log_ids
+          ids = []
 
-            ids
-          end
+          ids
         end
       end
     end
