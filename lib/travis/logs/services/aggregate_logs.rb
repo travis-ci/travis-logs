@@ -100,6 +100,7 @@ module Travis
             end
           end
           queue_archiving(log_id)
+          queue_send_timings(log_id)
           Travis.logger.debug(
             'aggregating',
             action: 'aggregate', log_id: log_id, result: 'successful'
@@ -154,6 +155,10 @@ module Travis
             per_aggregate_limit,
             order: aggregatable_order
           )
+        end
+
+        private def queue_send_timings(log_id)
+          Travis::Logs::Sidekiq::SendTimings.perform_async(log_id)
         end
 
         private def intervals
