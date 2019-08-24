@@ -68,7 +68,8 @@ module Travis
                 cmd_end_time:   DateTime.strptime(end_timer_id[0..-10],   '%s'), # drop last 9 digits to create time in seconds
               }.merge(marker_data)
 
-              Travis::Honeycomb.send(event) # but this is not the right client…
+              #Travis::Honeycomb.send(event) # but this is not the right client…
+              Travis.logger.info event
             end
           end
         end
