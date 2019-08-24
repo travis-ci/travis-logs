@@ -20,7 +20,7 @@ module Travis
         end
 
         private def send_timings_service
-          @send_timings_service ||= Travis::Logs::Services::Sendtimings.new
+          @send_timings_service ||= Travis::Logs::Services::SendTimings.new
         end
       end
     end
