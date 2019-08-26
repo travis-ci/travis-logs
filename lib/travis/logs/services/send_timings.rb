@@ -62,8 +62,6 @@ module Travis
               event = {
                 duration_ms: duration_ms,
                 job_id: job_id,
-                cmd_start_time: DateTime.strptime(start_timer_id[0..-10], '%s'), # drop last 9 digits to create time in seconds
-                cmd_end_time:   DateTime.strptime(end_timer_id[0..-10],   '%s'), # drop last 9 digits to create time in seconds
               }.merge(marker_data)
 
               #Travis::Honeycomb.send(event) # but this is not the right client…
