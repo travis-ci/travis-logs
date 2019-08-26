@@ -11,33 +11,8 @@ module Travis
         Travis::Logs::Sidekiq.setup
       end
 
-      def run
-        loop do
-          parse_logs
-          sleep sleep_interval
-        end
-      end
-
-      def parse_logs
-        lock.exclusive do
-          begin
-            send_timings_service.run
-          rescue StandardError => e
-            Travis::Exceptions.handle e
-          end
-        end
-      end
-
-      private def send_timings_service
-        @send_timings_service ||= Travis::Logs::Services::SendTimings.new
-      end
-
-      private def sleep_interval
-        Travis.config.logs.intervals.send_timings
-      end
-
-      private def lock
-        @lock ||= Travis::Logs::Lock.new('logs.send_timings')
+      def run(log_id)
+        Travis::Logs::Services::SendTimings.new(log_id).run
       end
     end
   end
