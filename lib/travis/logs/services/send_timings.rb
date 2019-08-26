@@ -8,7 +8,7 @@ module Travis
   module Logs
     module Services
       class SendTimings
-        attr_reader :log_id, :database
+        attr_reader :job_id, :database
 
         private :database
 
@@ -19,22 +19,20 @@ module Travis
           new.run
         end
 
-        def self.send_timings(log_id)
-          new.send_timings(log_id)
+        def self.send_timings(job_id)
+          new.send_timings(job_id)
         end
 
-        def initialize(log_id, database: Travis::Logs.database_connection)
-          @log_id   = log_id
+        def initialize(job_id, database: Travis::Logs.database_connection)
+          @job_id   = job_id
           @database = database
         end
 
         def run
-          parsable_log_ids.each do |log_id|
-            send_timings log_id
-          end
+          send_timings job_id
         end
 
-        def send_timings(log_id)
+        def send_timings(job_id)
           timer_stack = []
 
           content.each_line do |l|
@@ -63,7 +61,7 @@ module Travis
 
               event = {
                 duration_ms: duration_ms,
-                log_id: log_id,
+                job_id: job_id,
                 cmd_start_time: DateTime.strptime(start_timer_id[0..-10], '%s'), # drop last 9 digits to create time in seconds
                 cmd_end_time:   DateTime.strptime(end_timer_id[0..-10],   '%s'), # drop last 9 digits to create time in seconds
               }.merge(marker_data)
@@ -76,11 +74,11 @@ module Travis
 
         def log
           @log ||= begin
-            log = database.log_for_id(log_id)
+            log = database.log_for_id(job_id)
             unless log
               Travis.logger.warn(
                 'log not found',
-                action: 'archive', id: log_id, result: 'not_found'
+                action: 'archive', id: job_id, result: 'not_found'
               )
               mark('log.not_found')
             end
@@ -104,12 +102,6 @@ module Travis
           # with symbols as keys
           # e.g., 'a=b,c=d' => '{:a=>"b", :c=> "d"}'
           str.split(',').map { |s| s.split('=', 2) }.to_h.transform_keys(&:to_sym)
-        end
-
-        def parsable_log_ids
-          ids = []
-
-          ids
         end
       end
     end
