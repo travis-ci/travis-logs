@@ -74,11 +74,12 @@ module Travis
 
         def log
           @log ||= begin
-            log = database.log_for_id(job_id)
+            log_id = database.log_id_for_job_id(job_id)
+            log = database.log_for_id(log_id)
             unless log
               Travis.logger.warn(
                 'log not found',
-                action: 'archive', id: job_id, result: 'not_found'
+                action: 'send_timings', id: log_id, result: 'not_found'
               )
             end
             log
