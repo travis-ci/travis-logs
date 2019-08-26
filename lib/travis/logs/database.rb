@@ -95,6 +95,11 @@ module Travis
         log[:id] if log
       end
 
+      def job_id_for_log_id(log_id)
+        log = db[:logs].select(:job_id).where(id: log_id).first
+        log[:job_id] if log
+      end
+
       def cached_log_id_for_job_id(job_id)
         cache_key = "log_id.#{job_id}"
         log_id = cache.read(cache_key)

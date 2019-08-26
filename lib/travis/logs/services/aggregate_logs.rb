@@ -158,7 +158,7 @@ module Travis
         end
 
         private def queue_send_timings(log_id)
-          Travis::Logs::Sidekiq::SendTimings.perform_async(log_id)
+          Travis::Logs::Sidekiq::SendTimings.perform_async(database.job_id_for_log_id(log_id))
         end
 
         private def intervals
