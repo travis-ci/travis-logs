@@ -14,9 +14,9 @@ module Travis
         sidekiq_options queue: 'send_timing', retry: 3,
                         unique: :until_and_while_executing
 
-        def perform(log_id)
-          Travis::Honeycomb.context.set('log_id', log_id)
-          Travis::Logs::Services::SendTimings.new(log_id).run
+        def perform(job_id)
+          Travis::Honeycomb.context.set('job_id', job_id)
+          Travis::Logs::Services::SendTimings.new(job_id).run
         end
       end
     end
