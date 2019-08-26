@@ -65,7 +65,7 @@ module Travis
               }.merge(marker_data)
 
               #Travis::Honeycomb.send(event) # but this is not the right client…
-              Travis.logger.info event
+              Travis.logger.info event.to_s
             end
           end
         end
