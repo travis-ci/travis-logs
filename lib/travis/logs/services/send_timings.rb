@@ -80,7 +80,6 @@ module Travis
                 'log not found',
                 action: 'archive', id: job_id, result: 'not_found'
               )
-              mark('log.not_found')
             end
             log
           end
