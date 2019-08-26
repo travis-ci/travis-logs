@@ -11,7 +11,7 @@ module Travis
       class SendTimings
         include ::Sidekiq::Worker
 
-        sidekiq_options queue: 'send_timing', retry: 3,
+        sidekiq_options queue: 'send_timings', retry: 3,
                         unique: :until_and_while_executing
 
         def perform(job_id)
