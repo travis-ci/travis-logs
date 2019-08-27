@@ -54,15 +54,9 @@ module Travis
 
               marker_data = parse_marker_data(info)
 
-              next unless marker_data.key?(:duration)
-
-              # duration is given by nanoseconds
-              duration_ms = marker_data.delete(:duration).to_i / (10**6)
-
               event = {
-                duration_ms: duration_ms,
                 job_id: job_id,
-              }.merge(marker_data)
+              }.merge(normalize_timestamps marker_data)
 
               #Travis::Honeycomb.send(event) # but this is not the right client…
               Travis.logger.info event.to_s
@@ -100,6 +94,25 @@ module Travis
           # with symbols as keys
           # e.g., 'a=b,c=d' => '{:a=>"b", :c=> "d"}'
           str.split(',').map { |s| s.split('=', 2) }.to_h.transform_keys(&:to_sym)
+        end
+
+        def normalize_timestamps(hsh)
+          new_hsh = {}
+
+          hsh.each do |k,v|
+            case k
+            when :start, :finish
+              # nanoseconds to seconds
+              new_hsh[k] = v.to_i / (10**9)
+            when :druation
+              # nanoseconds to milliseconds
+              new_hsh[:duration_ms] = v.to_i / (10**6)
+            else
+              new_hsh[k] = v
+            end
+          end
+
+          new_hsh
         end
       end
     end
