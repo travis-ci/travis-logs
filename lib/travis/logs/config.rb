@@ -42,6 +42,10 @@ module Travis
             writekey: ENV['HONEYCOMB_WRITEKEY'],
             dataset:  ENV['HONEYCOMB_DATASET'],
             sample_rate: ENV['HONEYCOMB_SAMPLE_RATE']&.to_i || 1,
+            build_timings: {
+              writekey: ENV.fetch('HONEYCOMB_BUILD_TIMINGS_WRITEKEY', ENV['HONEYCOMB_WRITEKEY']),
+              dataset: ENV.fetch('HONEYCOMB_DATASET', ENV['HONEYCOMB_DATASET']),
+            }
           },
           intervals: {
             aggregate: 60,

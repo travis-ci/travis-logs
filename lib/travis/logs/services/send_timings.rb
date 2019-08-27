@@ -34,6 +34,12 @@ module Travis
 
         def send_timings(job_id)
           timer_stack = []
+          # Build a honeycomb event
+          honey = Travis::Honeycomb.honey
+
+          ev_builder = honey.builder
+          ev_builder.writekey = Travis.config.logs.honeycomb.build_timings.writekey
+          ev_builder.dataset  = Travis.config.logs.honeycomb.build_timings.dataset
 
           content.each_line do |l|
             l.scan(/#{TIMER_START}|#{TIMER_END}/) do |start_timer_id, end_timer_id, info|
@@ -51,14 +57,13 @@ module Travis
               end
 
               # matched TIMER_END regexp, so we have `end_timer_id` and `info` defined
-
               marker_data = parse_marker_data(info)
 
-              event = {
-                job_id: job_id,
-              }.merge(normalize_timestamps marker_data)
+              event = ev_builder.event
+              event.add_field(:job_id, job_id)
+              event.add normalize_timestamps(marker_data)
 
-              #Travis::Honeycomb.send(event) # but this is not the right client…
+              event.send
               Travis.logger.info event.to_s
             end
           end
