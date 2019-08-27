@@ -38,6 +38,11 @@ module Travis
           drain_loop_sleep_interval: 10,
           drain_timeout_interval: 3,
           drain_rabbitmq_sharding: false,
+          honeycomb: {
+            writekey: ENV['HONEYCOMB_WRITEKEY'],
+            dataset:  ENV['HONEYCOMB_DATASET'],
+            sample_rate: ENV['HONEYCOMB_SAMPLE_RATE']&.to_i || 1,
+          },
           intervals: {
             aggregate: 60,
             force: 3 * 60 * 60,
