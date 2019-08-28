@@ -58,6 +58,7 @@ module Travis
 
               # matched TIMER_END regexp, so we have `end_timer_id` and `info` defined
               marker_data = parse_marker_data(info)
+              next unless has_extra_info?(marker_data)
 
               event = ev_builder.event
               event.add_field(:job_id, job_id)
@@ -118,6 +119,11 @@ module Travis
           end
 
           new_hsh
+        end
+
+        def has_extra_info?(hsh)
+          base_keys = %i( start finish duration )
+          !hsh.select { |k,_| !base_keys.include?(k) }.empty?
         end
       end
     end
