@@ -54,7 +54,7 @@ module Travis
             action: 'archive', id: log_id, job_id: job_id, result: 'successful'
           )
           queue_purge
-          queue_send_timings(log_id)
+          queue_timing_info(log_id)
         ensure
           mark_as_archiving(false)
         end
@@ -156,8 +156,8 @@ module Travis
           Travis.config.s3.hostname
         end
 
-        private def queue_send_timings(log_id)
-          Travis::Logs::Sidekiq::SendTimings.perform_async(database.job_id_for_log_id(log_id))
+        private def queue_timing_info(log_id)
+          Travis::Logs::Sidekiq::TimingInfo.perform_async(database.job_id_for_log_id(log_id))
         end
 
         private def retrying(header, times: retry_times)

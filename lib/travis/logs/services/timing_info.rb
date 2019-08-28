@@ -7,7 +7,7 @@ require 'travis/logs'
 module Travis
   module Logs
     module Services
-      class SendTimings
+      class TimingInfo
         attr_reader :job_id, :database
 
         private :database
@@ -19,8 +19,8 @@ module Travis
           new.run
         end
 
-        def self.send_timings(job_id)
-          new.send_timings(job_id)
+        def self.timing_info(job_id)
+          new.timing_info(job_id)
         end
 
         def initialize(job_id, database: Travis::Logs.database_connection)
@@ -29,10 +29,10 @@ module Travis
         end
 
         def run
-          send_timings job_id
+          timing_info job_id
         end
 
-        def send_timings(job_id)
+        def timing_info(job_id)
           timer_stack = []
           # Build a honeycomb event
           honey = Travis::Honeycomb.honey
@@ -76,7 +76,7 @@ module Travis
             unless log
               Travis.logger.warn(
                 'log not found',
-                action: 'send_timings', id: log_id, result: 'not_found'
+                action: 'timing_info', id: log_id, result: 'not_found'
               )
             end
             log

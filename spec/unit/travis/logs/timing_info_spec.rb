@@ -1,4 +1,4 @@
-describe Travis::Logs::Services::SendTimings do
+describe Travis::Logs::Services::TimingInfo do
   let(:database) { double(Travis::Logs::Database) }
   let(:archiver) { Travis::Logs::Sidekiq::Archive }
   let(:log_id) { rand(10_000..19_999) }

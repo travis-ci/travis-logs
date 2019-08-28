@@ -8,15 +8,15 @@ require 'travis/logs'
 module Travis
   module Logs
     module Sidekiq
-      class SendTimings
+      class TimingInfo
         include ::Sidekiq::Worker
 
-        sidekiq_options queue: 'send_timings', retry: 3,
+        sidekiq_options queue: 'timing_info', retry: 3,
                         unique: :until_and_while_executing
 
         def perform(job_id)
           Travis::Honeycomb.context.set('job_id', job_id)
-          Travis::Logs::Services::SendTimings.new(job_id).run
+          Travis::Logs::Services::TimingInfo.new(job_id).run
         end
       end
     end

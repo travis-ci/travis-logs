@@ -11,7 +11,7 @@ module Travis
       autoload :NormalizeLogParts, 'travis/logs/services/normalize_log_parts'
       autoload :PartmanMaintenance, 'travis/logs/services/partman_maintenance'
       autoload :PurgeLog, 'travis/logs/services/purge_log'
-      autoload :SendTimings, 'travis/logs/services/send_timings'
+      autoload :TimingInfo, 'travis/logs/services/timing_info'
       autoload :UpsertLog, 'travis/logs/services/upsert_log'
     end
   end

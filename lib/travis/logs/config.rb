@@ -52,7 +52,7 @@ module Travis
             force: 3 * 60 * 60,
             purge: 6,
             regular: 3 * 60,
-            send_timings: 60,
+            timing_info: 60,
             sweeper: 10 * 60
           },
           maintenance_expiry: 5.minutes,
