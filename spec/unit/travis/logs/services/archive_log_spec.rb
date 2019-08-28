@@ -38,7 +38,7 @@ end
 describe Travis::Logs::Services::ArchiveLog do
   let(:content) { 'Hello, world!' }
   let(:log) { { id: 1, job_id: 2, content: content } }
-  let(:database) { double('database', update_archiving_status: nil, mark_archive_verified: nil, log_for_id: log, job_id_for_log_id: log) }
+  let(:database) { double('database', update_archiving_status: nil, mark_archive_verified: nil, log_for_id: log, job_id_for_log_id: 2) }
   let(:storage_service) { FakeStorageService.new }
   let(:service) { described_class.new(log[:id], storage_service: storage_service, database: database) }
 
