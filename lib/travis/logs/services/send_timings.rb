@@ -109,7 +109,7 @@ module Travis
             when :start, :finish
               # nanoseconds to seconds
               new_hsh[k] = v.to_i / (10**9)
-            when :druation
+            when :duration
               # nanoseconds to milliseconds
               new_hsh[:duration_ms] = v.to_i / (10**6)
             else
