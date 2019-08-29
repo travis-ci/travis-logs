@@ -50,9 +50,11 @@ module Travis
               end
 
               if timer_stack.empty?
+                Travis.logger.warn "Empty log event timer stack"
                 next
               end
               unless (last_timer_id = timer_stack.pop) == end_timer_id
+                Travis.logger.warn "Timer IDs do not match. From stack: #{last_timer_id}; seen: #{end_timer_id}"
                 next
               end
 
