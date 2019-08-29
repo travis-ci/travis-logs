@@ -6,9 +6,18 @@ AllCops:
 Style/Documentation:
   Enabled: false
 
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
 Style/GuardClause:
   Exclude:
   - 'lib/travis/logs/services/fetch*.rb'
+
+Style/StringLiterals:
+  Enabled: false
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
 
 Metrics/LineLength:
   Max: 160

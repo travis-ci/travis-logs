@@ -43,7 +43,6 @@ module Travis
 
           content.each_line do |l|
             l.scan(/#{TIMER_START}|#{TIMER_END}/) do |start_timer_id, end_timer_id, info|
-
               if start_timer_id
                 timer_stack << start_timer_id
                 next
