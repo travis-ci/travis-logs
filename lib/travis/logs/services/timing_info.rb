@@ -58,7 +58,7 @@ module Travis
 
               # matched TIMER_END regexp, so we have `end_timer_id` and `info` defined
               marker_data = parse_marker_data(info)
-              next unless has_extra_info?(marker_data)
+              next unless extra_info?(marker_data)
 
               event = ev_builder.event
               event.add_field(:job_id, job_id)
@@ -105,7 +105,7 @@ module Travis
         def normalize_timestamps(hsh)
           new_hsh = {}
 
-          hsh.each do |k,v|
+          hsh.each do |k, v|
             case k
             when :start, :finish
               # nanoseconds to seconds
@@ -121,9 +121,9 @@ module Travis
           new_hsh
         end
 
-        def has_extra_info?(hsh)
-          base_keys = %i( start finish duration )
-          !hsh.select { |k,_| !base_keys.include?(k) }.empty?
+        def extra_info?(hsh)
+          base_keys = %i[start finish duration]
+          !hsh.reject { |k, _| base_keys.include?(k) }.empty?
         end
       end
     end

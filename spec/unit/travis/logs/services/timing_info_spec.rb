@@ -7,7 +7,7 @@ describe Travis::Logs::Services::TimingInfo do
 
   let(:log) { { id: 1, job_id: 2, content: content } }
   let(:database) { double('database', update_archiving_status: nil, mark_archive_verified: nil, log_for_id: log, job_id_for_log_id: 2) }
-  let(:service) { described_class.new(log[:job_id], database: database)}
+  let(:service) { described_class.new(log[:job_id], database: database) }
   let(:honey) { Libhoney::TestClient.new }
 
   before do
