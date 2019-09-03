@@ -64,6 +64,7 @@ module Travis
               event = ev_builder.event
               event.add_field(:job_id, job_id)
               event.add normalize_timestamps(marker_data)
+              event.timestamp = marker_data[:finish]
 
               event.send
               Travis.logger.debug event.to_s
@@ -111,8 +112,8 @@ module Travis
             k, v = pair
             case k
             when :start, :finish
-              # nanoseconds to seconds
-              memo[k] = v.to_i / (10**9)
+              # nanoseconds to Date
+              memo[k] = Date.strptime(v[0..-10], '%s')
             when :duration
               # nanoseconds to milliseconds
               memo[:duration_ms] = v.to_i / (10**6)
