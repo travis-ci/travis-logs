@@ -99,7 +99,11 @@ module Travis
           # key-value paris, build a hash with the key-value pairs thus specified
           # with symbols as keys
           # e.g., 'a=b,c=d' => '{:a=>"b", :c=> "d"}'
-          str.split(',').map { |s| s.split('=', 2) }.to_h.transform_keys(&:to_sym)
+          str.split(',')
+            .reject {|s| !s.include?('=')}
+            .map { |s| s.split('=', 2) }
+            .to_h
+            .transform_keys(&:to_sym)
         end
 
         def normalize_timestamps(hsh)
