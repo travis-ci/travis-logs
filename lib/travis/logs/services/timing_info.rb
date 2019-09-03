@@ -104,22 +104,20 @@ module Travis
         end
 
         def normalize_timestamps(hsh)
-          new_hsh = {}
-
-          hsh.each do |k, v|
+          hsh.inject({}) do |memo, pair|
+            k,v = pair
             case k
             when :start, :finish
               # nanoseconds to seconds
-              new_hsh[k] = v.to_i / (10**9)
+              memo[k] = v.to_i / (10**9)
             when :duration
               # nanoseconds to milliseconds
-              new_hsh[:duration_ms] = v.to_i / (10**6)
+              memo[:duration_ms] = v.to_i / (10**6)
             else
-              new_hsh[k] = v
+              memo[k] = v
             end
+            memo
           end
-
-          new_hsh
         end
 
         def extra_info?(hsh)
