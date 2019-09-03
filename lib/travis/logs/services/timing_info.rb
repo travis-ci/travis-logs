@@ -100,15 +100,15 @@ module Travis
           # with symbols as keys
           # e.g., 'a=b,c=d' => '{:a=>"b", :c=> "d"}'
           str.split(',')
-            .reject {|s| !s.include?('=')}
-            .map { |s| s.split('=', 2) }
-            .to_h
-            .transform_keys(&:to_sym)
+             .select { |s| s.include?('=') }
+             .map    { |s| s.split('=', 2) }
+             .to_h
+             .transform_keys(&:to_sym)
         end
 
         def normalize_timestamps(hsh)
-          hsh.inject({}) do |memo, pair|
-            k,v = pair
+          hsh.each_with_object({}) do |pair, memo|
+            k, v = pair
             case k
             when :start, :finish
               # nanoseconds to seconds
