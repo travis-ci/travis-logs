@@ -84,7 +84,6 @@ module Travis
             log
           end
         end
-        alias fetch log
 
         private
 
