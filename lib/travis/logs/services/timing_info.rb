@@ -66,7 +66,7 @@ module Travis
               event.add normalize_timestamps(marker_data)
 
               event.send
-              Travis.logger.debug event.to_s
+              Travis.logger.info event.to_s
             end
           end
         end
