@@ -54,9 +54,9 @@ module Travis
 
       def honey
         @honey ||= Libhoney::Client.new(
-          writekey:    ENV['HONEYCOMB_WRITEKEY'],
-          dataset:     ENV['HONEYCOMB_DATASET'],
-          sample_rate: ENV['HONEYCOMB_SAMPLE_RATE']&.to_i || 1
+          writekey:    Travis.config.logs.honeycomb.writekey,
+          dataset:     Travis.config.logs.honeycomb.dataset,
+          sample_rate: Travis.config.logs.honeycomb.sample_rate
         )
       end
     end

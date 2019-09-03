@@ -36,6 +36,7 @@ module Travis
     autoload :PusherForwarder, 'travis/logs/pusher_forwarder'
     autoload :RedisPool, 'travis/logs/redis_pool'
     autoload :S3, 'travis/logs/s3'
+    autoload :TimingInfo, 'travis/logs/timing_info'
     autoload :Services, 'travis/logs/services'
     autoload :Sidekiq, 'travis/logs/sidekiq'
     autoload :UnderMaintenanceError, 'travis/logs/under_maintenance_error'
