@@ -62,6 +62,7 @@ module Travis
               next unless extra_info?(marker_data)
 
               event = ev_builder.event
+              event.timestamp = Time.at(marker_data[:finish].to_i / 10**9)
               event.add_field(:job_id, job_id)
               event.add normalize_timestamps(marker_data)
 
