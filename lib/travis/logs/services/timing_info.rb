@@ -112,8 +112,8 @@ module Travis
             k, v = pair
             case k
             when :start, :finish
-              # nanoseconds to Date
-              memo[k] = Date.strptime(v[0..-10], '%s')
+              # nanoseconds to Time
+              memo[k] = Time.at(v.to_i / 10**9)
             when :duration
               # nanoseconds to milliseconds
               memo[:duration_ms] = v.to_i / (10**6)
