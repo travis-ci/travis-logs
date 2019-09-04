@@ -89,7 +89,7 @@ module Travis
         private
 
         def content
-          @content ||= log[:content]
+          @content ||= log.fetch(:content,'')
         end
 
         attr_writer :content
