@@ -67,7 +67,7 @@ module Travis
               event.timestamp = marker_data[:finish]
 
               event.send
-              Travis.logger.info event.to_s
+              Travis.logger.info event.inspect
             end
           end
         end
