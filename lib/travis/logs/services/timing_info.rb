@@ -63,7 +63,7 @@ module Travis
 
               event = ev_builder.event
               event.add_field(:job_id, job_id)
-              event.add normalize_timestamps(marker_data)
+              event.add(marker_data = normalize_timestamps(marker_data))
               event.timestamp = marker_data[:finish]
 
               event.send
