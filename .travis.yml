@@ -1,7 +1,5 @@
 language: ruby
-
-rvm: 2.5.4
-
+rvm: 2.5.3
 dist: xenial
 
 cache:
@@ -9,16 +7,6 @@ cache:
   directories:
   - ${HOME}/perl5
   - ${HOME}/.cache
-
-# temp env var to build a new docker image
-env:
-  global:
-  - BUILD_DOCKER: true
-
-stages:
-- name: "Testing time"
-- name: "Ship to Quay.io"
-  # if: type = cron OR branch =~ /^enterprise/ OR env(BUILD_DOCKER) IS present
 
 jobs:
   include:
@@ -37,6 +25,6 @@ jobs:
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
     before_script:
     - bundle exec rake setup
-  - stage: "Ship to Quay.io"
+  - stage: ":ship: it to quay.io"
     language: bash
-    script: ./script/docker-build-and-push
+    script: make ship
