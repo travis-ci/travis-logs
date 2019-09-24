@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+process=$1
+procfile=Procfile
+
+eval "$(cat $procfile | grep ^$process: | head -n 1 | sed "s/$process://")"
