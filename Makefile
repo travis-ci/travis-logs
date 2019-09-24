@@ -44,11 +44,6 @@ docker-push-latest-master:
 	$(DOCKER) tag $(DOCKER_DEST) $(QUAY_IMAGE):latest
 	$(DOCKER) push $(QUAY_IMAGE):latest
 
-.PHONY: docker-push-pull-request
-docker-push-pull-request:
-	$(DOCKER) tag $(DOCKER_DEST) $(QUAY_IMAGE):$(VERSION_VALUE)-pull-request
-	$(DOCKER) push $(QUAY_IMAGE):$(VERSION_VALUE)-pull-request
-
 .PHONY: docker-push-branch
 docker-push-branch:
 	$(DOCKER) tag $(DOCKER_DEST) $(QUAY_IMAGE):$(VERSION_VALUE)-$(BRANCH)
@@ -60,8 +55,6 @@ ship: docker-build docker-login
 ifeq ($(BRANCH),master)
 ifeq ($(TRAVIS_PULL_REQUEST),false)
 ship: docker-push-latest-master
-else
-ship: docker-push-pull-request
 endif
 else
 ship: docker-push-branch
