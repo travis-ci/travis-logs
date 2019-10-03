@@ -27,5 +27,3 @@ COPY . /app
 
 # Install sqitch so migrations work
 RUN /app/script/install-sqitch
-
-CMD /bin/bash
