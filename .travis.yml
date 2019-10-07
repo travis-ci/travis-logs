@@ -1,34 +1,30 @@
 language: ruby
 rvm: 2.5.3
-sudo: required
-dist: trusty
+dist: xenial
+
 cache:
   bundler: true
   directories:
   - ${HOME}/perl5
   - ${HOME}/.cache
-services:
-- redis
-- rabbitmq
-addons:
-  postgresql: 9.6
-  apt:
-    packages:
-    - postgresql-server-dev-9.6
-before_install:
-- script/install-sqitch
-- script/install-partman
-- eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
-- gem update bundler
-before_script:
-- bundle exec rake setup
 
 jobs:
   include:
-    - stage: "Testing time"
-    - stage: ":ship: it to Quay.io"
-      sudo: required
-      dist: trusty
-      install: echo skip
-      before_script: echo skip
-      script: ./script/docker-build-and-push
+  - stage: "Testing time"
+    services:
+    - redis
+    - rabbitmq
+    addons:
+      postgresql: 9.6
+      apt:
+        packages:
+        - postgresql-server-dev-9.6
+    before_install:
+    - script/install-sqitch
+    - script/install-partman
+    - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
+    before_script:
+    - bundle exec rake setup
+  - stage: ":ship: it to quay.io"
+    language: bash
+    script: make ship
