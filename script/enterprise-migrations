@@ -36,7 +36,10 @@ main() {
       --log-only \
       "db:${DATABASE_URL}"
   fi
-  __migrate
+
+  if __logparts_created_at_nullable; then
+    __migrate
+  fi
 }
 
 __pgdb_exists() {
@@ -62,6 +65,23 @@ __logs_tables_exist() {
 __table_exists_sql() {
   echo "SELECT 1/count(*) FROM pg_catalog.pg_tables " \
     "WHERE schemaname = 'public' AND tablename = '${1}'"
+}
+
+__logparts_created_at_nullable() {
+  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -q "no"; then
+    return 1
+  fi
+
+  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -q "timestamp"; then
+    return 1
+  fi
+
+  return 0
+}
+
+__logparts_created_at_nullable_sql() {
+  echo "SELECT data_type, is_nullable FROM information_schema.columns " \
+    "WHERE table_name = 'log_parts' AND column_name = 'created_at'"
 }
 
 __migrate() {
