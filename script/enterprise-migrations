@@ -36,8 +36,9 @@ main() {
       --log-only \
       "db:${DATABASE_URL}"
   fi
-
+  echo "Before Test Migrate"
   if __logparts_created_at_nullable; then
+    echo "Test Migrate"
     __migrate
   fi
 }
