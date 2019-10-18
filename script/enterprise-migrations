@@ -5,7 +5,7 @@ main() {
   if [[ "${DEBUG}" ]]; then
     set -o xtrace
   fi
-
+  echo "path"
   PATH="${HOME}/bin:${PATH}"
   eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
 
@@ -29,8 +29,9 @@ main() {
   if ! __pgdb_exists; then
     createdb
   fi
-
+  echo "Before __logs_tables_exist Migrate"
   if __logs_tables_exist; then
+  echo "__logs_tables_exist Migrate"
     sqitch deploy \
       --to-change structure \
       --log-only \
@@ -101,5 +102,5 @@ __migrate() {
     --to-change "${ENTERPRISE_MIGRATE_TO}" \
     "db:${DATABASE_URL}"
 }
-
+echo "Test"
 main "$@"
