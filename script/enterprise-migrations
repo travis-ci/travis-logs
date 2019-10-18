@@ -40,6 +40,9 @@ main() {
   if __logparts_created_at_nullable; then
     echo "Test Migrate"
     __migrate
+  else
+    sqitch verify \
+    "db:${DATABASE_URL}"
   fi
 }
 
