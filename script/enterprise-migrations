@@ -25,13 +25,12 @@ main() {
   }
 
   : "${ENTERPRISE_MIGRATE_TO:=log_parts_created_at_not_null}"
-  
+
   if ! __pgdb_exists; then
     createdb
   fi
-  echo "Before __logs_tables_exist Migrate"
+
   if __logs_tables_exist; then
-    echo "Before sqitch_verify Migrate"
     sqitch verify --to-change structure "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
       sqitch deploy \
         --to-change structure \
@@ -39,9 +38,8 @@ main() {
         "db:${DATABASE_URL}"
     fi
   fi
-  echo "Before Test Migrate"
+
   sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
-    echo "Test Migrate"
     __migrate
   else
     sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
@@ -71,11 +69,6 @@ __logs_tables_exist() {
 __table_exists_sql() {
   echo "SELECT 1/count(*) FROM pg_catalog.pg_tables " \
     "WHERE schemaname = 'public' AND tablename = '${1}'"
-}
-
-__logparts_created_at_nullable_sql() {
-  echo "SELECT data_type, is_nullable FROM information_schema.columns " \
-    "WHERE table_name = 'log_parts' AND column_name = 'created_at'"
 }
 
 __migrate() {
