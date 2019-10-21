@@ -40,7 +40,7 @@ main() {
     fi
   fi
   echo "Before Test Migrate"
-  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -qE "NO|timestamp"; then
+  sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
     echo "Test Migrate"
     __migrate
   else
