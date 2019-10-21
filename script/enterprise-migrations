@@ -31,12 +31,19 @@ main() {
   fi
 
   if __logs_tables_exist; then
-    sqitch deploy \
-      --to-change structure \
-      --log-only \
-      "db:${DATABASE_URL}"
+    sqitch verify --to-change structure "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
+      sqitch deploy \
+        --to-change structure \
+        --log-only \
+        "db:${DATABASE_URL}"
+    fi
   fi
-  __migrate
+
+  sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
+    __migrate
+  else
+    sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
+  fi
 }
 
 __pgdb_exists() {
