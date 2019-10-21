@@ -40,7 +40,7 @@ main() {
     fi
   fi
   echo "Before Test Migrate"
-  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -qE "NO|timestamp"; then
+  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -qE "NO"; then
     echo "Test Migrate"
     __migrate
   else
@@ -91,5 +91,5 @@ __migrate() {
     --to-change "${ENTERPRISE_MIGRATE_TO}" \
     "db:${DATABASE_URL}"
 }
-echo "Test"
+
 main "$@"
