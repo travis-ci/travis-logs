@@ -25,6 +25,12 @@ main() {
   }
 
   : "${ENTERPRISE_MIGRATE_TO:=log_parts_created_at_not_null}"
+  
+  echo "Before sqitch_verify Migrate"
+  sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if grep -qE "Verify successful" then
+    echo "sqitch_verify Migrate"
+    exit 0
+  fi
 
   if ! __pgdb_exists; then
     createdb
