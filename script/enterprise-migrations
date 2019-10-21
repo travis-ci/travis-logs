@@ -75,11 +75,14 @@ __table_exists_sql() {
 }
 
 __logparts_created_at_nullable() {
+  psql -c "$(__logparts_created_at_nullable_sql)"
   psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -q "no"; then
+    echo "no not found"
     return 1
   fi
 
   psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -q "timestamp"; then
+    echo "timestamp not found"
     return 1
   fi
 
