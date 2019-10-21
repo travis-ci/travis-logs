@@ -31,8 +31,7 @@ main() {
   fi
   echo "Before __logs_tables_exist Migrate"
   if __logs_tables_exist; then
-  echo "__logs_tables_exist Migrate"
-  echo "Before sqitch_verify Migrate"
+    echo "Before sqitch_verify Migrate"
     sqitch verify --to-change structure "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
       sqitch deploy \
         --to-change structure \
@@ -41,8 +40,7 @@ main() {
     fi
   fi
   echo "Before Test Migrate"
-  echo __logparts_created_at_nullable
-  if __logparts_created_at_nullable; then
+  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -qE "NO|timestamp"; then
     echo "Test Migrate"
     __migrate
   else
@@ -73,21 +71,6 @@ __logs_tables_exist() {
 __table_exists_sql() {
   echo "SELECT 1/count(*) FROM pg_catalog.pg_tables " \
     "WHERE schemaname = 'public' AND tablename = '${1}'"
-}
-
-__logparts_created_at_nullable() {
-  psql -c "$(__logparts_created_at_nullable_sql)" | ! grep -qE "NO"
-  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -qE "NO"; then
-    echo "no not found"
-    return 1
-  fi
-  psql -c "$(__logparts_created_at_nullable_sql)" | ! grep -qE "timestamp"
-  psql -c "$(__logparts_created_at_nullable_sql)" | if ! grep -qE "timestamp"; then
-    echo "timestamp not found"
-    return 1
-  fi
-
-  return 0
 }
 
 __logparts_created_at_nullable_sql() {
