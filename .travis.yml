@@ -2,29 +2,30 @@ language: ruby
 rvm: 2.5.3
 dist: xenial
 
+import:
+  - source: travis-ci/build-configs:ship-docker.yml
+    if: branch = master
+
+services:
+- redis
+- rabbitmq
+
+addons:
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-server-dev-9.6
+
 cache:
   bundler: true
   directories:
   - ${HOME}/perl5
   - ${HOME}/.cache
 
-jobs:
-  include:
-  - stage: "Testing time"
-    services:
-    - redis
-    - rabbitmq
-    addons:
-      postgresql: 9.6
-      apt:
-        packages:
-        - postgresql-server-dev-9.6
-    before_install:
-    - script/install-sqitch
-    - script/install-partman
-    - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
-    before_script:
-    - bundle exec rake setup
-  - stage: ":ship: it to quay.io"
-    language: bash
-    script: make ship
+before_install:
+- script/install-sqitch
+- script/install-partman
+- eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
+
+before_script:
+- bundle exec rake setup
