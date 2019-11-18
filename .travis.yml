@@ -4,7 +4,7 @@ dist: xenial
 
 import:
   - source: travis-ci/build-configs:ship-docker.yml
-    if: branch = master
+    if: type != pull_request
 
 services:
 - redis
