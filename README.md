@@ -149,3 +149,4 @@ operation lasts about 1 minute.
 See LICENSE file.
 
 Copyright (c) 2018 Travis CI GmbH
+
