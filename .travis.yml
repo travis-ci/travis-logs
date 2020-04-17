@@ -28,4 +28,4 @@ jobs:
   - stage: ":ship: it to quay.io"
     language: bash
     script: make ship
-    if: type = cron OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
+    if: commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
