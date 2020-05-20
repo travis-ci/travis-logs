@@ -8,6 +8,15 @@ cache:
   - ${HOME}/perl5
   - ${HOME}/.cache
 
+addons:
+  snaps:
+  - name: docker
+    channel: latest/beta
+
+env:
+  global:
+    - PATH=/snap/bin:$PATH
+
 jobs:
   include:
   - stage: "Testing time"
