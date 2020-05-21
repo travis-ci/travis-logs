@@ -37,10 +37,4 @@ jobs:
   - stage: ":ship: it to quay.io"
     language: bash
     script: make ship
-    if: commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
-
-deploy:
-  - provider: script
-    script: make ship
-    on:
-      branch: master
+    if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
