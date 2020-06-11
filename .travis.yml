@@ -1,5 +1,5 @@
 language: ruby
-rvm: 2.5.3
+rvm: 2.5.8
 dist: xenial
 
 cache:
@@ -7,11 +7,6 @@ cache:
   directories:
   - ${HOME}/perl5
   - ${HOME}/.cache
-
-addons:
-  snaps:
-  - name: docker
-    channel: latest/beta
 
 env:
   global:
@@ -35,6 +30,10 @@ jobs:
     before_script:
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
+    addons:
+      snaps:
+      - name: docker
+        channel: latest/beta
     language: bash
     script: make ship
     if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true

@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '2.5.3' if ENV.key?('DYNO')
+ruby '2.5.8' if ENV.key?('DYNO')
 
 def gh(slug)
   "https://github.com/#{slug}.git"
