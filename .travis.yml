@@ -20,7 +20,9 @@ before_install:
 - script/install-sqitch
 - script/install-partman
 - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
-- gem update bundler
+- gem uninstall -v '>=2' -i $(rvm gemdir)@global -ax bundler || true
+- gem install bundler -v '1.17.3'
+- travis_retry bundle install
 before_script:
 - bundle exec rake setup
 
