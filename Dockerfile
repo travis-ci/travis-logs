@@ -4,6 +4,8 @@ LABEL maintainer Travis CI GmbH <support+travis-app-docker-images@travis-ci.com>
 
 RUN ( \
   apt-get update; \
+  # update to deb 10.8
+  apt-get upgrade -y ; \
   apt-get upgrade -y --no-install-recommends; \
   apt-get install -y curl postgresql postgresql-server-dev-all liblocal-lib-perl build-essential; \
   rm -rf /var/lib/apt/lists/* ; \
