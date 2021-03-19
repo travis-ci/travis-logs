@@ -24,7 +24,7 @@ jobs:
     - script/install-sqitch
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
     before_script:
-    - docker run --rm -P -p 127.0.0.1:5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name pg11 postgres:11
+    - docker run -d --rm -P -p 127.0.0.1:5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name pg11 postgres:11
     - export PGHOST="localhost"
     - export PGUSER="postgres"
     - bundle exec rake setup
