@@ -24,6 +24,8 @@ jobs:
     - script/install-sqitch
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
     before_script:
+    - export PGHOST="localhost"
+    - export PGUSER="postgres"
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
     addons:
