@@ -19,13 +19,9 @@ jobs:
     - redis
     - rabbitmq
     addons:
-      postgresql: 9.6
-      apt:
-        packages:
-        - postgresql-server-dev-9.6
+      postgresql: 11
     before_install:
     - script/install-sqitch
-      #- script/install-partman
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
     before_script:
     - bundle exec rake setup
