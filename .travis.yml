@@ -1,6 +1,6 @@
 language: ruby
 rvm: 2.5.8
-dist: xenial
+dist: bionic
 
 cache:
   bundler: true
@@ -18,15 +18,15 @@ jobs:
     services:
     - redis
     - rabbitmq
-      #addons:
-      # postgresql: 11
+    addons:
+      postgresql: 11
     before_install:
     - script/install-sqitch
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
     before_script:
-    - docker run -d --rm -P -p 127.0.0.1:5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name pg11 postgres:11
-    - export PGHOST="localhost"
-    - export PGUSER="postgres"
+      #- docker run -d --rm -P -p 127.0.0.1:5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name pg11 postgres:11
+      #- export PGHOST="localhost"
+      #- export PGUSER="postgres"
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
     addons:
