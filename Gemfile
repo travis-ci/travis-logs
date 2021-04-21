@@ -27,6 +27,7 @@ gem 'pg'
 gem 'pry'
 gem 'puma'
 gem 'pusher'
+gem 'rack'
 gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rake'
