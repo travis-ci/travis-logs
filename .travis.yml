@@ -29,7 +29,7 @@ jobs:
     addons:
       snaps:
       - name: docker
-        channel: latest/beta
+        channel: latest/stable
     language: bash
     script: make ship
     if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
