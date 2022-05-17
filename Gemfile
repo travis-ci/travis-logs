@@ -8,7 +8,7 @@ def gh(slug)
   "https://github.com/#{slug}.git"
 end
 
-gem 'activesupport'
+gem 'activesupport', '~> 5.2.4'
 gem 'aws-sdk'
 gem 'bunny'
 gem 'coder'
