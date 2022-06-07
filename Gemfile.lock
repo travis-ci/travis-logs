@@ -717,7 +717,7 @@ GEM
     i18n (1.8.2)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.1)
-    jmespath (1.4.0)
+    jmespath (1.6.1)
     json (2.1.0)
     jwt (2.1.0)
     libhoney (1.11.0)
