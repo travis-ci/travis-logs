@@ -22,4 +22,8 @@ BEGIN;
 
   ALTER SEQUENCE scan_tracker_id_seq OWNED BY scan_tracker.id;
 
+  ALTER TABLE ONLY scan_tracker
+  ALTER COLUMN id
+  SET DEFAULT nextval('scan_tracker_id_seq'::regclass);
+
 COMMIT;
