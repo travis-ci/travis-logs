@@ -149,6 +149,24 @@ module Travis
         db[:logs].insert(job_id: job_id, created_at: now, updated_at: now)
       end
 
+      def create_scan_tracker_entry(log_id, scan_status)
+        maint.restrict!
+        db[:scan_tracker].insert({
+          log_id: log_id,
+          scan_status: scan_status,
+          created_at: Time.now.utc
+        })
+      end
+
+      def update_log_scan_status(log_id, scan_status)
+        db.transaction do
+          db[:logs]
+            .where(id: log_id)
+            .update(scan_status_updated_at: Time.now.utc, scan_status: scan_status)
+          create_scan_tracker_entry(log_id, scan_status)
+        end
+      end
+
       def create_log_part(params)
         maint.restrict!
         db[:log_parts].insert(params.merge(created_at: Time.now.utc))
