@@ -1,31 +1,27 @@
-FROM ruby:2.5.8
+FROM ruby:2.5.8-slim
 
 LABEL maintainer Travis CI GmbH <support+travis-app-docker-images@travis-ci.com>
 
 RUN ( \
-  apt-get update; \
-  # update to deb 10.8
-  apt-get upgrade -y ; \
-  apt-get upgrade -y --no-install-recommends; \
-  apt-get install -y curl postgresql postgresql-server-dev-all liblocal-lib-perl build-essential; \
-  rm -rf /var/lib/apt/lists/* ; \
+   bundle config set no-cache 'true'; \
+   bundle config --global frozen 1; \
+   bundle config set deployment 'true'; \
+   mkdir -p /app; \
 )
-
-# throw errors if Gemfile has been modified since Gemfile.lock
-RUN bundle config --global frozen 1
-
-RUN mkdir -p /app
 WORKDIR /app
-
-COPY Gemfile      /app
-COPY Gemfile.lock /app
-
-RUN bundle install --deployment
-
+COPY Gemfile*      /app/
 COPY . /app
 
-# Sqitch expects partman
-# RUN /app/script/install-partman
+RUN ( \
+  apt-get update; \
+  apt-get upgrade -y ; \
+  apt-get install -y build-essential git curl  libpq-dev; \
+  bundle install --deployment; \
+  apt-get remove -y build-essential git curl gcc g++ make perl; \
+  apt-get -y autoremove; \
+  rm -rf /var/lib/apt/lists/* ; \
+  bundle clean && rm -rf /app/vendor/bundle/ruby/2.5.0/cache/*; \
+  rm -rf /root/.bundle/cache; \
+  for i in `find /app/vendor/ -name \*.o -o -name \*.c -o -name \*.h`; do rm -f $i; done; \
+)
 
-# Install sqitch so migrations work
-RUN /app/script/install-sqitch

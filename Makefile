@@ -2,9 +2,12 @@ SHELL := bash
 
 VERSION_VALUE ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 DOCKER_IMAGE_REPO ?= travisci/travis-logs
+DOCKER_MIGRATIONS_IMAGE_REPO ?= travisci/travis-logs-migrations
 DOCKER_DEST ?= $(DOCKER_IMAGE_REPO):$(VERSION_VALUE)
+DOCKER_MIGRATIONS_DEST ?= $(DOCKER_MIGRATIONS_IMAGE_REPO):$(VERSION_VALUE)
 QUAY ?= quay.io
 QUAY_IMAGE ?= $(QUAY)/$(DOCKER_IMAGE_REPO)
+QUAY_MIGRATIONS_IMAGE ?= $(QUAY)/$(DOCKER_MIGRATIONS_IMAGE_REPO)
 
 ifdef $$QUAY_ROBOT_HANDLE
 	QUAY_ROBOT_HANDLE := $$QUAY_ROBOT_HANDLE
@@ -23,15 +26,12 @@ ifdef $$TRAVIS_PULL_REQUEST
 	TRAVIS_PULL_REQUEST := $$TRAVIS_PULL_REQUEST
 endif
 
-ifndef $$BUNDLE_GEMS__CONTRIBSYS__COM
-	BUNDLE_GEMS__CONTRIBSYS__COM ?= $$BUNDLE_GEMS__CONTRIBSYS__COM
-endif
-
 DOCKER ?= docker
 
 .PHONY: docker-build
 docker-build:
-	$(DOCKER) build --build-arg bundle_gems__contribsys__com=$(BUNDLE_GEMS__CONTRIBSYS__COM) -t $(DOCKER_DEST) .
+	$(DOCKER) build --pull --no-cache -t $(DOCKER_DEST) .
+	$(DOCKER) build --pull --no-cache -t $(DOCKER_MIGRATIONS_DEST) . -f Dockerfile.migrations
 
 .PHONY: docker-login
 docker-login:
@@ -44,10 +44,17 @@ docker-push-latest-master:
 	$(DOCKER) tag $(DOCKER_DEST) $(QUAY_IMAGE):latest
 	$(DOCKER) push $(QUAY_IMAGE):latest
 
+	$(DOCKER) tag $(DOCKER_MIGRATIONS_DEST) $(QUAY_MIGRATIONS_IMAGE):$(VERSION_VALUE)
+	$(DOCKER) push $(QUAY_MIGRATIONS_IMAGE):$(VERSION_VALUE)
+	$(DOCKER) tag $(DOCKER_MIGRATIONS_DEST) $(QUAY_MIGRATIONS_IMAGE):latest
+	$(DOCKER) push $(QUAY_MIGRATIONS_IMAGE):latest
+
 .PHONY: docker-push-branch
 docker-push-branch:
 	$(DOCKER) tag $(DOCKER_DEST) $(QUAY_IMAGE):$(VERSION_VALUE)-$(BRANCH)
 	$(DOCKER) push $(QUAY_IMAGE):$(VERSION_VALUE)-$(BRANCH)
+	$(DOCKER) tag $(DOCKER_MIGRATIONS_DEST) $(QUAY_MIGRATIONS_IMAGE):$(VERSION_VALUE)-$(BRANCH)
+	$(DOCKER) push $(QUAY_MIGRATIONS_IMAGE):$(VERSION_VALUE)-$(BRANCH)
 
 .PHONY: ship
 ship: docker-build docker-login
