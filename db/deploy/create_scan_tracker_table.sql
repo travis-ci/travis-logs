@@ -25,5 +25,8 @@ BEGIN;
   ALTER TABLE ONLY scan_tracker
   ALTER COLUMN id
   SET DEFAULT nextval('scan_tracker_id_seq'::regclass);
+  
+  ALTER TABLE ONLY scan_tracker
+  ADD CONSTRAINT scan_tracker_pkey PRIMARY KEY (id);
 
 COMMIT;
