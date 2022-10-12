@@ -31,5 +31,8 @@ BEGIN;
   ALTER TABLE ONLY scan_results
   ALTER COLUMN id
   SET DEFAULT nextval('scan_results_id_seq'::regclass);
+  
+  ALTER TABLE ONLY scan_results
+  ADD CONSTRAINT scan_results_pkey PRIMARY KEY (id);
 
 COMMIT;
