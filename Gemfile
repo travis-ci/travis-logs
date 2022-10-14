@@ -15,6 +15,7 @@ gem 'coder'
 gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'dalli'
+gem 'google-protobuf', '~> 3.19.6'
 gem 'jemalloc', git: gh('joshk/jemalloc-rb')
 gem 'jwt'
 gem 'libhoney'
@@ -49,4 +50,3 @@ gem 'travis-exceptions', git: gh('travis-ci/travis-exceptions')
 gem 'travis-lock', git: gh('travis-ci/travis-lock')
 gem 'travis-logger', git: gh('travis-ci/travis-logger')
 gem 'travis-metrics', git: gh('travis-ci/travis-metrics')
-gem 'google-protobuf', '~> 3.19.6'
