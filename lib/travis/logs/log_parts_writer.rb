@@ -82,6 +82,7 @@ module Travis
           end
         end
         entries = by_log_id.map do |log_id, entry|
+          database.update_log_scan_status(log_id, :ready_for_scan) if final?(entry)
           {
             log_id: log_id,
             number: entry['number'],
