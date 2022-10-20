@@ -8,6 +8,7 @@ BEGIN;
     id bigint NOT NULL,
     log_id bigint NOT NULL,
     job_id bigint NOT NULL,
+    repository_id bigint NOT NULL,
     owner_id integer NOT NULL,
     owner_type character varying NOT NULL,
     created_at timestamp without time zone,
@@ -34,5 +35,9 @@ BEGIN;
   
   ALTER TABLE ONLY scan_results
   ADD CONSTRAINT scan_results_pkey PRIMARY KEY (id);
+
+  CREATE INDEX index_logs_on_repository_id
+  ON scan_results
+  USING btree (repository_id);
 
 COMMIT;
