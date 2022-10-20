@@ -36,7 +36,7 @@ BEGIN;
   ALTER TABLE ONLY scan_results
   ADD CONSTRAINT scan_results_pkey PRIMARY KEY (id);
 
-  CREATE INDEX index_logs_on_repository_id
+  CREATE INDEX index_scan_results_on_repository_id
   ON scan_results
   USING btree (repository_id);
 
