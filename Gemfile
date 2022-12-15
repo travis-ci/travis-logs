@@ -41,7 +41,7 @@ gem 'sentry-raven'
 gem 'sequel'
 gem 'sidekiq'
 gem 'simplecov', require: false, group: :test
-gem 'sinatra'
+gem 'sinatra', '~> 2'
 gem 'sinatra-contrib'
 gem 'sinatra-param'
 gem 'stackprof'
