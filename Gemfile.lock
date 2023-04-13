@@ -661,7 +661,7 @@ GEM
       amq-protocol (~> 2.3, >= 2.3.0)
     coder (0.4.0)
     coderay (1.1.2)
-    concurrent-ruby (1.0.5)
+    concurrent-ruby (1.2.2)
     connection_pool (2.4.0)
     dalli (2.7.9)
     diff-lcs (1.3)
