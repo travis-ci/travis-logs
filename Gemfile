@@ -37,7 +37,7 @@ gem 'rspec', group: :test
 gem 'rubocop', require: false, group: :test
 gem 'sentry-raven'
 gem 'sequel'
-gem 'sidekiq'
+gem 'sidekiq', '>= 7.0.8'
 gem 'simplecov', require: false, group: :test
 gem 'sinatra'
 gem 'sinatra-contrib'
