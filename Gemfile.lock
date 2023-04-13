@@ -1596,7 +1596,7 @@ GEM
     sentry-raven (2.7.4)
       faraday (>= 0.7.6, < 1.0)
     sequel (5.13.0)
-    sidekiq (7.0.7)
+    sidekiq (7.0.8)
       concurrent-ruby (< 2)
       connection_pool (>= 2.3.0)
       rack (>= 2.2.4)
@@ -1669,7 +1669,7 @@ DEPENDENCIES
   rubocop
   sentry-raven
   sequel
-  sidekiq (>= 6.2.1)
+  sidekiq (>= 7.0.8)
   simplecov
   sinatra (>= 2.2.3)
   sinatra-contrib (>= 2.2.3)
