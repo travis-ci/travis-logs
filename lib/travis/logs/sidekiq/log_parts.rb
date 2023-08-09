@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'sidekiq/worker'
-
 require 'travis/logs'
 
 module Travis

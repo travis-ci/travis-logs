@@ -25,14 +25,13 @@ module Travis
             pool_size: Travis.config.sidekiq.pool_size,
             host: URI(Travis.config.redis.url).host
           )
-          ::Sidekiq.redis = ::Sidekiq::RedisConnection.create(
-            url: Travis.config.redis.url,
-            namespace: Travis.config.sidekiq.namespace,
-            size: Travis.config.sidekiq.pool_size,
-            id: nil
-          )
-          ::Sidekiq.logger = sidekiq_logger
           ::Sidekiq.configure_server do |config|
+            config.redis = ::Sidekiq::RedisConnection.create(
+              url: Travis.config.redis.url,
+              size: Travis.config.sidekiq.pool_size,
+              id: nil
+            )
+            config.logger = sidekiq_logger
             config.server_middleware do |chain|
               chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
                         pause_time: Travis.config.logs.sidekiq_error_retry_pause
