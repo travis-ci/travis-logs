@@ -1,14 +1,14 @@
 GIT
-  remote: https://github.com/joshk/jemalloc-rb.git
-  revision: 8c9dbef98f6bd4f96b371ec336b7e0c4fdc02d49
-  specs:
-    jemalloc (1.4.5)
-
-GIT
   remote: https://github.com/piotrmilcarz/coder.git
   revision: 6ba9bb3d11c51e53efca777d6be03c6dc93bd7db
   specs:
     coder (0.4.0)
+
+GIT
+  remote: https://github.com/piotrmilcarz/jemalloc-rb.git
+  revision: 73fac8c43a7b7cf3a79792bd7cfe933c479b83a1
+  specs:
+    jemalloc (1.4.5)
 
 GIT
   remote: https://github.com/travis-ci/metriks-librato_metrics.git
@@ -1534,6 +1534,7 @@ GEM
       gapic-common (>= 0.19.1, < 2.a)
       google-cloud-errors (~> 1.0)
     google-protobuf (3.23.4-x86_64-darwin)
+    google-protobuf (3.23.4-x86_64-linux)
     googleapis-common-protos (1.4.0)
       google-protobuf (~> 3.14)
       googleapis-common-protos-types (~> 1.2)
@@ -1548,6 +1549,9 @@ GEM
       os (>= 0.9, < 2.0)
       signet (>= 0.16, < 2.a)
     grpc (1.56.2-x86_64-darwin)
+      google-protobuf (~> 3.23)
+      googleapis-common-protos-types (~> 1.0)
+    grpc (1.56.2-x86_64-linux)
       google-protobuf (~> 3.23)
       googleapis-common-protos-types (~> 1.0)
     hashr (2.0.1)
