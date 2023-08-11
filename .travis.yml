@@ -1,6 +1,6 @@
 language: ruby
 rvm: 3.2.2
-dist: focal
+dist: xenial
 
 cache:
   bundler: true
