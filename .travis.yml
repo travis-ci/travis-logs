@@ -28,7 +28,6 @@ jobs:
     - script/install-partman
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
     - bundle config set --local path 'vendor/bundle'
-    - bundle lock --add-platform x86_64-linux
     before_script:
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
