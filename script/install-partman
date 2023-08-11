@@ -13,6 +13,7 @@ main() {
   curl -sSL 'https://github.com/keithf4/pg_partman/archive/v2.6.4.tar.gz' \
     | tar -xzf - -C "${tmp}"
 
+  "${sudo}" "${tmp}/pg_partman-2.6.4/configure"
   "${sudo}" make install -C "${tmp}/pg_partman-2.6.4"
 }
 
