@@ -19,10 +19,10 @@ jobs:
     - redis
     - rabbitmq
     addons:
-      postgresql: 11
+      postgresql: 10
       apt:
         packages:
-        - postgresql-server-dev-11
+        - postgresql-server-dev-10
     before_install:
     - script/install-sqitch
     - script/install-partman
