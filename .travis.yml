@@ -30,6 +30,7 @@ jobs:
     - bundle config set --local path 'vendor/bundle'
     - gem install bundler
     before_script:
+    - sudo apt-get install postgresql-contrib
     - sudo systemctl start postgresql
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
