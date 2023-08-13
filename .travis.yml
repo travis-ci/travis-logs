@@ -23,6 +23,7 @@ jobs:
       apt:
         packages:
         - postgresql-server-dev-11
+        - postgresql-contrib
     before_install:
     - script/install-sqitch
     - script/install-partman
@@ -31,7 +32,6 @@ jobs:
     - gem install bundler
     before_script:
     - sudo systemctl start postgresql
-    - sudo journalctl -xe
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
     addons:
