@@ -30,8 +30,8 @@ jobs:
     - bundle config set --local path 'vendor/bundle'
     - gem install bundler
     before_script:
-    - systemctl start postgresql
-    - journalctl -xe
+    - sudo systemctl start postgresql
+    - sudo journalctl -xe
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
     addons:
