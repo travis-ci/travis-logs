@@ -23,7 +23,6 @@ jobs:
       apt:
         packages:
         - postgresql-server-dev-11
-        - postgresql-contrib
     before_install:
     - script/install-sqitch
     - script/install-partman
