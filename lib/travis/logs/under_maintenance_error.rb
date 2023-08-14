@@ -3,7 +3,7 @@
 module Travis
   module Logs
     class UnderMaintenanceError < StandardError
-      def initialize(ttl)
+      def initialize(ttl) # rubocop:disable Lint/MissingSuper
         @ttl = ttl
       end
 
