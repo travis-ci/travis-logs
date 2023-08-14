@@ -12,6 +12,7 @@ describe Travis::Logs::Services::AggregateLogs do
     allow(database)
       .to receive_message_chain(:db, :transaction) { |&block| block.call }
     allow(database).to receive(:aggregatable_logs).and_return([1, 2])
+    allow(database).to receive(:update_log_scan_status)
     allow(database).to receive(:log_for_id) { |id| { id: id, content: 'foo' } }
     allow(database).to receive(:aggregate)
     allow(database).to receive(:delete_log_parts)
