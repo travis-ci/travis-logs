@@ -77,7 +77,7 @@ describe Travis::Logs::Services::AggregateLogs do
 
     it 'does not vacuum log parts' do
       service.run
-      
+
       expect(database).not_to have_received(:delete_log_parts)
     end
   end
