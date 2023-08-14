@@ -11,8 +11,7 @@ $stdout.sync = true
 $stderr.sync = true
 
 Travis::Config::Serialize::Env.new(
-  Travis::Logs.config.to_h,
-  prefix: 'travis'
+  Travis::Logs.config.to_h
 ).apply.sort.each do |entry|
   $stdout.puts entry
 end
