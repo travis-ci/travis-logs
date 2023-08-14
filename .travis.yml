@@ -32,6 +32,7 @@ jobs:
     before_script:
     - sudo apt-get install postgresql-contrib-10
     - sudo systemctl start postgresql
+    - sudo systemctl start redis
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
     addons:
