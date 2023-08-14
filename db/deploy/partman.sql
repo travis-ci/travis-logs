@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS pg_partman SCHEMA partman;
 SELECT partman.create_parent(
     'public.log_parts',
     'created_at',
-    'native',
+    'partman',
     'daily',
     p_constraint_cols := '{"log_id"}',
     p_premake := 2
