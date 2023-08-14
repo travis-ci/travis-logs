@@ -74,7 +74,7 @@ module Travis
         end
         alias fetch log
 
-        def mark_as_archiving(archiving: true)
+        def mark_as_archiving(archiving = true) # rubocop:disable Style/OptionalBooleanParameter
           database.update_archiving_status(log_id, archiving)
         end
 
