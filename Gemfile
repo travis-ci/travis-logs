@@ -22,7 +22,7 @@ gem 'metriks', git: gh('travis-ci/metriks')
 gem 'metriks-librato_metrics', git: gh('travis-ci/metriks-librato_metrics')
 gem 'multi_json'
 gem 'opencensus'
-gem 'opencensus-stackdriver'
+gem 'opencensus-stackdriver', '>= 0.3.0'
 gem 'pg'
 gem 'pry'
 gem 'puma', '>= 4.3.12'
