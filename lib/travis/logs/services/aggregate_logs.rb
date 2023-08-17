@@ -96,6 +96,7 @@ module Travis
           measure do
             database.db.transaction do
               aggregate(log_id)
+              database.update_log_scan_status(log_id, 'ready_for_scan')
               clean(log_id) unless skip_empty? && log_empty?(log_id)
             end
           end
