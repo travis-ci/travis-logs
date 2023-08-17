@@ -1,4 +1,4 @@
-FROM ruby:2.7.6
+FROM ruby:3.1.3
 
 LABEL maintainer Travis CI GmbH <support+travis-app-docker-images@travis-ci.com>
 
