@@ -25,7 +25,7 @@ gem 'opencensus'
 gem 'opencensus-stackdriver', '>= 0.3.0'
 gem 'pg'
 gem 'pry'
-gem 'puma', '>= 4.3.12'
+gem 'puma', '>= 6.3.1'
 gem 'pusher'
 gem 'rack-ssl'
 gem 'rack-test', '>= 2.0.0', group: :test
