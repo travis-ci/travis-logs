@@ -28,7 +28,6 @@ module Travis
           ::Sidekiq.configure_server do |config|
             config.redis = ::Sidekiq::RedisConnection.create(
               url: Travis.config.redis.url,
-              size: Travis.config.sidekiq.pool_size,
               id: nil
             )
             config.logger = sidekiq_logger
