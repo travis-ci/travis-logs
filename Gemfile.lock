@@ -5,12 +5,6 @@ GIT
     coder (0.4.0)
 
 GIT
-  remote: https://github.com/piotrmilcarz/jemalloc-rb.git
-  revision: 73fac8c43a7b7cf3a79792bd7cfe933c479b83a1
-  specs:
-    jemalloc (1.4.5)
-
-GIT
   remote: https://github.com/travis-ci/metriks-librato_metrics.git
   revision: 7ec1c97f4f6f783d2a04c7922baac98a9fbbba25
   specs:
@@ -1731,7 +1725,6 @@ DEPENDENCIES
   concurrent-ruby
   connection_pool
   dalli
-  jemalloc!
   jwt
   libhoney
   metriks!
