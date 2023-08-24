@@ -26,9 +26,8 @@ module Travis
             host: URI(Travis.config.redis.url).host
           )
           ::Sidekiq.configure_server do |config|
-            config.redis = ::Sidekiq::RedisConnection.create(
-              url: Travis.config.redis.url,
-              id: nil
+            config.redis = {
+              url: Travis.config.redis.url
             )
             config.logger = sidekiq_logger
             config.server_middleware do |chain|
