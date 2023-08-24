@@ -28,7 +28,7 @@ module Travis
           ::Sidekiq.configure_server do |config|
             config.redis = {
               url: Travis.config.redis.url
-            )
+            }
             config.logger = sidekiq_logger
             config.server_middleware do |chain|
               chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
