@@ -83,8 +83,8 @@ module Travis
           )
         end
         require 'connection_pool'
-        require 'active_support/cache/dalli_store'
-        ActiveSupport::Cache::DalliStore.new(
+        require 'active_support/cache/mem_cache_store'
+        ActiveSupport::Cache::MemCacheStore.new(
           config.memcached[:servers].to_s.split(','),
           username: config.memcached[:username],
           password: config.memcached[:password],
