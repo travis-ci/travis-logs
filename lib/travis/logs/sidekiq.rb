@@ -32,7 +32,7 @@ module Travis
             config.logger = sidekiq_logger
             config.server_middleware do |chain|
               chain.add Travis::Logs::Sidekiq::ErrorMiddleware,
-                        pause_time: Travis.config.logs.sidekiq_error_retry_pause
+                        Travis.config.logs.sidekiq_error_retry_pause
 
               chain.add Metrics::Sidekiq
               chain.add Travis::Honeycomb::Sidekiq
