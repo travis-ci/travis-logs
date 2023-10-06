@@ -8,13 +8,13 @@ def gh(slug)
   "https://github.com/#{slug}.git"
 end
 
-gem 'activesupport'
+gem 'activesupport', '>= 7.0.7.1'
 gem 'aws-sdk'
 gem 'bunny'
 gem 'coder'
 gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
-gem 'dalli'
+gem 'dalli', '>= 3.2.3'
 gem 'jemalloc', git: gh('joshk/jemalloc-rb')
 gem 'jwt'
 gem 'libhoney'
@@ -22,13 +22,13 @@ gem 'metriks', git: gh('travis-ci/metriks')
 gem 'metriks-librato_metrics', git: gh('travis-ci/metriks-librato_metrics')
 gem 'multi_json'
 gem 'opencensus'
-gem 'opencensus-stackdriver'
+gem 'opencensus-stackdriver', '>= 0.3.0'
 gem 'pg'
 gem 'pry'
-gem 'puma'
+gem 'puma', '>= 6.3.1'
 gem 'pusher'
 gem 'rack-ssl'
-gem 'rack-test', group: :test
+gem 'rack-test', '>= 2.0.0', group: :test
 gem 'rake'
 gem 'rbtrace'
 gem 'redis-namespace'
@@ -37,10 +37,10 @@ gem 'rspec', group: :test
 gem 'rubocop', require: false, group: :test
 gem 'sentry-raven'
 gem 'sequel'
-gem 'sidekiq'
+gem 'sidekiq', '>= 7.1.3'
 gem 'simplecov', require: false, group: :test
-gem 'sinatra'
-gem 'sinatra-contrib'
+gem 'sinatra', '>= 2.2.3'
+gem 'sinatra-contrib', '>= 3.0.6'
 gem 'sinatra-param'
 gem 'stackprof'
 gem 'travis-config'
