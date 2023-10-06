@@ -40,7 +40,7 @@ gem 'sequel'
 gem 'sidekiq', '>= 7.1.3'
 gem 'simplecov', require: false, group: :test
 gem 'sinatra', '>= 2.2.3'
-gem 'sinatra-contrib', '>= 2.2.3'
+gem 'sinatra-contrib', '>= 3.0.6'
 gem 'sinatra-param'
 gem 'stackprof'
 gem 'travis-config'
