@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'net/http'
 require 'travis/exceptions'
 require 'travis/logs'
 require 'travis/metrics'
@@ -12,6 +13,7 @@ module Travis
 
       def self.setup
         return if defined?(@setup)
+        self.ensure_sharding_policy if Travis.config.logs.drain_rabbitmq_sharding
 
         Travis.logger.debug('setting up drain dependencies')
         Travis::Exceptions.setup(
@@ -121,6 +123,22 @@ module Travis
 
       private def rabbitmq_sharding?
         Travis.config.logs.drain_rabbitmq_sharding
+      end
+
+      def self.ensure_sharding_policy
+        return unless Travis.config.amqp.include?(:host)
+
+        uri = URI("#{Travis.config.amqp[:tls] == true ? 'https' : 'http'}://#{Travis.config.amqp[:host]}:#{Travis.config.amqp[:port]}")
+        uri.path = '/api/policies/%2f/logs-sharding'
+        req = Net::HTTP::Put.new(uri)
+        req.basic_auth Travis.config.amqp[:username], Travis.config.amqp[:password]
+        shards =  Travis.config.amqp.include?('shards_per_node') ? Travis.config.amqp[:shards_per_node] : 2
+        priority = Travis.config.amqp.include?('shards_priority') ? Travis.config.amqp[:shards_priority] : -8
+        req.body = "{\"pattern\": \"^reporting.jobs.logs_sharded$\",\"definition\": {\"shards-per-node\": #{shards}}, \"priority\": {#priority}, \"apply-to\":\"exchanges\"}"
+        req.content_type = 'application/json'
+        res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+          http.request(req)
+        end
       end
     end
   end
