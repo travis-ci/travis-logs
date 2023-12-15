@@ -4,7 +4,7 @@ AllCops:
   TargetRubyVersion: 2.3
   Exclude:
   - 'je'
-  - 'vendor'
+  - 'vendor/**/*'
 
 Style/Documentation:
   Enabled: false
