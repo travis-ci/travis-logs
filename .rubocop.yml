@@ -2,6 +2,8 @@ inherit_from: .rubocop_todo.yml
 
 AllCops:
   TargetRubyVersion: 2.3
+  Exclude:
+  - 'je'
 
 Style/Documentation:
   Enabled: false
@@ -20,7 +22,7 @@ Style/TrailingCommaInHashLiteral:
   Enabled: false
 
 Metrics/LineLength:
-  Max: 160
+  Max: 180
   Exclude:
   - 'spec/**/*'
   - 'lib/travis/logs/app/opencensus.rb'
