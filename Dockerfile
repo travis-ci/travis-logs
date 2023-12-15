@@ -15,7 +15,7 @@ COPY . /app
 RUN ( \
   apt-get update; \
   apt-get upgrade -y ; \
-  apt-get install -y build-essential git curl  libpq-dev; \
+  apt-get install -y build-essential git curl  libpq-dev libjemalloc-dev; \
   bundle install --deployment; \
   apt-get remove -y build-essential git curl gcc g++ make perl; \
   apt-get -y autoremove; \
