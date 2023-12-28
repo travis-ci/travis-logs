@@ -128,6 +128,7 @@ module Travis
 
       def self.ensure_sharding_policy
         return unless Travis.config.amqp.include?(:host)
+        return unless Travis.config.amqp.include?(:api_port)
 
         uri = URI("#{Travis.config.amqp[:tls] == true ? 'https' : 'http'}://#{Travis.config.amqp[:host]}:#{Travis.config.amqp[:api_port]}")
         uri.path = "/api/policies/#{Travis.config.amqp[:vhost]}/logs-sharding"
