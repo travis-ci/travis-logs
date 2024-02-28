@@ -32,6 +32,7 @@ gem 'redis-namespace', '>= 1.11.0'
 gem 'redlock'
 gem 'rspec', group: :test
 gem 'rubocop', require: false, group: :test
+gem 'rubocop-performance', require: false, group: :test
 gem 'sentry-ruby'
 gem 'sequel'
 gem 'sidekiq', '~> 7.1.2'
