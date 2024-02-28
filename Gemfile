@@ -20,6 +20,7 @@ gem 'metriks-librato_metrics', github: 'travis-ci/metriks-librato_metrics'
 gem 'multi_json'
 gem 'opencensus'
 gem 'opencensus-stackdriver'
+gem 'panolint', require: false, group: :test
 gem 'pg'
 gem 'pry'
 gem 'puma'
