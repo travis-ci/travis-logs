@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'sidekiq'
-require 'sidekiq/worker'
 
 require 'travis/logs'
 

@@ -37,12 +37,12 @@ module Travis
         name = [
           (env['REQUEST_METHOD'] || 'unk').downcase,
           env['PATH_INFO'].to_s
-            .sub('/', '')
-            .gsub(/[[:digit:]]+/, 'id')
+                          .sub('/', '')
+                          .gsub(/[[:digit:]]+/, 'id')
                           .gsub(/\.+/, '.')
         ].join('.')
-               .gsub(/[^\.[:alnum:]]+/, '_')
-               .gsub(/[\._]+$/, '')
+               .gsub(/[^.[:alnum:]]+/, '_')
+               .gsub(/[._]+$/, '')
         return name if KNOWN_TIMER_NAMES.include?(name)
 
         'unk.unk'

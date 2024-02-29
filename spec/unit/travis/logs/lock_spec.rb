@@ -6,7 +6,7 @@ describe Travis::Logs::Lock do
   let(:redis_url) { 'redis://very.memory.example.com' }
 
   subject do
-    described_class.new('flarp.flub', {})
+    described_class.new('flarp.flub')
   end
 
   before :each do

@@ -1,13 +1,13 @@
-FROM ruby:2.5.8
+FROM ruby:3.2.2
 
 LABEL maintainer Travis CI GmbH <support+travis-app-docker-images@travis-ci.com>
 
 RUN ( \
   apt-get update; \
   apt-get upgrade -y --no-install-recommends; \
-  apt-get install -y curl postgresql postgresql-server-dev-all liblocal-lib-perl build-essential; \
+  apt-get install -y curl postgresql postgresql-server-dev-all liblocal-lib-perl build-essential libjemalloc-dev; \
   rm -rf /var/lib/apt/lists/* ; \
-)
+  )
 
 # throw errors if Gemfile has been modified since Gemfile.lock
 RUN bundle config --global frozen 1

@@ -15,7 +15,7 @@ module Travis
           Travis::Honeycomb.context.clear
 
           Travis::Honeycomb.context.tags(
-            request_type:  'rabbitmq',
+            request_type: 'rabbitmq',
             request_shape: worker_name
           )
 
@@ -50,17 +50,17 @@ module Travis
           delivery[:delivery_tag] = delivery_info.delivery_tag
           event = event.merge(
             rabbitmq: {
-              bytes:      payload.bytesize,
+              bytes: payload.bytesize,
               properties: properties.to_hash,
-              delivery:   delivery
+              delivery: delivery
             },
             request_duration_ms: request_time * 1000,
-            request_queue_ms:    queue_time * 1000,
-            exception_class:     e&.class&.name,
-            exception_message:   e&.message,
+            request_queue_ms: queue_time * 1000,
+            exception_class: e&.class&.name,
+            exception_message: e&.message,
             exception_backtrace: e&.backtrace,
-            prev_exception_class:     e&.cause&.class&.name,
-            prev_exception_message:   e&.cause&.message,
+            prev_exception_class: e&.cause&.class&.name,
+            prev_exception_message: e&.cause&.message,
             prev_exception_backtrace: e&.cause&.backtrace
           )
           # remove nil and blank values
