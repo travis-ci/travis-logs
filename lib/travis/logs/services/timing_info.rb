@@ -12,8 +12,8 @@ module Travis
 
         private :database
 
-        TIMER_START = /travis_time:start:(?<timer_id>[0-9a-f]+)/
-        TIMER_END = /travis_time:end:(?<timer_id>[0-9a-f]+):(?<info>[^\r]+)\r/
+        TIMER_START = /travis_time:start:(?<timer_id>[0-9a-f]+)/.freeze
+        TIMER_END = /travis_time:end:(?<timer_id>[0-9a-f]+):(?<info>[^\r]+)\r/.freeze
 
         def self.run
           new.run

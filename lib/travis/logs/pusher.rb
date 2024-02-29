@@ -30,7 +30,7 @@ module Travis
             time_to_first_log_line_pusher_ms: elapsed * 1000,
             infra: meta['infra'],
             queue: meta['queue'],
-            repo:  meta['repo']
+            repo: meta['repo']
           )
         end
       end

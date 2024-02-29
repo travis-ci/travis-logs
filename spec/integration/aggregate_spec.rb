@@ -14,7 +14,7 @@ describe 'aggregation' do
   def word_salad(n = 100)
     s = ''
     n.times { s += "#{lorem_ipsum_words.sample} " }
-    s + "\n"
+    "#{s}\n"
   end
 
   def create_payload(job_id, n)

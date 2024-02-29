@@ -18,9 +18,7 @@ module Travis
         METRIKS_PREFIX
       end
 
-      attr_reader :batch_buffer, :flush_mutex
-      attr_reader :reporting_jobs_queue, :batch_handler
-      attr_reader :pusher_handler, :periodic_flush_task
+      attr_reader :batch_buffer, :flush_mutex, :reporting_jobs_queue, :batch_handler, :pusher_handler, :periodic_flush_task
       private :batch_buffer
       private :flush_mutex
       private :batch_handler

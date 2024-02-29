@@ -190,11 +190,13 @@ describe Travis::Logs::App do
       @log_id = 456
 
       allow(Travis::Logs::Sidekiq::LogParts).to receive(:perform_async).with(
-        'id' => @job_id,
-        'log' => Base64.strict_encode64('fafafaf'),
-        'encoding' => 'base64',
-        'number' => '1',
-        'final' => false
+        {
+          'id' => @job_id,
+          'log' => Base64.strict_encode64('fafafaf'),
+          'encoding' => 'base64',
+          'number' => '1',
+          'final' => false
+        }
       ).and_return(nil)
     end
 

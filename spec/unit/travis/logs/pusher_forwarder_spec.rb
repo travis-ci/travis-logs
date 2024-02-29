@@ -81,10 +81,12 @@ describe Travis::Logs::PusherForwarder do
     it 'notifies pusher on a private channel' do
       expect(pusher_client).to receive(:push)
         .with(
-          'id' => 2,
-          'chars' => "hello, world \xde\x86wowbytes",
-          'number' => anything,
-          'final' => false
+          {
+            'id' => 2,
+            'chars' => "hello, world \xde\x86wowbytes",
+            'number' => anything,
+            'final' => false
+          }
         ).exactly(2).times
       service.run(payload)
     end
@@ -98,10 +100,12 @@ describe Travis::Logs::PusherForwarder do
     it 'notifies pusher on a regular channel' do
       expect(pusher_client).to receive(:push)
         .with(
-          'id' => 2,
-          'chars' => "hello, world \xde\x86wowbytes",
-          'number' => anything,
-          'final' => false
+          {
+            'id' => 2,
+            'chars' => "hello, world \xde\x86wowbytes",
+            'number' => anything,
+            'final' => false
+          }
         ).exactly(2).times
       service.run(payload)
     end

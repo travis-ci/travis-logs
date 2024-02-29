@@ -2,6 +2,9 @@ inherit_from: .rubocop_todo.yml
 
 AllCops:
   TargetRubyVersion: 2.3
+  Exclude:
+  - je
+  - vendor/bundle/**/*
 
 Style/Documentation:
   Enabled: false
@@ -10,6 +13,7 @@ Style/FrozenStringLiteralComment:
   Enabled: false
 
 Style/GuardClause:
+  Enabled: false
   Exclude:
   - 'lib/travis/logs/services/fetch*.rb'
 
@@ -42,9 +46,6 @@ Metrics/CyclomaticComplexity:
 
 Metrics/PerceivedComplexity:
   Max: 15
-
-Style/GuardClause:
-  Enabled: false
 
 Metrics/AbcSize:
   Max: 100

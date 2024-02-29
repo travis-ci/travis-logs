@@ -14,9 +14,9 @@ module Travis
         Travis::Honeycomb.clear
 
         Travis::Honeycomb.context.tags(
-          request_type:  'sidekiq',
+          request_type: 'sidekiq',
           request_shape: job['class'],
-          request_id:    job['jid']
+          request_id: job['jid']
         )
 
         queue_time = Time.now - Time.at(job['enqueued_at'])
@@ -45,16 +45,16 @@ module Travis
         event = event.merge(
           sidekiq_job: {
             class: job['class'],
-            jid:   job['jid'],
+            jid: job['jid'],
             queue: job['queue']
           },
           request_duration_ms: request_time * 1000,
-          request_queue_ms:    queue_time * 1000,
-          exception_class:     e&.class&.name,
-          exception_message:   e&.message,
+          request_queue_ms: queue_time * 1000,
+          exception_class: e&.class&.name,
+          exception_message: e&.message,
           exception_backtrace: e&.backtrace,
-          prev_exception_class:     e&.cause&.class&.name,
-          prev_exception_message:   e&.cause&.message,
+          prev_exception_class: e&.cause&.class&.name,
+          prev_exception_message: e&.cause&.message,
           prev_exception_backtrace: e&.cause&.backtrace
         )
         # remove nil and blank values

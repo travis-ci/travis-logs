@@ -40,7 +40,7 @@ Naming/MemoizedInstanceVariableName:
 # Offense count: 6
 # Configuration parameters: MinNameLength, AllowNamesEndingInNumbers, AllowedNames, ForbiddenNames.
 # AllowedNames: io, id, to, by, on, in, at, ip, db
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Exclude:
     - 'lib/travis/honeycomb/context.rb'
     - 'lib/travis/honeycomb/rabbitmq.rb'
