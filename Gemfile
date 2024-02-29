@@ -20,6 +20,7 @@ gem 'metriks-librato_metrics', github: 'travis-ci/metriks-librato_metrics'
 gem 'multi_json'
 gem 'opencensus'
 gem 'opencensus-stackdriver'
+gem 'panolint', require: false, group: :test
 gem 'pg'
 gem 'pry'
 gem 'puma'
@@ -32,8 +33,8 @@ gem 'redis-namespace', '>= 1.11.0'
 gem 'redlock'
 gem 'rspec', group: :test
 gem 'rubocop', require: false, group: :test
-gem 'rubocop-performance'
-gem 'rubocop-rspec'
+gem 'rubocop-performance', require: false, group: :test
+gem 'rubocop-rspec', require: false, group: :test
 gem 'sentry-ruby'
 gem 'sequel'
 gem 'sidekiq', '~> 7.1.2'

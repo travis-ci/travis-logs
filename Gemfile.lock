@@ -1492,6 +1492,7 @@ GEM
     aws-sigv4 (1.6.0)
       aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.1.1)
+    brakeman (5.4.1)
     bunny (2.22.0)
       amq-protocol (~> 2.3, >= 2.3.1)
       sorted_set (~> 1, >= 1.0.2)
@@ -1589,6 +1590,13 @@ GEM
       opencensus (~> 0.5)
     optimist (3.1.0)
     os (1.1.4)
+    panolint (0.1.6)
+      brakeman (>= 4.8, < 6.0)
+      rubocop (>= 0.83, < 2.0)
+      rubocop-performance (~> 1.5)
+      rubocop-rails (~> 2.5)
+      rubocop-rake (~> 0.5)
+      rubocop-rspec (~> 2.0)
     parallel (1.23.0)
     parser (3.2.2.3)
       ast (~> 2.4.1)
@@ -1664,6 +1672,12 @@ GEM
     rubocop-performance (1.19.1)
       rubocop (>= 1.7.0, < 2.0)
       rubocop-ast (>= 0.4.0)
+    rubocop-rails (2.22.1)
+      activesupport (>= 4.2.0)
+      rack (>= 1.1)
+      rubocop (>= 1.33.0, < 2.0)
+    rubocop-rake (0.6.0)
+      rubocop (~> 1.0)
     rubocop-rspec (2.26.1)
       rubocop (~> 1.40)
       rubocop-capybara (~> 2.17)
@@ -1733,6 +1747,7 @@ DEPENDENCIES
   multi_json
   opencensus
   opencensus-stackdriver
+  panolint
   pg
   pry
   puma

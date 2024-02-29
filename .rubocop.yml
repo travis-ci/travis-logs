@@ -4,6 +4,7 @@ AllCops:
   TargetRubyVersion: 2.3
   Exclude:
   - je
+  - vendor/bundle/**/*
 
 Style/Documentation:
   Enabled: false
