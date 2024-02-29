@@ -22,4 +22,4 @@ end
 desc 'Set up test bits'
 task setup: %i[db:create db:migrate]
 
-task default: %i[rubocop spec]
+task default: %i[spec]
