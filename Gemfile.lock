@@ -23,40 +23,35 @@ GIT
 
 GIT
   remote: https://github.com/travis-ci/travis-config.git
-  revision: d6b678fb17b242508fa4e061ff7b01cae3b08996
-  branch: prd-ruby-upgrade-dev
+  revision: 601e9a6dcb799dc14944c40153c60aaf935629ee
   specs:
-    travis-config (1.1.5)
+    travis-config (2.0.0)
       hashr (~> 2.0)
 
 GIT
   remote: https://github.com/travis-ci/travis-exceptions.git
-  revision: 9bcf5989b9a6444a8a954540c26ba9fd4fd2ee85
-  branch: prd-ruby-upgrade-dev
+  revision: 7da3ea3b38349d66ea8f27c33d643e4af5087599
   specs:
-    travis-exceptions (0.0.2)
+    travis-exceptions (0.1.0)
       sentry-ruby
 
 GIT
   remote: https://github.com/travis-ci/travis-lock.git
-  revision: 46950a25cca6c3e4626bf7304787c02ce96eb5c6
-  branch: prd-ruby-upgrade-dev
+  revision: aeee7b5d11e3d44f19d0a113c2e54ec54756f20f
   specs:
-    travis-lock (0.1.1)
+    travis-lock (0.2.0)
 
 GIT
   remote: https://github.com/travis-ci/travis-logger.git
-  revision: 6f0627028d027a6ae9b74bbb654c9b5c37c76ee5
-  branch: prd-ruby-upgrade-dev
+  revision: c754e91f959015ac9ebe98e5082efdaf3754863d
   specs:
-    travis-logger (0.0.1)
+    travis-logger (0.1.0)
 
 GIT
   remote: https://github.com/travis-ci/travis-metrics.git
-  revision: c776366d7182829da5abf9e48b42c416249a0043
-  branch: prd-ruby-upgrade-dev
+  revision: 0b6a8accc70685a1cb65f1ec5305bceab41ad777
   specs:
-    travis-metrics (2.0.0)
+    travis-metrics (3.0.0)
       metriks-librato_metrics (~> 1.0)
 
 GEM
@@ -1662,9 +1657,17 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.29.0)
       parser (>= 3.2.1.0)
+    rubocop-capybara (2.20.0)
+      rubocop (~> 1.41)
+    rubocop-factory_bot (2.25.1)
+      rubocop (~> 1.41)
     rubocop-performance (1.19.1)
       rubocop (>= 1.7.0, < 2.0)
       rubocop-ast (>= 0.4.0)
+    rubocop-rspec (2.26.1)
+      rubocop (~> 1.40)
+      rubocop-capybara (~> 2.17)
+      rubocop-factory_bot (~> 2.22)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
     sentry-ruby (5.10.0)
@@ -1743,6 +1746,7 @@ DEPENDENCIES
   rspec
   rubocop
   rubocop-performance
+  rubocop-rspec
   sentry-ruby
   sequel
   sidekiq (~> 7.1.2)
@@ -1761,4 +1765,4 @@ RUBY VERSION
    ruby 3.2.2p53
 
 BUNDLED WITH
-   2.4.17
+   2.4.19
