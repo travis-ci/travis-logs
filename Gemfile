@@ -30,6 +30,7 @@ gem 'rack-test', group: :test
 gem 'rake'
 gem 'rbtrace'
 gem 'redis-namespace', '>= 1.11.0'
+gem 'redis'
 gem 'redlock'
 gem 'rspec', group: :test
 gem 'rubocop', require: false, group: :test
