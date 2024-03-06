@@ -3,6 +3,7 @@
 require 'opencensus'
 require 'opencensus/stackdriver'
 require 'sequel'
+require 'redis'
 
 module Travis
   module Logs

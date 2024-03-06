@@ -1756,6 +1756,7 @@ DEPENDENCIES
   rack-test
   rake
   rbtrace
+  redis
   redis-namespace (>= 1.11.0)
   redlock
   rspec

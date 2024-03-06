@@ -29,6 +29,7 @@ gem 'rack-ssl'
 gem 'rack-test', group: :test
 gem 'rake'
 gem 'rbtrace'
+gem 'redis'
 gem 'redis-namespace', '>= 1.11.0'
 gem 'redlock'
 gem 'rspec', group: :test
