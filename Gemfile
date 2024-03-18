@@ -14,7 +14,6 @@ gem 'concurrent-ruby', require: 'concurrent'
 gem 'connection_pool'
 gem 'dalli'
 gem 'google-protobuf', '~> 3.19.6'
-gem 'jemalloc', git: gh('joshk/jemalloc-rb')
 gem 'jwt'
 gem 'libhoney'
 gem 'metriks', github: 'travis-ci/metriks'
