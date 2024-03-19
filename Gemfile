@@ -42,7 +42,7 @@ gem 'sentry-ruby'
 gem 'sequel'
 gem 'sidekiq', '~> 7.1.2'
 gem 'simplecov', require: false, group: :test
-gem 'sinatra', '>= 3.0.6'
+gem 'sinatra', '~> 3.0'
 gem 'sinatra-contrib'
 gem 'sinatra-param'
 gem 'stackprof'
