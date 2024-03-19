@@ -24,7 +24,7 @@ gem 'opencensus-stackdriver'
 gem 'panolint', require: false, group: :test
 gem 'pg'
 gem 'pry'
-gem 'puma', '~> 4'
+gem 'puma'
 gem 'pusher'
 gem 'rack'
 gem 'rack-ssl'

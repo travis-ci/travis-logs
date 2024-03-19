@@ -1717,7 +1717,7 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
     public_suffix (5.0.4)
-    puma (4.3.12)
+    puma (6.4.2)
       nio4r (~> 2.0)
     pusher (2.0.3)
       httpclient (~> 2.8)
@@ -1863,7 +1863,7 @@ DEPENDENCIES
   panolint
   pg
   pry
-  puma (~> 4)
+  puma
   pusher
   rack
   rack-ssl
