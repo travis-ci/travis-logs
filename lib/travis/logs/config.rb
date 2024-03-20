@@ -10,7 +10,7 @@ module Travis
       define(
         amqp: {
           automatic_recovery: true,
-          recover_from_connection_close: true
+          recover_from_connection_close: true,
         },
         channels_existence_check: true,
         lock: { strategy: :redis, ttl: 150 },
