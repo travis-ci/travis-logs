@@ -152,10 +152,10 @@ module Travis
       def create_scan_tracker_entry(log_id, scan_status)
         maint.restrict!
         db[:scan_tracker].insert({
-          log_id: log_id,
-          scan_status: scan_status,
-          created_at: Time.now.utc
-        })
+                                   log_id: log_id,
+                                   scan_status: scan_status,
+                                   created_at: Time.now.utc
+                                 })
       end
 
       def update_log_scan_status(log_id, scan_status)

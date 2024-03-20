@@ -6,7 +6,6 @@ require 'jwt'
 require 'multi_json'
 require 'pusher'
 require 'rack/ssl'
-require 'raven'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/param'
@@ -25,7 +24,6 @@ module Travis
         disable :dump_errors
         use Rack::SSL unless Travis.config.logs.disable_ssl?
         use Travis::Logs::MetricsMiddleware
-        use Raven::Rack
         use Travis::Logs::OpenCensus if Travis::Logs::OpenCensus.enabled?
       end
 

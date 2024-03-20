@@ -89,7 +89,7 @@ module Travis
       end
 
       private def final?(entry)
-        !!entry['final'] # rubocop:disable Style/DoubleNegation
+        !!entry['final']
       end
 
       private def pusher_payload(entry)

@@ -2,7 +2,7 @@
 
 describe Travis::Logs::Sidekiq::ErrorMiddleware do
   subject do
-    described_class.new(pause_time: 0)
+    described_class.new(0)
   end
 
   it 'calls the block it wraps' do

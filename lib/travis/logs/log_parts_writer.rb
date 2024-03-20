@@ -64,7 +64,7 @@ module Travis
               time_to_first_log_line_log_parts_ms: elapsed * 1000,
               infra: meta['infra'],
               queue: meta['queue'],
-              repo:  meta['repo']
+              repo: meta['repo']
             )
           end
 
@@ -123,7 +123,7 @@ module Travis
       end
 
       private def final?(entry)
-        !!entry['final'] # rubocop:disable Style/DoubleNegation
+        !!entry['final']
       end
 
       private def intervals

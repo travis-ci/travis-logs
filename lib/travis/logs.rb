@@ -3,8 +3,6 @@
 require 'forwardable'
 
 require 'active_support'
-require 'raven'
-require 'raven/processor/removestacktrace'
 require 'rbtrace'
 require 'sidekiq/redis_connection'
 
@@ -85,8 +83,8 @@ module Travis
           )
         end
         require 'connection_pool'
-        require 'active_support/cache/dalli_store'
-        ActiveSupport::Cache::DalliStore.new(
+        require 'active_support/cache/mem_cache_store'
+        ActiveSupport::Cache::MemCacheStore.new(
           config.memcached[:servers].to_s.split(','),
           username: config.memcached[:username],
           password: config.memcached[:password],
@@ -103,13 +101,12 @@ module Travis
 
       private def setup_exceptions
         Travis::Exceptions.setup(config, config.env, logger)
-        Raven.configure do |c|
+        Sentry.init do |c|
           c.dsn = config.sentry.dsn unless config.sentry.dsn.to_s.empty?
-          c.current_environment = config.env.to_s
-          c.environments = %w[staging production]
+          c.environment = config.env.to_s
+          c.enabled_environments = %w[staging production]
           c.excluded_exceptions = %w[Travis::Logs::UnderMaintenanceError]
           c.release = version
-          c.silence_ready = true
         end
       end
 

@@ -28,7 +28,7 @@ module Travis
           end
         end
 
-        attr_reader :log_id
+        attr_reader :log_id, :storage_service, :database
 
         def initialize(
           log_id,
@@ -74,7 +74,7 @@ module Travis
         end
         alias fetch log
 
-        def mark_as_archiving(archiving = true)
+        def mark_as_archiving(archiving = true) # rubocop:disable Style/OptionalBooleanParameter
           database.update_archiving_status(log_id, archiving)
         end
 
@@ -132,8 +132,6 @@ module Travis
         def target_url
           "http://#{hostname}/jobs/#{job_id}/log.txt"
         end
-
-        attr_reader :storage_service, :database
         private :storage_service
         private :database
 

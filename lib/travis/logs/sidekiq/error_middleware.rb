@@ -8,7 +8,7 @@ module Travis
   module Logs
     module Sidekiq
       class ErrorMiddleware
-        def initialize(pause_time: 3.seconds)
+        def initialize(pause_time = 3.seconds)
           @pause_time = pause_time
         end
 

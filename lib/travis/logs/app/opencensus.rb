@@ -3,6 +3,7 @@
 require 'opencensus'
 require 'opencensus/stackdriver'
 require 'sequel'
+require 'redis'
 
 module Travis
   module Logs
@@ -14,6 +15,7 @@ module Travis
           end
         end
       end
+
       module Redis
         def logging(commands, &block)
           ActiveSupport::Notifications.instrument('command.redis', commands: commands) do
