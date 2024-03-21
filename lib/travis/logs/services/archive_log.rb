@@ -2,6 +2,7 @@
 
 require 'uri'
 
+require 'active_support/core_ext'
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
 require 'multi_json'
