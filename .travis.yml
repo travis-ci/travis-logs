@@ -19,10 +19,10 @@ jobs:
     - redis
     - rabbitmq
     addons:
-      postgresql: 10
+      postgresql: 11
       apt:
         packages:
-        - postgresql-server-dev-10
+        - postgresql-server-dev-11
     before_install:
     - script/install-sqitch
     - script/install-partman
@@ -35,10 +35,6 @@ jobs:
     - sudo systemctl start redis-server
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
-    addons:
-      snaps:
-      - name: docker
-        channel: latest/beta
     language: bash
     script: make ship
     if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
