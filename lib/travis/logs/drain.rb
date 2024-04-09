@@ -133,10 +133,10 @@ module Travis
         uri = URI("#{Travis.config.amqp[:tls] == true ? 'https' : 'http'}://#{Travis.config.amqp[:host]}:#{Travis.config.amqp[:api_port]}")
         uri.path = "/api/policies/#{Travis.config.amqp[:vhost]}/logs-sharding"
         req = Net::HTTP::Put.new(uri)
-        req.basic_auth Travis.config.amqp[:management_user] || Travis.config.amqp[:username], Travis.config.amqp[:management_pass] || Travis.config.amqp[:password]
+        req.basic_auth Travis.config.amqp[:management_user] || Travis.config.amqp[:username], Travis.config.amqp[:management_pass] || Travis.config.amqp[:password] # rubocop:disable Layout/LineLength
         shards = Travis.config.amqp.include?('shards_per_node') ? Travis.config.amqp[:shards_per_node] : 2
         priority = Travis.config.amqp.include?('shards_priority') ? Travis.config.amqp[:shards_priority] : -8
-        req.body = "{\"pattern\": \"^reporting.jobs.logs_sharded$\",\"definition\": {\"shards-per-node\": #{shards}}, \"priority\": #{priority}, \"apply-to\":\"exchanges\"}"
+        req.body = "{\"pattern\": \"^reporting.jobs.logs_sharded$\",\"definition\": {\"shards-per-node\": #{shards}}, \"priority\": #{priority}, \"apply-to\":\"exchanges\"}" # rubocop:disable Layout/LineLength
         req.content_type = 'application/json'
         Net::HTTP.start(uri.hostname, uri.port) do |http|
           http.request(req)
