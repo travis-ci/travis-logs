@@ -24,8 +24,6 @@ main() {
     exit 1
   }
 
-  : "${ENTERPRISE_MIGRATE_TO:=log_parts_created_at_not_null}"
-
   if ! __pgdb_exists; then
     createdb
   fi
@@ -39,11 +37,17 @@ main() {
     fi
   fi
 
-  sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
-    __migrate
-  else
-    sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
-  fi
+  deployFiles=('log_parts_created_at_not_null' 'create_scan_results_table' 'create_scan_tracker_table' 'logs_create_scan_status')
+
+  for deployFile in "${deployFiles[@]}"
+  do
+    ENTERPRISE_MIGRATE_TO=$deployFile
+    sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
+      __migrate
+    else
+      sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
+    fi
+  done
 }
 
 __pgdb_exists() {
