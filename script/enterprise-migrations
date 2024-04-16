@@ -41,7 +41,7 @@ main() {
 
     ENTERPRISE_MIGRATE_TO=${deployFiles[0]}
     sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
-      for (( i = 1; i < ${#deployFiles[@]}; i++ ));
+      for (( i = 0; i < ${#deployFiles[@]}; i++ ));
       do
         __migrate "${deployFiles[$i]}"
       done
