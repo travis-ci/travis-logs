@@ -39,15 +39,15 @@ main() {
 
     deployFiles=('log_parts_created_at_not_null' 'create_scan_results_table' 'create_scan_tracker_table' 'logs_create_scan_status')
 
-    ENTERPRISE_MIGRATE_TO=${deployFiles[0]}
-    sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
-      for (( i = 0; i < ${#deployFiles[@]}; i++ ));
-      do
-        __migrate "${deployFiles[$i]}"
-      done
-    else
-      sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
-    fi
+    for (( i = 0; i < ${#deployFiles[@]}; i++ ));
+    do
+      ENTERPRISE_MIGRATE_TO=${deployFiles[$i]}
+      sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
+          __migrate "${deployFiles[$i]}"
+      else
+        sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
+      fi
+    done
 }
 
 __pgdb_exists() {
