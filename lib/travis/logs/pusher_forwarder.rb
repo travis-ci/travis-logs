@@ -60,7 +60,7 @@ module Travis
             entry['log'].bytesize
           end.reduce(&:+))
 
-          normalized.each do |_, entry|
+          normalized.map do |_, entry|
             notify(entry)
           end
         end

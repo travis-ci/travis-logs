@@ -9,12 +9,15 @@ module Travis
   module Logs
     class S3
       def self.setup
+        return unless Travis.config.s3
+
         Aws.config.update(
-          region: ENV['TRAVIS_LOGS_S3_REGION'] || 'us-east-1',
+          region: ENV['TRAVIS_LOGS_S3_REGION'] || Travis.config.log_options&.s3&.region || 'us-east-1',
           credentials: Aws::Credentials.new(
             Travis.config.s3.access_key_id,
             Travis.config.s3.secret_access_key
-          )
+          ),
+          endpoint: endpoint
         )
       end
 
@@ -38,6 +41,12 @@ module Travis
 
       private def object(uri)
         bucket(uri).object(uri.path[1..-1])
+      end
+
+      def self.endpoint
+        return unless Travis.config.s3
+
+        Travis.config.s3.endpoint&.index('http')&.zero? ? Travis.config.s3.endpoint : "https://#{Travis.config.s3.endpoint}"
       end
 
       private def bucket(uri)

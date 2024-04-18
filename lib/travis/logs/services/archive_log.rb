@@ -2,6 +2,7 @@
 
 require 'uri'
 
+require 'active_support/core_ext'
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/numeric/time'
 require 'multi_json'
@@ -130,6 +131,8 @@ module Travis
         end
 
         def target_url
+          return "http://#{Travis.config.log_options.s3.bucket}/jobs/#{job_id}/log.txt" if Travis.config.s3.bucket
+
           "http://#{hostname}/jobs/#{job_id}/log.txt"
         end
         private :storage_service
