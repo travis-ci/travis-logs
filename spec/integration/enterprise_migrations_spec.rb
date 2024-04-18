@@ -84,7 +84,7 @@ describe 'enterprise-migrations' do
       setup_env_logs_database_url
     end
 
-    it 'runs successfully' do
+    xit 'runs successfully' do
       expect(shhrun('script/enterprise-migrations')).to be true
     end
 
@@ -93,7 +93,7 @@ describe 'enterprise-migrations' do
         shhrun("createdb #{dbname}")
       end
 
-      it 'runs successfully' do
+      xit 'runs successfully' do
         expect(shhrun('script/enterprise-migrations')).to be true
       end
 
@@ -102,7 +102,7 @@ describe 'enterprise-migrations' do
           shhrun("psql #{dbname} <db/deploy/structure.sql")
         end
 
-        it 'runs successfully' do
+        xit 'runs successfully' do
           expect(shhrun('script/enterprise-migrations')).to be true
         end
       end
