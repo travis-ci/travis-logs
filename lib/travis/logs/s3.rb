@@ -10,7 +10,7 @@ module Travis
     class S3
       def self.setup
         Aws.config.update(
-          region: ENV['TRAVIS_LOGS_S3_REGION'] ||Travis.config.log_options.s3.region || 'us-east-1',
+          region: ENV['TRAVIS_LOGS_S3_REGION'] || Travis.config.log_options.s3.region || 'us-east-1',
           credentials: Aws::Credentials.new(
             Travis.config.s3.access_key_id,
             Travis.config.s3.secret_access_key
@@ -42,7 +42,7 @@ module Travis
       end
 
       def self.endpoint
-        Travis.config.s3.endpoint&.index('http') == 0 ? Travis.config.s3.endpoint: "https://#{Travis.config.s3.endpoint}"
+        Travis.config.s3.endpoint&.index('http')&.zero? ? Travis.config.s3.endpoint : "https://#{Travis.config.s3.endpoint}"
       end
 
       private def bucket(uri)
