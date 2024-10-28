@@ -32,7 +32,7 @@ describe Travis::Logs::Lock do
     [
       { unofficial: :config, such: :rogue, strategy: :redis },
       { unofficial: :config, such: :rogue, strategy: :redis,
-        url: 'redis://very.memory.example.com' }
+        url: 'redis://very.memory.example.com', ssl: false }
     ]
   ].each do |options, normalized_options|
     it "normalizes locking options #{options.inspect}" do
