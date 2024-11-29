@@ -28,8 +28,8 @@ module Travis
           ::Sidekiq.configure_server do |config|
             config.redis = {
               url: Travis.config.redis.url,
-              ssl: config.redis.ssl || false,
-              ssl_params: redis_ssl_params
+              ssl: Travis.config.redis.ssl || false,
+              ssl_params: redis_ssl_params(Travis.config)
             }
             config.logger = sidekiq_logger
             config.server_middleware do |chain|
