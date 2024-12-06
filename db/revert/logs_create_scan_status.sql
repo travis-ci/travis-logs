@@ -14,8 +14,8 @@ BEGIN;
   DROP COLUMN scan_finalizing_at,
   DROP COLUMN scan_ended_at;
 
-  DROP INDEX index_logs_on_scan_status_and_id_desc;
-  DROP INDEX index_logs_on_scan_status_and_scan_status_updated_at;
-  DROP INDEX index_logs_on_scan_status_and_created_at_desc;
+  DROP INDEX IF EXISTS logs.index_logs_on_scan_status_and_id_desc;
+  DROP INDEX IF EXISTS index_logs_on_scan_status_and_scan_status_updated_at;
+  DROP INDEX IF EXISTS index_logs_on_scan_status_and_created_at_desc;
 
 COMMIT;
