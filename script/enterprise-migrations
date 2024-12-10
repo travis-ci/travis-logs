@@ -37,17 +37,14 @@ main() {
     fi
   fi
 
-    deployFiles=('log_parts_created_at_not_null' 'create_scan_results_table' 'create_scan_tracker_table' 'logs_create_scan_status')
+  __fix
 
-    for (( i = 0; i < ${#deployFiles[@]}; i++ ));
-    do
-      ENTERPRISE_MIGRATE_TO=${deployFiles[$i]}
-      sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
-          __migrate "${deployFiles[$i]}"
-      else
-        sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
-      fi
-    done
+  ENTERPRISE_MIGRATE_TO="create_scan_results_table"
+  sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
+          __migrate  ${ENTERPRISE_MIGRATE_TO}
+  else
+    sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}"
+  fi
 }
 
 __pgdb_exists() {
@@ -75,15 +72,33 @@ __table_exists_sql() {
     "WHERE schemaname = 'public' AND tablename = '${1}'"
 }
 
+__fix() {
+  if ! psql -c "$(__table_exists_sql 'scan_results')" &>/dev/null; then
+	echo "REVERTING"
+	psql $DATABASE_URL -f db/deploy/logs_create_scan_status.sql || true
+	psql $DATABASE_URL -f db/deploy/log_parts_created_at_not_null.sql || true
+	psql $DATABASE_URL -c "CREATE TABLE IF NOT EXISTS scan_results();"
+	psql $DATABASE_URL -c "CREATE TABLE IF NOT EXISTS scan_tracker();"
+	sqitch revert --to-change structure -y --verbose "db:$DATABASE_URL"
+	psql $DATABASE_URL -f db/revert/logs_create_scan_status.sql || true
+	psql $DATABASE_URL -f db/revert/log_parts_created_at_not_null.sql || true
+	psql $DATABASE_URL -c "DROP TABLE IF EXISTS scan_results;"
+	psql $DATABASE_URL -c "DROP TABLE IF EXISTS scan_tracker;"
+	echo "REVERT DONE"
+  fi
+}
+
 __migrate() {
   # Use the DATABASE_URL we use elsewhere but make it fit the DATABASE_URI format
   # sqitch expects
   sqitch deploy \
     --to-change "$1" \
     "db:${DATABASE_URL}"
+
   sqitch deploy \
     --log-only --no-verify \
     "db:${DATABASE_URL}"
+
   sqitch verify \
     --to-change "$1" \
     "db:${DATABASE_URL}"
