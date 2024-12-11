@@ -40,6 +40,15 @@ module Travis
               chain.add Travis::Honeycomb::Sidekiq
             end
           end
+
+          ::Sidekiq.configure_client do |config|
+            config.redis = {
+              url: Travis.config.redis.url,
+              ssl: Travis.config.redis.ssl || false,
+              ssl_params: redis_ssl_params(Travis.config)
+            }
+            config.logger = sidekiq_logger
+          end
         end
 
         def redis_ssl_params(config)
