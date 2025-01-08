@@ -80,7 +80,7 @@ module Travis
           secret: '',
           secure: !ENV['PUSHER_SECURE'].nil?
         },
-        redis: { url: '' , ssl: (ENV['REDIS_SSL']=='true') || false },
+        redis: { url: '', ssl: (ENV['REDIS_SSL'] == 'true') || false },
         s3: {
           access_key_id: '',
           acl: '',
