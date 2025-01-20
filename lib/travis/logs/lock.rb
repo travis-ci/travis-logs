@@ -21,7 +21,14 @@ module Travis
 
       private def normalized_locking_options(options: nil)
         options ||= base_lock_config
-        options[:url] ||= redis_url if options[:strategy] == :redis
+        if options[:strategy] == :redis
+          options[:url] ||= redis_url
+          options[:ssl] ||= Travis.config.redis.ssl || false
+          options[:ca_path] ||= ENV['REDIS_SSL_CA_PATH'] if ENV['REDIS_SSL_CA_PATH']
+          options[:cert] ||= OpenSSL::X509::Certificate.new(File.read(ENV['REDIS_SSL_CERT_FILE'])) if ENV['REDIS_SSL_CERT_FILE']
+          options[:key] ||= OpenSSL::PKEY::RSA.new(File.read(ENV['REDIS_SSL_KEY_FILE'])) if ENV['REDIS_SSL_KEY_FILE']
+          options[:verify_mode] ||= OpenSSL::SSL::VERIFY_NONE if Travis.config.ssl_verify == false
+        end
         options
       end
 

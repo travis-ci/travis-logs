@@ -58,7 +58,22 @@ module Travis
       end
 
       def redis
-        @redis ||= Travis::Logs::RedisPool.new(redis_config)
+        cfg = redis_config
+        cfg = cfg.merge(ssl_params: redis_ssl_params) if redis_config[:ssl]
+        @redis ||= Travis::Logs::RedisPool.new(cfg)
+      end
+
+      def redis_ssl_params
+        @redis_ssl_params ||= begin
+          return nil unless redis_config[:ssl]
+
+          value = {}
+          value[:ca_path] = ENV['REDIS_SSL_CA_PATH'] if ENV['REDIS_SSL_CA_PATH']
+          value[:cert] = OpenSSL::X509::Certificate.new(File.read(ENV['REDIS_SSL_CERT_FILE'])) if ENV['REDIS_SSL_CERT_FILE']
+          value[:key] = OpenSSL::PKEY::RSA.new(File.read(ENV['REDIS_SSL_KEY_FILE'])) if ENV['REDIS_SSL_KEY_FILE']
+          value[:verify_mode] = OpenSSL::SSL::VERIFY_NONE if config.ssl_verify == false
+          value
+        end
       end
 
       def redis_config
