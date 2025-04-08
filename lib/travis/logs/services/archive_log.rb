@@ -131,8 +131,18 @@ module Travis
         end
 
         def target_url
+          Travis.logger.warn(
+            's3 archive url',
+            url: hostname
+          )
+          Travis.logger.warn(
+            'log_options.s3.bucket',
+            s3: Travis.config.log_options.s3
+          )
           return "http://#{Travis.config.log_options.s3.bucket}/jobs/#{job_id}/log.txt" if Travis.config.s3.bucket
-
+          Travis.logger.warn(
+            "returning the #{hostname}"
+          )
           "http://#{hostname}/jobs/#{job_id}/log.txt"
         end
         private :storage_service
