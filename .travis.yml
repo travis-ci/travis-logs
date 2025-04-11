@@ -20,6 +20,7 @@ jobs:
     - rabbitmq
     - postgresql
     before_install:
+    - sudo apt update -q && sudo apt install -yq postgresql-server-dev-13
     - script/install-sqitch
     - script/install-partman
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
