@@ -18,11 +18,7 @@ jobs:
     services:
     - redis
     - rabbitmq
-    addons:
-      postgresql: 11
-      apt:
-        packages:
-        - postgresql-server-dev-11
+    - postgresql
     before_install:
     - script/install-sqitch
     - script/install-partman
@@ -30,8 +26,6 @@ jobs:
     - bundle config set --local path 'vendor/bundle'
     - gem install bundler
     before_script:
-    - sudo apt-get install postgresql-contrib-10
-    - sudo systemctl start postgresql
     - sudo systemctl start redis-server
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
