@@ -137,10 +137,10 @@ module Travis
           )
           Travis.logger.warn(
             'log_options.s3.bucket',
-            s3: Travis.config.log_options.s3
+            s3: Travis.config.s3
           )
 
-          return "http://#{Travis.config.log_options.s3.bucket}/jobs/#{job_id}/log.txt" if Travis.config.s3.bucket
+          return "http://#{Travis.config.s3.bucket}/jobs/#{job_id}/log.txt" if Travis.config.s3.bucket
 
           Travis.logger.warn(
             "returning the #{hostname}"

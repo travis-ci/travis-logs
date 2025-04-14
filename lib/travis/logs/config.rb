@@ -84,7 +84,7 @@ module Travis
         s3: {
           access_key_id: '',
           acl: '',
-          hostname: ENV.fetch('TRAVIS_S3_HOSTNAME', ''),
+          hostname: '',
           secret_access_key: ''
         },
         sentry: {
