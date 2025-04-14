@@ -12,7 +12,7 @@ module Travis
         return unless Travis.config.s3
 
         Aws.config.update(
-          region: ENV['TRAVIS_LOGS_S3_REGION'] || Travis.config.log_options&.s3&.region || 'us-east-1',
+          region: ENV['TRAVIS_LOGS_S3_REGION'] || Travis.config.log_options&.s3&.region || 'us-east-2',
           credentials: Aws::Credentials.new(
             Travis.config.s3.access_key_id,
             Travis.config.s3.secret_access_key

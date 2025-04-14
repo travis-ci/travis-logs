@@ -136,7 +136,7 @@ module Travis
             url: hostname
           )
           Travis.logger.warn(
-            'log_options.s3.bucket',
+            'log_options.s3',
             s3: Travis.config.s3
           )
 
