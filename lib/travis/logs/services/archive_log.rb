@@ -145,8 +145,7 @@ module Travis
           Travis.logger.warn(
             "returning the #{hostname}"
           )
-
-          "http://#{hostname}/jobs/#{job_id}/log.txt"
+          "http://#{hostname}.s3.amazonaws.com/jobs/#{job_id}/log.txt"
         end
         private :storage_service
         private :database
