@@ -50,6 +50,15 @@ module Travis
       end
 
       private def bucket(uri)
+        Travis.logger.warn(
+          'final url',
+          uri: uri
+        )
+        Travis.logger.warn(
+          'uri host',
+          host: uri.host
+        )
+
         s3.bucket(uri.host)
       end
 
