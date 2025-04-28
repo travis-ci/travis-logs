@@ -16,8 +16,7 @@ module Travis
           credentials: Aws::Credentials.new(
             Travis.config.s3.access_key_id,
             Travis.config.s3.secret_access_key
-          ),
-          endpoint: endpoint
+          )
         )
       end
 
