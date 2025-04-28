@@ -197,6 +197,16 @@ module Travis
               action: 'archive', retrying: header, exceeded: times,
               error: e.backtrace.first, type: e.class.name
             )
+            Travis.logger.error(
+              'error while archiving',
+              action: 'archive', retrying: header, exceeded: times,
+              error: e.backtrace, type: e.class.name
+            )
+            Travis.logger.error(
+              'error while archiving',
+              action: 'archive', retrying: header, exceeded: times,
+              error: e, type: e.class.name
+            )
             raise
           end
         end
