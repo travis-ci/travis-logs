@@ -130,13 +130,17 @@ module Travis
           Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
         end
 
+        def target_url
+          "http://#{hostname}.s3.amazonaws.com/jobs/#{job_id}/log.txt"
+        end
+
         def bucket_name
           Travis.logger.warn(
-            'log_options.s3.bucket',
-            bucket: Travis.config.s3.bucket
+            'log_options.s3.hostname',
+            bucket: Travis.config.s3.hostname
           )
 
-          Travis.config.s3.bucket if Travis.config.s3.bucket
+          Travis.config.s3.hostname if Travis.config.s3
         end
 
         def object_key
