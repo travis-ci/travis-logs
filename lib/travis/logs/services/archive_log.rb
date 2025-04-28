@@ -95,7 +95,7 @@ module Travis
         def store
           retrying(:store) do
             measure('store') do
-              storage_service.store(content, target_url)
+              storage_service.store(content, bucket_name, object_key)
             end
           end
         end
@@ -130,23 +130,19 @@ module Travis
           Travis::Logs::Sidekiq::Purge.perform_at(delay.hours.from_now, log_id)
         end
 
-        def target_url
+        def bucket_name
           Travis.logger.warn(
-            's3 archive url',
-            url: hostname
-          )
-          Travis.logger.warn(
-            'log_options.s3',
-            s3: Travis.config.s3
+            'log_options.s3.bucket',
+            bucket: Travis.config.s3.bucket
           )
 
-          return "http://#{Travis.config.s3.bucket}/jobs/#{job_id}/log.txt" if Travis.config.s3.bucket
-
-          Travis.logger.warn(
-            "returning the #{hostname}"
-          )
-          "http://#{hostname}.s3.amazonaws.com/jobs/#{job_id}/log.txt"
+          Travis.config.s3.bucket if Travis.config.s3.bucket
         end
+
+        def object_key
+          "jobs/#{job_id}/log.txt"
+        end
+
         private :storage_service
         private :database
 

@@ -8,31 +8,24 @@ require 'travis/logs'
 module Travis
   module Logs
     class S3
-      def self.setup
-        return unless Travis.config.s3
-
-        Aws.config.update(
-          region: ENV['TRAVIS_LOGS_S3_REGION'] || Travis.config.log_options&.s3&.region || 'us-east-2',
-          credentials: Aws::Credentials.new(
-            Travis.config.s3.access_key_id,
-            Travis.config.s3.secret_access_key
-          ),
-          endpoint: endpoint
-        )
-      end
 
       attr_reader :s3
 
       def initialize
-        @s3 = Aws::S3::Resource.new
+        return unless Travis.config.s3
+        @s3 = Aws::S3::Client.new(access_key_id: Travis.config.s3.access_key_id,
+                                  secret_access_key: Travis.config.s3.secret_access_key,
+                                  region: ENV['TRAVIS_LOGS_S3_REGION'] || 'us-east-2')
       end
 
-      def store(data, url)
-        object(URI(url)).put(
+      def store(data, bucket_name, object_key)
+        s3.put_object(
+          bucket: bucket_name,
+          key: object_key,
           body: data,
-          content_type: 'text/plain',
           acl: acl
         )
+
       end
 
       def content_length(url)
