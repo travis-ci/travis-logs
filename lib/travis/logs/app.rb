@@ -128,11 +128,15 @@ module Travis
         param :job_id, Integer
         param :part_numbers, Array, default: []
         param :after, Integer
+        param :require_all, Bool
+        param :content, Bool
 
         results = fetch_log_parts_service.run(
           job_id: params[:job_id],
           after: params[:after],
-          part_numbers: params[:part_numbers].map { |i| Integer(i) }
+          part_numbers: params[:part_numbers].map { |i| Integer(i) },
+          require_all: params[:require_all],
+          content: params[:content] || true
         )
         halt 404 if results.nil?
         content_type :json, charset: 'utf-8'
