@@ -1,6 +1,6 @@
 language: ruby
-rvm: 3.2.2
-dist: focal
+rvm: 3.4.4
+dist: noble
 
 cache:
   bundler: true
@@ -20,7 +20,6 @@ jobs:
     - rabbitmq
     - postgresql
     before_install:
-    - sudo apt update -q && sudo apt install -yq postgresql-server-dev-13
     - script/install-sqitch
     - script/install-partman
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
@@ -30,7 +29,7 @@ jobs:
     - sudo systemctl start redis-server
     - bundle exec rake setup
   - stage: ":ship: it to quay.io"
-    dist: focal
+    dist: noble
     language: bash
     script: make ship
     if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
