@@ -128,8 +128,8 @@ module Travis
         param :job_id, Integer
         param :part_numbers, Array, default: []
         param :after, Integer
-        param :require_all, Bool
-        param :content, Bool
+        param :require_all, Boolean
+        param :content, Boolean
 
         results = fetch_log_parts_service.run(
           job_id: params[:job_id],
