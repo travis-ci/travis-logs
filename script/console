@@ -8,5 +8,4 @@ require 'pry'
 require 'travis'
 require 'travis/logs'
 
-Pry.config.prompt = Pry::SIMPLE_PROMPT
 Pry.start(Pry.toplevel_binding)

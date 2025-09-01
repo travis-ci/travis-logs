@@ -185,13 +185,18 @@ module Travis
         db[:log_parts].where(log_id: log_id).delete
       end
 
-      def log_parts(log_id, after: nil, part_numbers: [])
+      def log_parts(log_id, after: nil, part_numbers: [], require_all: false, content: true)
         maint.restrict!
-        query = db[:log_parts].select(:id, :number, :content, :final)
-                              .where(log_id: log_id)
+        query = content ? db[:log_parts].select(:id, :number, :content, :final) : db[:log_parts].select(:id, :number, :final)
+        query = query.where(log_id: log_id)
         query = query.where { number > after } if after
         query = query.where(number: part_numbers) unless part_numbers.empty?
-        query.order(:number).to_a
+        result = query.order(:number).to_a
+        if require_all && !part_numbers.empty?
+          return nil if result.pluck(:number) != part_numbers.sort
+        end
+
+        result
       end
 
       def set_log_content(log_id, content, removed_by: nil)
