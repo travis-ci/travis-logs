@@ -59,4 +59,55 @@ class SpecHelper
   end
 end
 
+class PopulateLogParts
+  def initialize(job_id: 1, job_count: 1, parts_count: 50)
+    @job_id = job_count == 1 ? job_id: nil
+    @job_count = job_count
+    @parts_count = parts_count
+  end
+
+  def run
+    populate_logs(parts_count: @parts_count)
+  end
+
+  private
+
+  def lorem_ipsum_words
+    @lorem_ipsum_words ||= File.read(
+      File.expand_path('./lorem_ipsum', __dir__)
+    ).split
+  end
+
+  def word_salad(n = 100)
+    s = ''
+    n.times { s += "#{lorem_ipsum_words.sample} " }
+    "#{s}\n"
+  end
+
+  def create_payload(job_id, n)
+    {
+      'id' => job_id,
+      'number' => n,
+      'log' => word_salad(10 * (job_id % (n + 1)))
+    }
+  end
+
+  def populate_logs(parts_count: 50)
+    lps = Travis::Logs::LogPartsWriter.new
+
+    @job_count.times do |n|
+      job_id = @job_id || Random.rand(20_000) + n
+      entries = []
+      parts_count.times do |log_part_n|
+        entries.push(create_payload(@job_id, log_part_n))
+      end
+
+      entries.push(
+        create_payload(@job_id, parts_count + 1).merge('final' => true)
+      )
+      lps.run(entries)
+    end
+  end
+end
+
 ENV['JWT_RSA_PUBLIC_KEY'] = SpecHelper.rsa_key.public_key.to_pem

@@ -11,7 +11,7 @@ module Travis
         attr_reader :database
         private :database
 
-        def run(log_id: nil, job_id: nil, after: nil, part_numbers: [])
+        def run(log_id: nil, job_id: nil, after: nil, part_numbers: [], require_all: false, content: true)
           if job_id
             if ignored_job_id?(job_id)
               return temporarily_unavailable_log_parts
@@ -30,17 +30,22 @@ module Travis
             log_id: log_id,
             job_id: job_id,
             after: after,
-            part_numbers: part_numbers
+            part_numbers: part_numbers,
+            require_all: require_all,
+            content: content
           )
         end
 
         private def fetch(
-          log_id: nil, job_id: nil, after: nil, part_numbers: []
+          log_id: nil, job_id: nil, after: nil, part_numbers: [], require_all: false, content: true
         )
           log_id = database.cached_log_id_for_job_id(job_id) if log_id.nil?
           return nil if log_id.nil?
 
-          database.log_parts(log_id, after: after, part_numbers: part_numbers)
+          result = database.log_parts(log_id, after: after, part_numbers: part_numbers, require_all: require_all, content: content)
+          return temporarily_unavailable_log_parts(log_id: log_id) unless result
+
+          result
         end
 
         private def min_accepted_job_id
