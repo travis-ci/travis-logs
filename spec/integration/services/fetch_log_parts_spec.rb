@@ -46,4 +46,16 @@ describe 'fetch_log_parts' do
     expect(result.count).to eq(3)
     expect(result.pluck(:content).all?(&:nil?)).to be true
   end
+
+  it 'returns log with \'log aggregated\' content' do
+    log_id = db[:log_parts].first[:log_id]
+    expect(Travis::Logs.database_connection).to receive(:log_for_id).with(log_id)
+      .and_return(
+        content: '',
+        aggregated_at: Time.now.utc
+      )
+    result = subject.run(log_id:, job_id:, part_numbers: [10,12, 13, 119], content:false)
+    expect(result.count).to eq(1)
+    expect(result[0][:content]).to eq('log aggregated')
+  end
 end

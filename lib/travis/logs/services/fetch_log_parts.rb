@@ -42,6 +42,9 @@ module Travis
           log_id = database.cached_log_id_for_job_id(job_id) if log_id.nil?
           return nil if log_id.nil?
 
+          log = database.log_for_id(log_id)
+          return log_aggregated(log_id) if log && log[:aggregated_at]
+
           result = database.log_parts(log_id, after: after, part_numbers: part_numbers, require_all: require_all, content: content)
           return temporarily_unavailable_log_parts(log_id: log_id) unless result
 
@@ -70,6 +73,16 @@ module Travis
               number: 0,
               log_id: log_id,
               content: 'Your log is temporarily unavailable'
+            }
+          ]
+        end
+
+        private def log_aggregated(log_id)
+          [
+            {
+              number: 0,
+              log_id: log_id,
+              content: 'log aggregated'
             }
           ]
         end
