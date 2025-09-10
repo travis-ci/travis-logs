@@ -21,7 +21,6 @@ jobs:
     - postgresql
     before_install:
     - sudo apt-get update
-    - sudo apt-get install libpq-dev postgresql-server-dev-16 -y
     - script/install-sqitch
     - script/install-partman
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
