@@ -76,16 +76,16 @@ module Travis
         metrics: { reporter: 'librato' },
         pusher: {
           app_id: '',
-          key: '',
-          secret: '',
+          key: ENV.fetch('TRAVIS_PUSHER_KEY', ''),
+          secret: ENV.fetch('TRAVIS_PUSHER_SECRET', ''),
           secure: !ENV['PUSHER_SECURE'].nil?
         },
         redis: { url: '', ssl: (ENV['REDIS_SSL'] == 'true') || false },
         s3: {
-          access_key_id: '',
+          access_key_id: ENV.fetch('TRAVIS_S3_ACCESS_KEY_ID', ''),
           acl: '',
           hostname: '',
-          secret_access_key: ''
+          secret_access_key: ENV.fetch('TRAVIS_S3_SECRET_ACCESS_KEY', '')
         },
         sentry: {
           dsn: ENV['SENTRY_DSN']
