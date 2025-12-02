@@ -2,7 +2,6 @@ FROM debian:buster-slim
 
 LABEL maintainer Travis CI GmbH <support+travis-app-docker-images@travis-ci.com>
 
-
 RUN ( \
    mkdir -p /app; \
 )
@@ -14,10 +13,11 @@ RUN ( \
   apt-get update; \
   # update to deb 10.8
   apt-get upgrade -y ; \
-  apt-get install -y build-essential git libpq-dev curl postgresql-client perl-modules; \
-  rm -rf /var/lib/apt/lists/* ; \
+  apt-get install -y build-essential git libpq-dev curl postgresql-client perl-modules liblocal-lib-perl; \
   /app/script/install-sqitch; \
+  # Remove ONLY build tools, then reinstall postgresql-client to prevent autoremove from removing it
   apt-get remove -y build-essential git libpq-dev gcc g++; \
+  apt-get install -y --no-install-recommends postgresql-client liblocal-lib-perl; \
   apt-get -y autoremove; \
+  rm -rf /var/lib/apt/lists/*; \
 )
-
