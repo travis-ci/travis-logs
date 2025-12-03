@@ -37,7 +37,10 @@ main() {
     fi
   fi
 
-  __fix
+  # Only run fix for existing databases with sqitch registry
+  if __sqitch_registry_exists; then
+    __fix
+  fi
 
   ENTERPRISE_MIGRATE_TO="create_scan_results_table"
   sqitch verify --to-change "${ENTERPRISE_MIGRATE_TO}" "db:${DATABASE_URL}" | if ! grep -qE "Verify successful"; then
@@ -70,6 +73,14 @@ __logs_tables_exist() {
 __table_exists_sql() {
   echo "SELECT 1/count(*) FROM pg_catalog.pg_tables " \
     "WHERE schemaname = 'public' AND tablename = '${1}'"
+}
+
+__sqitch_registry_exists() {
+  if psql -c "SELECT 1 FROM pg_tables WHERE schemaname = 'sqitch' AND tablename = 'changes'" &>/dev/null; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 __fix() {
