@@ -21,6 +21,7 @@ jobs:
     - postgresql
     before_install:
     - sudo apt-get update
+    - sudo apt-get install -y build-essential libpq-dev libssl-dev libperl-dev pkg-config postgresql-client
     - script/install-sqitch
     - script/install-partman
     - eval "$(perl -I ~/perl5/lib/perl5/ '-Mlocal::lib')"
