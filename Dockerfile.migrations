@@ -8,16 +8,21 @@ RUN ( \
 WORKDIR /app
 COPY . /app
 
+# Debian Buster is EOL, use archive repos
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i '/security.debian.org/d' /etc/apt/sources.list && \
+    sed -i '/buster-updates/d' /etc/apt/sources.list
 
 RUN ( \
   apt-get update; \
   # update to deb 10.8
   apt-get upgrade -y ; \
-  apt-get install -y build-essential git libpq-dev curl postgresql-client perl-modules liblocal-lib-perl; \
+  apt-get install -y build-essential git libpq-dev curl postgresql-client perl-modules make; \
   /app/script/install-sqitch; \
-  # Remove ONLY build tools, then reinstall postgresql-client to prevent autoremove from removing it
+  # Remove ONLY build tools, keep postgresql-client and perl runtime
   apt-get remove -y build-essential git libpq-dev gcc g++; \
-  apt-get install -y --no-install-recommends postgresql-client liblocal-lib-perl; \
+  # Reinstall postgresql-client to ensure it stays
+  apt-get install -y --no-install-recommends postgresql-client; \
   apt-get -y autoremove; \
   rm -rf /var/lib/apt/lists/*; \
 )
