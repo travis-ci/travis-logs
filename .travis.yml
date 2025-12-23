@@ -34,3 +34,5 @@ jobs:
     language: bash
     script: make ship
     if: (branch = master and type = push ) OR commit_message =~ /ship:docker/ OR env(SHIP_DOCKER) = true
+before_install:
+  - gem install rubygems-update -v 3.4.22
