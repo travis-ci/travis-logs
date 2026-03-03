@@ -50,7 +50,7 @@ module Travis
           intervals: {
             aggregate: 60,
             force: 3 * 60 * 60,
-            purge: 6,
+            purge: 2,
             regular: 3 * 60,
             timing_info: 60,
             sweeper: 10 * 60
